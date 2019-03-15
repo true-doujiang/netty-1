@@ -25,6 +25,9 @@ import java.util.Map;
  */
 public abstract class ChannelHandlerAdapter implements ChannelHandler {
 
+    /**
+     * 默认false  刚new出来还没有添加到PipeLine中
+     */
     // Not using volatile because it's used only for a sanity check.
     boolean added;
 

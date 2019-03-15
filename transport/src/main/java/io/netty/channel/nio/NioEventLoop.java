@@ -146,6 +146,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         selectStrategy = strategy;
     }
 
+    /**
+     * 把 nio Selector 又包装了一下
+     */
     private static final class SelectorTuple {
         final Selector unwrappedSelector;
         final Selector selector;

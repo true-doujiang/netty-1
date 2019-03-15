@@ -49,7 +49,9 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
      * @see MultithreadEventExecutorGroup#MultithreadEventExecutorGroup(int, Executor, Object...)
      */
     protected MultithreadEventLoopGroup(int nThreads, Executor executor, Object... args) {
-        super(nThreads == 0 ? DEFAULT_EVENT_LOOP_THREADS : nThreads, executor, args);
+        //super(nThreads == 0 ? DEFAULT_EVENT_LOOP_THREADS : nThreads, executor, args);
+        // 2个NioEventLoop  不根据CPU核心计算了
+        super(nThreads == 0 ? 2 : nThreads, executor, args);
     }
 
     /**
@@ -70,7 +72,8 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
 
     @Override
     protected ThreadFactory newDefaultThreadFactory() {
-        return new DefaultThreadFactory(getClass(), Thread.MAX_PRIORITY);
+        DefaultThreadFactory defaultThreadFactory = new DefaultThreadFactory(getClass(), Thread.MAX_PRIORITY);
+        return defaultThreadFactory;
     }
 
     @Override

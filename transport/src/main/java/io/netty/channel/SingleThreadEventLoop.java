@@ -56,6 +56,7 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
                                     boolean addTaskWakesUp, int maxPendingTasks,
                                     RejectedExecutionHandler rejectedExecutionHandler) {
         super(parent, executor, addTaskWakesUp, maxPendingTasks, rejectedExecutionHandler);
+        // 干什么用的 tailTasks: MpscUnboundedArrayQueue
         tailTasks = newTaskQueue(maxPendingTasks);
     }
 
