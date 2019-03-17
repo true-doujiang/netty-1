@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * HandlerContext本身才是链表结构  pipeline本身不是链表结构
+ *
  */
 public class HandlerContext {
 

@@ -31,6 +31,9 @@ import java.util.Map;
  */
 public abstract class AbstractBootstrapConfig<B extends AbstractBootstrap<B, C>, C extends Channel> {
 
+    /**
+     * 服务端ServerBootstrap 或者 客户端Bootstrap
+     */
     protected final B bootstrap;
 
     protected AbstractBootstrapConfig(B bootstrap) {

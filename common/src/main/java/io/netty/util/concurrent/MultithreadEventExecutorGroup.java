@@ -76,7 +76,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
             System.out.println("start 创建 ThreadPerTaskExecutor");
             ThreadFactory threadFactory = newDefaultThreadFactory();
             executor = new ThreadPerTaskExecutor(threadFactory);
-            System.out.println("end 创建 ThreadPerTaskExecutor = " + executor);
+            System.out.println("end   创建 ThreadPerTaskExecutor = " + executor);
         }
 
         children = new EventExecutor[nThreads];

@@ -49,12 +49,25 @@ import java.util.Map;
  */
 public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C extends Channel> implements Cloneable {
 
+    /**
+     * bossGroup
+     */
     volatile EventLoopGroup group;
+    /**
+     * 创建 NioServerSocketChannel的 ReflectiveChannelFactory
+     */
     @SuppressWarnings("deprecation")
     private volatile ChannelFactory<? extends C> channelFactory;
+
     private volatile SocketAddress localAddress;
+    /**
+     *
+     */
     private final Map<ChannelOption<?>, Object> options = new LinkedHashMap<ChannelOption<?>, Object>();
     private final Map<AttributeKey<?>, Object> attrs = new LinkedHashMap<AttributeKey<?>, Object>();
+    /**
+     *
+     */
     private volatile ChannelHandler handler;
 
     AbstractBootstrap() {
@@ -103,7 +116,8 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         if (channelClass == null) {
             throw new NullPointerException("channelClass");
         }
-        return channelFactory(new ReflectiveChannelFactory<C>(channelClass));
+        ReflectiveChannelFactory<C> channelFactory = new ReflectiveChannelFactory<C>(channelClass);
+        return channelFactory(channelFactory);
     }
 
     /**
@@ -279,6 +293,9 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     }
 
     private ChannelFuture doBind(final SocketAddress localAddress) {
+        /**
+         *
+         */
         final ChannelFuture regFuture = initAndRegister();
         final Channel channel = regFuture.channel();
         if (regFuture.cause() != null) {
@@ -330,7 +347,13 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             return new DefaultChannelPromise(new FailedChannel(), GlobalEventExecutor.INSTANCE).setFailure(t);
         }
 
-        ChannelFuture regFuture = config().group().register(channel);
+        /**
+         * 把创建好的 channel 注册到Selector 上，在
+         */
+        //ChannelFuture regFuture = config().group().register(channel);
+        AbstractBootstrapConfig bootstrapConfig = config();
+        EventLoopGroup eventLoopGroup = bootstrapConfig.group();  //MultithreadEventLoopGroup
+        ChannelFuture regFuture = eventLoopGroup.register(channel);
         if (regFuture.cause() != null) {
             if (channel.isRegistered()) {
                 channel.close();
@@ -438,8 +461,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         return copiedMap(attrs);
     }
 
-    static void setChannelOptions(
-            Channel channel, Map<ChannelOption<?>, Object> options, InternalLogger logger) {
+    static void setChannelOptions(Channel channel, Map<ChannelOption<?>, Object> options, InternalLogger logger) {
         for (Map.Entry<ChannelOption<?>, Object> e: options.entrySet()) {
             setChannelOption(channel, e.getKey(), e.getValue(), logger);
         }
@@ -453,15 +475,13 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     }
 
     @SuppressWarnings("unchecked")
-    private static void setChannelOption(
-            Channel channel, ChannelOption<?> option, Object value, InternalLogger logger) {
+    private static void setChannelOption(Channel channel, ChannelOption<?> option, Object value, InternalLogger logger) {
         try {
             if (!channel.config().setOption((ChannelOption<Object>) option, value)) {
                 logger.warn("Unknown channel option '{}' for channel '{}'", option, channel);
             }
         } catch (Throwable t) {
-            logger.warn(
-                    "Failed to set channel option '{}' with value '{}' for channel '{}'", option, value, channel, t);
+            logger.warn("Failed to set channel option '{}' with value '{}' for channel '{}'", option, value, channel, t);
         }
     }
 

@@ -120,9 +120,14 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return name;
     }
 
+    /**
+     * fire   Registered
+     */
     @Override
     public ChannelHandlerContext fireChannelRegistered() {
-        invokeChannelRegistered(findContextInbound());
+        // 从前往后找
+        AbstractChannelHandlerContext inbound = findContextInbound();
+        invokeChannelRegistered(inbound);
         return this;
     }
 
@@ -143,7 +148,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     private void invokeChannelRegistered() {
         if (invokeHandler()) {
             try {
-                ((ChannelInboundHandler) handler()).channelRegistered(this);
+                ChannelInboundHandler inboundHandler = (ChannelInboundHandler) handler();
+                inboundHandler.channelRegistered(this);
+                //((ChannelInboundHandler) handler()).channelRegistered(this);
             } catch (Throwable t) {
                 notifyHandlerException(t);
             }
@@ -152,6 +159,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     * fire   Unregistered
+     */
     @Override
     public ChannelHandlerContext fireChannelUnregistered() {
         invokeChannelUnregistered(findContextInbound());
@@ -184,9 +194,13 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     *  fire  Active
+     */
     @Override
     public ChannelHandlerContext fireChannelActive() {
-        invokeChannelActive(findContextInbound());
+        AbstractChannelHandlerContext inbound = findContextInbound();
+        invokeChannelActive(inbound);
         return this;
     }
 
@@ -207,7 +221,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     private void invokeChannelActive() {
         if (invokeHandler()) {
             try {
-                ((ChannelInboundHandler) handler()).channelActive(this);
+                ChannelInboundHandler inboundHandler = (ChannelInboundHandler) handler();
+                inboundHandler.channelActive(this);
+                //((ChannelInboundHandler) handler()).channelActive(this);
             } catch (Throwable t) {
                 notifyHandlerException(t);
             }
@@ -216,6 +232,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     *  fire  InActive
+     */
     @Override
     public ChannelHandlerContext fireChannelInactive() {
         invokeChannelInactive(findContextInbound());
@@ -248,6 +267,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     *  fire   ExceptionCaught
+     */
     @Override
     public ChannelHandlerContext fireExceptionCaught(final Throwable cause) {
         invokeExceptionCaught(next, cause);
@@ -299,6 +321,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     * fire  UserEventTriggered
+     */
     @Override
     public ChannelHandlerContext fireUserEventTriggered(final Object event) {
         invokeUserEventTriggered(findContextInbound(), event);
@@ -332,6 +357,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     *  fire   Read
+     */
     @Override
     public ChannelHandlerContext fireChannelRead(final Object msg) {
         invokeChannelRead(findContextInbound(), msg);
@@ -356,7 +384,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     private void invokeChannelRead(Object msg) {
         if (invokeHandler()) {
             try {
-                ((ChannelInboundHandler) handler()).channelRead(this, msg);
+                ChannelInboundHandler inboundHandler = (ChannelInboundHandler) handler();
+                inboundHandler.channelRead(this, msg);
+                //((ChannelInboundHandler) handler()).channelRead(this, msg);
             } catch (Throwable t) {
                 notifyHandlerException(t);
             }
@@ -365,6 +395,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     *  fire    ReadComplete
+     */
     @Override
     public ChannelHandlerContext fireChannelReadComplete() {
         invokeChannelReadComplete(findContextInbound());
@@ -396,6 +429,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     * fire  ChannelWritabilityChanged
+     */
     @Override
     public ChannelHandlerContext fireChannelWritabilityChanged() {
         invokeChannelWritabilityChanged(findContextInbound());
@@ -652,6 +688,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     *
+     */
     @Override
     public ChannelHandlerContext read() {
         final AbstractChannelHandlerContext next = findContextOutbound();
@@ -810,9 +849,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     private void notifyHandlerException(Throwable cause) {
         if (inExceptionCaught(cause)) {
             if (logger.isWarnEnabled()) {
-                logger.warn(
-                        "An exception was thrown by a user handler " +
-                                "while handling an exceptionCaught event", cause);
+                logger.warn("An exception was thrown by a user handler " + "while handling an exceptionCaught event", cause);
             }
             return;
         }
@@ -901,6 +938,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return false;
     }
 
+    /**
+     * 这是挑选outbound  第一个肯定是HeadContext，从第二个开始才是用户添加的 所以用do while
+     */
     private AbstractChannelHandlerContext findContextInbound() {
         AbstractChannelHandlerContext ctx = this;
         do {
@@ -909,6 +949,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return ctx;
     }
 
+    /**
+     * 这是挑选inbound  最后一个肯定是TailContext，从第二个开始才是用户添加的 所以用do while
+     */
     private AbstractChannelHandlerContext findContextOutbound() {
         AbstractChannelHandlerContext ctx = this;
         do {
@@ -946,11 +989,16 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         assert updated; // This should always be true as it MUST be called before setAddComplete() or setRemoved().
     }
 
+    /**
+     *
+     */
     final void callHandlerAdded() throws Exception {
         // We must call setAddComplete before calling handlerAdded. Otherwise if the handlerAdded method generates
         // any pipeline events ctx.handler() will miss them because the state will not allow it.
         if (setAddComplete()) {
-            handler().handlerAdded(this);
+            //handler().handlerAdded(this);
+            ChannelHandler handler = handler();
+            handler.handlerAdded(this);
         }
     }
 
@@ -1021,6 +1069,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return StringUtil.simpleClassName(ChannelHandlerContext.class) + '(' + name + ", " + channel() + ')';
     }
 
+    /**
+     *
+     */
     abstract static class AbstractWriteTask implements Runnable {
 
         private static final boolean ESTIMATE_TASK_SIZE_ON_SUBMIT =
@@ -1092,6 +1143,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     *
+     */
     static final class WriteTask extends AbstractWriteTask implements SingleThreadEventLoop.NonWakeupRunnable {
 
         private static final Recycler<WriteTask> RECYCLER = new Recycler<WriteTask>() {
@@ -1113,6 +1167,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     *
+     */
     static final class WriteAndFlushTask extends AbstractWriteTask {
 
         private static final Recycler<WriteAndFlushTask> RECYCLER = new Recycler<WriteAndFlushTask>() {
@@ -1122,8 +1179,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
             }
         };
 
-        static WriteAndFlushTask newInstance(
-                AbstractChannelHandlerContext ctx, Object msg,  ChannelPromise promise) {
+        static WriteAndFlushTask newInstance(AbstractChannelHandlerContext ctx, Object msg,  ChannelPromise promise) {
             WriteAndFlushTask task = RECYCLER.get();
             init(task, ctx, msg, promise);
             return task;
@@ -1140,7 +1196,11 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     *
+     */
     private static final class Tasks {
+
         private final AbstractChannelHandlerContext next;
         private final Runnable invokeChannelReadCompleteTask = new Runnable() {
             @Override

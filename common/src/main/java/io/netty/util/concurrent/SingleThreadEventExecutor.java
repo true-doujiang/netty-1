@@ -163,7 +163,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         this.maxPendingTasks = Math.max(16, maxPendingTasks);
         // executor: ThreadPerTaskExecutor
         this.executor = ObjectUtil.checkNotNull(executor, "executor");
-        // 干什么用的
+        // 干什么用的   加入荣的是ServerBootstrap中 ServerBootstrapAcceptor
         taskQueue = newTaskQueue(this.maxPendingTasks);
         rejectedExecutionHandler = ObjectUtil.checkNotNull(rejectedHandler, "rejectedHandler");
     }
@@ -329,7 +329,8 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         if (isShutdown()) {
             reject();
         }
-        return taskQueue.offer(task);
+        boolean offer = taskQueue.offer(task);
+        return offer;
     }
 
     /**

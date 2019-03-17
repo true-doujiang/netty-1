@@ -7,6 +7,10 @@ import java.util.concurrent.TimeUnit;
 
 public class ServerHandler extends ChannelInboundHandlerAdapter {
 
+    /**
+     * 这些方法都是在 AbstractChannelHandlerContext 中调用的
+     */
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         System.out.println(Thread.currentThread().getName() + " channelActive");
@@ -22,6 +26,9 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
         System.out.println(Thread.currentThread().getName() + " handlerAdded");
     }
 
+    /**
+     * AbstractChannelHandlerContext 中调用的
+     */
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         super.channelRead(ctx, msg);

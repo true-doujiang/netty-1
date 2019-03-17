@@ -27,20 +27,21 @@ public final class Server {
         EventLoopGroup bossGroup = null;
         EventLoopGroup workerGroup = null;
         try {
+            // 每个NioEventLoopGroup 会包含一个 ThreadPerTaskExecutor
             bossGroup = new NioEventLoopGroup(1);
             workerGroup = new NioEventLoopGroup();
-            //System.out.println("bossGroup: " + bossGroup + "  workerGroup:" + workerGroup);
 
             ServerHandler serverHandler = new ServerHandler();
             ChannelInitializer<SocketChannel> childHandler = new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel ch) {
+                    //
                     AuthHandler authHandler = new AuthHandler();
+                    System.out.println(Thread.currentThread().getName() + " childHandler HAuthHandler: " + authHandler);
                     ch.pipeline().addLast(authHandler);
                     //..
                 }
             };
-            //System.out.println("serverHandler: " + serverHandler + "  childHandler:" + childHandler);
 
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)

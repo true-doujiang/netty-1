@@ -48,15 +48,18 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractNioChannel extends AbstractChannel {
 
-    private static final InternalLogger logger =
-            InternalLoggerFactory.getInstance(AbstractNioChannel.class);
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractNioChannel.class);
 
     private static final ClosedChannelException DO_CLOSE_CLOSED_CHANNEL_EXCEPTION = ThrowableUtil.unknownStackTrace(
             new ClosedChannelException(), AbstractNioChannel.class, "doClose()");
 
+    /**
+     * JDK ServerSocketChannel 或者 SocketChannel
+     */
     private final SelectableChannel ch;
     protected final int readInterestOp;
     volatile SelectionKey selectionKey;
+
     boolean readPending;
     private final Runnable clearReadPendingRunnable = new Runnable() {
         @Override
@@ -91,8 +94,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
                 ch.close();
             } catch (IOException e2) {
                 if (logger.isWarnEnabled()) {
-                    logger.warn(
-                            "Failed to close a partially initialized socket.", e2);
+                    logger.warn("Failed to close a partially initialized socket.", e2);
                 }
             }
 
@@ -194,6 +196,8 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     }
 
     /**
+     * NioUnsafe
+     *
      * Special {@link Unsafe} sub-type which allows to access the underlying {@link SelectableChannel}
      */
     public interface NioUnsafe extends Unsafe {
@@ -215,6 +219,9 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         void forceFlush();
     }
 
+    /**
+     *
+     */
     protected abstract class AbstractNioUnsafe extends AbstractUnsafe implements NioUnsafe {
 
         protected final void removeReadOp() {
@@ -378,6 +385,9 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         return loop instanceof NioEventLoop;
     }
 
+    /**
+     * 把JDK 的ServerSocketChannel 或者 SocketChannel 注册到 Selector上 默认不关心任何事件
+     */
     @Override
     protected void doRegister() throws Exception {
         boolean selected = false;
@@ -400,6 +410,9 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         }
     }
 
+    /**
+     *  取消注册
+     */
     @Override
     protected void doDeregister() throws Exception {
         eventLoop().cancel(selectionKey());

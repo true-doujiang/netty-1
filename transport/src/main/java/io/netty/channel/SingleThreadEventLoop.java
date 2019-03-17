@@ -72,9 +72,13 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
 
     @Override
     public ChannelFuture register(Channel channel) {
-        return register(new DefaultChannelPromise(channel, this));
+        DefaultChannelPromise channelPromise = new DefaultChannelPromise(channel, this);
+        return register(channelPromise);
     }
 
+    /**
+     * 开始要把JDK 的channel 注册到 Selector上了
+     */
     @Override
     public ChannelFuture register(final ChannelPromise promise) {
         ObjectUtil.checkNotNull(promise, "promise");

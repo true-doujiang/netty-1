@@ -44,10 +44,20 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ServerBootstrap.class);
 
+    /**
+     *
+     */
     private final Map<ChannelOption<?>, Object> childOptions = new LinkedHashMap<ChannelOption<?>, Object>();
     private final Map<AttributeKey<?>, Object> childAttrs = new LinkedHashMap<AttributeKey<?>, Object>();
+
     private final ServerBootstrapConfig config = new ServerBootstrapConfig(this);
+    /**
+     * workerGroup
+     */
     private volatile EventLoopGroup childGroup;
+    /**
+     *
+     */
     private volatile ChannelHandler childHandler;
 
     public ServerBootstrap() { }
@@ -137,6 +147,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         return this;
     }
 
+    /**
+     * 初始化服务端 NioServerSocketChannel
+     */
     @Override
     void init(Channel channel) throws Exception {
         final Map<ChannelOption<?>, Object> options = options0();
@@ -166,24 +179,30 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             currentChildAttrs = childAttrs.entrySet().toArray(newAttrArray(0));
         }
 
-        p.addLast(new ChannelInitializer<Channel>() {
+        ChannelInitializer initializerHandler = new ChannelInitializer<Channel>() {
             @Override
             public void initChannel(final Channel ch) throws Exception {
                 final ChannelPipeline pipeline = ch.pipeline();
                 ChannelHandler handler = config.handler();
                 if (handler != null) {
+                    // 如果给服务端配置了Handler 则这个时候添加到服务端ch的pipeline
                     pipeline.addLast(handler);
                 }
-
+                // ch 是服务端
                 ch.eventLoop().execute(new Runnable() {
                     @Override
                     public void run() {
-                        pipeline.addLast(new ServerBootstrapAcceptor(
-                                ch, currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs));
+                        ServerBootstrapAcceptor acceptorHandler =
+                                new ServerBootstrapAcceptor(ch, currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs);
+                        pipeline.addLast(acceptorHandler);
                     }
                 });
             }
-        });
+        };
+        /**
+         * 再给服务端NioServerSocketChannel的pipeline添加一个HandlerContext(initializerHandler)
+         */
+        p.addLast(initializerHandler);
     }
 
     @Override
@@ -209,6 +228,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         return new Map.Entry[size];
     }
 
+    /**
+     *
+     */
     private static class ServerBootstrapAcceptor extends ChannelInboundHandlerAdapter {
 
         private final EventLoopGroup childGroup;
