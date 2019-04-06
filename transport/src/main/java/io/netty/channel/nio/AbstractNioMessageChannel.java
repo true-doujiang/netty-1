@@ -42,9 +42,11 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
         super(parent, ch, readInterestOp);
     }
 
+    /**
+     *
+     */
     @Override
     protected AbstractNioUnsafe newUnsafe() {
-        //
         return new NioMessageUnsafe();
     }
 
@@ -57,7 +59,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
     }
 
     /**
-     *
+     * 负责接入新的客户端链接
      */
     private final class NioMessageUnsafe extends AbstractNioUnsafe {
 

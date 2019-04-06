@@ -793,7 +793,11 @@ public final class PlatformDependent {
         return hash;
     }
 
+    /**
+     *
+     */
     private static final class Mpsc {
+
         private static final boolean USE_MPSC_CHUNKED_ARRAY_QUEUE;
 
         private Mpsc() {
@@ -1330,6 +1334,9 @@ public final class PlatformDependent {
         return "unknown";
     }
 
+    /**
+     *
+     */
     private static final class AtomicLongCounter extends AtomicLong implements LongCounter {
         private static final long serialVersionUID = 4074772784610639305L;
 

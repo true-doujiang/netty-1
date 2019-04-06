@@ -21,7 +21,11 @@ import java.nio.channels.Selector;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.Set;
 
+/**
+ * 对nio selector 进行包装
+ */
 final class SelectedSelectionKeySetSelector extends Selector {
+
     private final SelectedSelectionKeySet selectionKeys;
     private final Selector delegate;
 
@@ -59,7 +63,8 @@ final class SelectedSelectionKeySetSelector extends Selector {
     @Override
     public int select(long timeout) throws IOException {
         selectionKeys.reset();
-        return delegate.select(timeout);
+        int count = delegate.select(timeout);
+        return count;
     }
 
     @Override

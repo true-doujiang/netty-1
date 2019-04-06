@@ -116,6 +116,9 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         return ch;
     }
 
+    /**
+     *
+     */
     @Override
     public NioEventLoop eventLoop() {
         return (NioEventLoop) super.eventLoop();
@@ -196,7 +199,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     }
 
     /**
-     * NioUnsafe
+     * NioUnsafe 接口
      *
      * Special {@link Unsafe} sub-type which allows to access the underlying {@link SelectableChannel}
      */
@@ -220,7 +223,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     }
 
     /**
-     *
+     * Unsafe 实现类
      */
     protected abstract class AbstractNioUnsafe extends AbstractUnsafe implements NioUnsafe {
 

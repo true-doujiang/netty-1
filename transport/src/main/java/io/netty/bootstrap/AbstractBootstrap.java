@@ -66,7 +66,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     private final Map<ChannelOption<?>, Object> options = new LinkedHashMap<ChannelOption<?>, Object>();
     private final Map<AttributeKey<?>, Object> attrs = new LinkedHashMap<AttributeKey<?>, Object>();
     /**
-     *
+     * 用户代码设置的服务端 handler
      */
     private volatile ChannelHandler handler;
 
@@ -293,10 +293,9 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     }
 
     private ChannelFuture doBind(final SocketAddress localAddress) {
-        /**
-         *
-         */
+        // 创建 & 初始化 & 注册 服务端channel
         final ChannelFuture regFuture = initAndRegister();
+
         final Channel channel = regFuture.channel();
         if (regFuture.cause() != null) {
             return regFuture;
@@ -350,9 +349,11 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         /**
          * 把创建好的 channel 注册到Selector 上，在
          */
-        //ChannelFuture regFuture = config().group().register(channel);
+        // ChannelFuture regFuture = config().group().register(channel);
         AbstractBootstrapConfig bootstrapConfig = config();
-        EventLoopGroup eventLoopGroup = bootstrapConfig.group();  //MultithreadEventLoopGroup
+        // MultithreadEventLoopGroup
+        EventLoopGroup eventLoopGroup = bootstrapConfig.group();
+        // eventLoopGroup 用户代码中的boss 或者 worker
         ChannelFuture regFuture = eventLoopGroup.register(channel);
         if (regFuture.cause() != null) {
             if (channel.isRegistered()) {
@@ -382,11 +383,13 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
 
         // This method is invoked before channelRegistered() is triggered.  Give user handlers a chance to set up
         // the pipeline in its channelRegistered() implementation.
+        System.out.println("====" + channel.eventLoop().inEventLoop()); //true
         channel.eventLoop().execute(new Runnable() {
             @Override
             public void run() {
                 if (regFuture.isSuccess()) {
-                    channel.bind(localAddress, promise).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+                    ChannelFuture bind = channel.bind(localAddress, promise);
+                    bind.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
                 } else {
                     promise.setFailure(regFuture.cause());
                 }

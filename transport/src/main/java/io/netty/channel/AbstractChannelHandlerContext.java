@@ -35,6 +35,9 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import java.net.SocketAddress;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
+/**
+ *
+ */
 abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         implements ChannelHandlerContext, ResourceLeakHint {
 
@@ -218,6 +221,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     * 激活用户代码中设置的 Handler.active()
+     */
     private void invokeChannelActive() {
         if (invokeHandler()) {
             try {
@@ -493,6 +499,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return deregister(newPromise());
     }
 
+    /**
+     * 绑定端口
+     */
     @Override
     public ChannelFuture bind(final SocketAddress localAddress, final ChannelPromise promise) {
         if (localAddress == null) {
@@ -518,10 +527,14 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return promise;
     }
 
+    /**
+     * 绑定端口
+     */
     private void invokeBind(SocketAddress localAddress, ChannelPromise promise) {
         if (invokeHandler()) {
             try {
-                ((ChannelOutboundHandler) handler()).bind(this, localAddress, promise);
+                ChannelOutboundHandler outHandler = (ChannelOutboundHandler) handler();
+                outHandler.bind(this, localAddress, promise);
             } catch (Throwable t) {
                 notifyOutboundHandlerException(t, promise);
             }
@@ -950,7 +963,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
-     * 这是挑选inbound  最后一个肯定是TailContext，从第二个开始才是用户添加的 所以用do while
+     * 这是挑选inbound  最后一个肯定是TailContext，从倒数第二个开始才是用户添加的 所以用do while
      */
     private AbstractChannelHandlerContext findContextOutbound() {
         AbstractChannelHandlerContext ctx = this;

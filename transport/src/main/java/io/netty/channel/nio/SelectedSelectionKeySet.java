@@ -21,6 +21,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * 用这个类替换掉 nio SelectorImpl类中的selectedKeys
+ *                  WindowsSelectorImpl类中selectedKeys
+ */
 final class SelectedSelectionKeySet extends AbstractSet<SelectionKey> {
 
     SelectionKey[] keys;

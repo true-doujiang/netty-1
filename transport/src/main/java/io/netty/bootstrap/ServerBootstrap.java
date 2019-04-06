@@ -56,7 +56,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
      */
     private volatile EventLoopGroup childGroup;
     /**
-     *
+     * 用户代码中设置
      */
     private volatile ChannelHandler childHandler;
 
@@ -168,6 +168,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
         ChannelPipeline p = channel.pipeline();
 
+        // worker group
         final EventLoopGroup currentChildGroup = childGroup;
         final ChannelHandler currentChildHandler = childHandler;
         final Entry<ChannelOption<?>, Object>[] currentChildOptions;
@@ -179,16 +180,20 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             currentChildAttrs = childAttrs.entrySet().toArray(newAttrArray(0));
         }
 
+        /**
+         * 再给服务端NioServerSocketChannel的pipeline添加一个HandlerContext(initializerHandler)
+         */
         ChannelInitializer initializerHandler = new ChannelInitializer<Channel>() {
             @Override
             public void initChannel(final Channel ch) throws Exception {
                 final ChannelPipeline pipeline = ch.pipeline();
                 ChannelHandler handler = config.handler();
+
                 if (handler != null) {
-                    // 如果给服务端配置了Handler 则这个时候添加到服务端ch的pipeline
-                    pipeline.addLast(handler);
+                    pipeline.addLast(handler);  // 如果给服务端配置了Handler 则这个时候添加到服务端ch的pipeline
                 }
-                // ch 是服务端
+
+                // ch 是服务端 配置ServerBootstrapAcceptor 用于给新接入的客户端channel分配线程
                 ch.eventLoop().execute(new Runnable() {
                     @Override
                     public void run() {
@@ -199,9 +204,6 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                 });
             }
         };
-        /**
-         * 再给服务端NioServerSocketChannel的pipeline添加一个HandlerContext(initializerHandler)
-         */
         p.addLast(initializerHandler);
     }
 

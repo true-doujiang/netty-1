@@ -32,12 +32,13 @@ public final class Server {
             workerGroup = new NioEventLoopGroup();
 
             ServerHandler serverHandler = new ServerHandler();
+
             ChannelInitializer<SocketChannel> childHandler = new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel ch) {
-                    //
+                    // 给每个新链接进来的SocketChannel 绑定一个Handler
                     AuthHandler authHandler = new AuthHandler();
-                    System.out.println(Thread.currentThread().getName() + " childHandler HAuthHandler: " + authHandler);
+                    System.out.println(Thread.currentThread().getName() + " new childHandler AuthHandler: " + authHandler);
                     ch.pipeline().addLast(authHandler);
                     //..
                 }
@@ -46,9 +47,10 @@ public final class Server {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
+                    .attr(AttributeKey.newInstance("myServerAttr"), "myServervalue")
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     .childAttr(AttributeKey.newInstance("childAttr"), "childAttrValue")
-                    .handler(serverHandler)
+                    .handler(serverHandler) //配置服务端pipeline
                     .childHandler(childHandler);
 
             ChannelFuture f = b.bind(8888).sync();

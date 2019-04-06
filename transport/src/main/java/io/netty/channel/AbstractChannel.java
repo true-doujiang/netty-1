@@ -59,15 +59,23 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      *
      */
     private final Channel parent;
+    /**
+     *
+     */
     private final ChannelId id;
     private final Unsafe unsafe;
     private final DefaultChannelPipeline pipeline;
+
     private final VoidChannelPromise unsafeVoidPromise = new VoidChannelPromise(this, false);
     private final CloseFuture closeFuture = new CloseFuture(this);
 
     private volatile SocketAddress localAddress;
     private volatile SocketAddress remoteAddress;
+    /**
+     * 注册 selector 的时候 初始化了
+     */
     private volatile EventLoop eventLoop;
+
     // 当前的channel是否注册到selector 上了
     private volatile boolean registered;
     private boolean closeInitiated;
@@ -86,7 +94,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     protected AbstractChannel(Channel parent) {
         this.parent = parent;
         id = newId();
-        unsafe = newUnsafe();
+        unsafe = newUnsafe(); //抽象方法
         pipeline = newChannelPipeline();
     }
 
@@ -117,6 +125,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /**
+     * 创建 Pipeline
      * Returns a new {@link DefaultChannelPipeline} instance.
      */
     protected DefaultChannelPipeline newChannelPipeline() {
@@ -160,6 +169,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         return config().getAllocator();
     }
 
+    /**
+     * 获取当前channel 绑定的 NioEventLoop(线程)
+     */
     @Override
     public EventLoop eventLoop() {
         EventLoop eventLoop = this.eventLoop;
@@ -258,6 +270,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         return this;
     }
 
+    /**
+     * 绑定端口
+     */
     @Override
     public ChannelFuture bind(SocketAddress localAddress, ChannelPromise promise) {
         return pipeline.bind(localAddress, promise);
@@ -345,6 +360,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /**
+     * 创建 Pipeline 具体子类创建
+     *
      * Create a new {@link AbstractUnsafe} instance which will be used for the life-time of the {@link Channel}
      */
     protected abstract AbstractUnsafe newUnsafe();
@@ -427,7 +444,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /**
-     *
+     *  Unsafe 实现类
+     *  1. channel 注册到 selector 上
+     *  2. channel 绑定端口
      *
      * {@link Unsafe} implementation which sub-classes must extend and use.
      */
@@ -466,6 +485,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             return remoteAddress0();
         }
 
+        /**
+         * 把JDK 的ServerSocketChannel 或者 SocketChannel 注册到 Selector上
+         */
         @Override
         public final void register(EventLoop eventLoop, final ChannelPromise promise) {
             if (eventLoop == null) {
@@ -480,8 +502,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 return;
             }
 
+            /**
+             * 注册的线程一定要在 NioEventLoop 线程上
+             */
             AbstractChannel.this.eventLoop = eventLoop;
-
             if (eventLoop.inEventLoop()) {
                 register0(promise);
             } else {
@@ -546,6 +570,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             }
         }
 
+        /**
+         * 绑定端口号
+         */
         @Override
         public final void bind(final SocketAddress localAddress, final ChannelPromise promise) {
             assertEventLoop();
@@ -569,6 +596,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             boolean wasActive = isActive();
             try {
+                //
                 doBind(localAddress);
             } catch (Throwable t) {
                 safeSetFailure(promise, t);
@@ -576,6 +604,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 return;
             }
 
+            // 传播ChannelActive事件
             if (!wasActive && isActive()) {
                 invokeLater(new Runnable() {
                     @Override
@@ -1036,6 +1065,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             close(voidPromise());
         }
 
+        /**
+         *
+         * @param task
+         */
         private void invokeLater(Runnable task) {
             try {
                 // This method is used by outbound operation implementations to trigger an inbound event later.
@@ -1049,6 +1082,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 //         -> handlerA.channelInactive() - (2) another inbound handler method called while in (1) yet
                 //
                 // which means the execution of two inbound handler methods of the same handler overlap undesirably.
+                System.out.println(eventLoop().inEventLoop());
                 eventLoop().execute(task);
             } catch (RejectedExecutionException e) {
                 logger.warn("Can't invoke task later as EventLoop rejected it", e);
@@ -1162,6 +1196,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         DefaultFileRegion.validate(region, position);
     }
 
+    /**
+     *
+     */
     static final class CloseFuture extends DefaultChannelPromise {
 
         CloseFuture(AbstractChannel ch) {
@@ -1193,6 +1230,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         }
     }
 
+    /**
+     *
+     */
     private static final class AnnotatedConnectException extends ConnectException {
 
         private static final long serialVersionUID = 3901958112696433556L;
@@ -1209,6 +1249,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         }
     }
 
+    /**
+     *
+     */
     private static final class AnnotatedNoRouteToHostException extends NoRouteToHostException {
 
         private static final long serialVersionUID = -6801433937592080623L;
@@ -1225,6 +1268,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         }
     }
 
+    /**
+     *
+     */
     private static final class AnnotatedSocketException extends SocketException {
 
         private static final long serialVersionUID = 3896743275010454039L;
