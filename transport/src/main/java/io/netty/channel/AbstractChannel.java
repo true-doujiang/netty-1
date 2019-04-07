@@ -56,11 +56,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             new NotYetConnectedException(), AbstractUnsafe.class, "flush0()");
 
     /**
-     *
+     * 创建NioServerSocketChannel   set to null
      */
     private final Channel parent;
     /**
-     *
+     * 三大件
      */
     private final ChannelId id;
     private final Unsafe unsafe;
@@ -117,6 +117,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /**
+     * 创建 id
      * Returns a new {@link DefaultChannelId} instance. Subclasses may override this method to assign custom
      * {@link ChannelId}s to {@link Channel}s that use the {@link AbstractChannel#AbstractChannel(Channel)} constructor.
      */
@@ -503,6 +504,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             }
 
             /**
+             * 配channel绑定一个NioEventLoop
+             *
              * 注册的线程一定要在 NioEventLoop 线程上
              */
             AbstractChannel.this.eventLoop = eventLoop;
@@ -510,12 +513,15 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 register0(promise);
             } else {
                 try {
-                    eventLoop.execute(new Runnable() {
+                    Runnable r = new Runnable() {
                         @Override
                         public void run() {
                             register0(promise);
                         }
-                    });
+                    };
+                    System.out.println("把channel注册的任务 丢给 NioEventLoop : " + r);
+                    // 把channel注册的任务 丢给 NioEventLoop
+                    eventLoop.execute(r);
                 } catch (Throwable t) {
                     logger.warn(
                             "Force-closing a channel whose registration task was not accepted by an event loop: {}",
@@ -606,12 +612,13 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             // 传播ChannelActive事件
             if (!wasActive && isActive()) {
-                invokeLater(new Runnable() {
+                Runnable r = new Runnable() {
                     @Override
                     public void run() {
                         pipeline.fireChannelActive();
                     }
-                });
+                };
+                invokeLater(r);
             }
 
             safeSetSuccess(promise);
@@ -1115,7 +1122,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         protected Executor prepareToClose() {
             return null;
         }
-    }
+    } // AbstractUnsafe over
 
     /**
      * Return {@code true} if the given {@link EventLoop} is compatible with this instance.

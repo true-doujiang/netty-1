@@ -1,5 +1,6 @@
 package com.yhh.example.chap02;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -14,6 +15,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         System.out.println(Thread.currentThread().getName() + " channelActive");
+        Channel channel = ctx.pipeline().channel();
     }
 
     @Override

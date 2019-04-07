@@ -30,10 +30,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class MultithreadEventExecutorGroup extends AbstractEventExecutorGroup {
 
+    /**
+     * NioEventLoops
+     */
     private final EventExecutor[] children;
+    // 同上，只是不能修改
     private final Set<EventExecutor> readonlyChildren;
     private final AtomicInteger terminatedChildren = new AtomicInteger();
     private final Promise<?> terminationFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);
+
     private final EventExecutorChooserFactory.EventExecutorChooser chooser;
 
     /**
@@ -73,10 +78,10 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
         }
 
         if (executor == null) {
-            System.out.println("start 创建 ThreadPerTaskExecutor");
+            //System.out.println("start 创建 ThreadPerTaskExecutor");
             ThreadFactory threadFactory = newDefaultThreadFactory();
             executor = new ThreadPerTaskExecutor(threadFactory);
-            System.out.println("end   创建 ThreadPerTaskExecutor = " + executor);
+            //System.out.println("end   创建 ThreadPerTaskExecutor = " + executor);
         }
 
         children = new EventExecutor[nThreads];
@@ -131,6 +136,9 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
         readonlyChildren = Collections.unmodifiableSet(childrenSet);
     }
 
+    /**
+     *
+     */
     protected ThreadFactory newDefaultThreadFactory() {
         return new DefaultThreadFactory(getClass());
     }

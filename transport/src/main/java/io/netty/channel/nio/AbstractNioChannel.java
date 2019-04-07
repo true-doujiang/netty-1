@@ -57,7 +57,9 @@ public abstract class AbstractNioChannel extends AbstractChannel {
      * JDK ServerSocketChannel 或者 SocketChannel
      */
     private final SelectableChannel ch;
+    //将来要关心的事件
     protected final int readInterestOp;
+    // 注册时返回的 SelectionKey
     volatile SelectionKey selectionKey;
 
     boolean readPending;
@@ -223,7 +225,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     }
 
     /**
-     * Unsafe 实现类
+     * NioUnsafe 实现类
      */
     protected abstract class AbstractNioUnsafe extends AbstractUnsafe implements NioUnsafe {
 
@@ -421,6 +423,9 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         eventLoop().cancel(selectionKey());
     }
 
+    /**
+     * 给channel注册要关心的事件
+     */
     @Override
     protected void doBeginRead() throws Exception {
         // Channel.read() or ChannelHandlerContext.read() was called

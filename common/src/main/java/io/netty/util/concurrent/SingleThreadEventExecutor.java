@@ -79,11 +79,15 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             AtomicReferenceFieldUpdater.newUpdater(
                     SingleThreadEventExecutor.class, ThreadProperties.class, "threadProperties");
 
+    // 别的别的线程往这里丢任务
     private final Queue<Runnable> taskQueue;
 
     private volatile Thread thread;
     @SuppressWarnings("unused")
     private volatile ThreadProperties threadProperties;
+    /**
+     *  ThreadPerTaskExecutor
+     */
     private final Executor executor;
     private volatile boolean interrupted;
 
@@ -93,6 +97,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     private final int maxPendingTasks;
     private final RejectedExecutionHandler rejectedExecutionHandler;
 
+    //
     private long lastExecutionTime;
 
     @SuppressWarnings({ "FieldMayBeFinal", "unused" })
@@ -163,7 +168,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         this.maxPendingTasks = Math.max(16, maxPendingTasks);
         // executor: ThreadPerTaskExecutor
         this.executor = ObjectUtil.checkNotNull(executor, "executor");
-        // 干什么用的   加入荣的是ServerBootstrap中 ServerBootstrapAcceptor
+        // 干什么用的: 别的别的线程往这里丢任务   加入荣的是ServerBootstrap中 ServerBootstrapAcceptor
         taskQueue = newTaskQueue(this.maxPendingTasks);
         rejectedExecutionHandler = ObjectUtil.checkNotNull(rejectedHandler, "rejectedHandler");
     }
@@ -376,6 +381,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      */
     protected final boolean runAllTasksFrom(Queue<Runnable> taskQueue) {
         Runnable task = pollTaskFrom(taskQueue);
+        System.out.println("NioEventLoop select() 期间 检测其它线程丢给它的task: " + task);
         if (task == null) {
             return false;
         }
@@ -393,8 +399,9 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      * the tasks in the task queue and returns if it ran longer than {@code timeoutNanos}.
      */
     protected boolean runAllTasks(long timeoutNanos) {
-        fetchFromScheduledTaskQueue();
+        fetchFromScheduledTaskQueue();//TODO
         Runnable task = pollTask();
+        System.out.println("NioEventLoop select() 期间 timeoutNanos= " + timeoutNanos + " 检测其它线程丢给它的task: " + task);
         if (task == null) {
             afterRunningAllTasks();
             return false;
@@ -471,7 +478,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     }
 
     /**
-     *
+     * NioEventLoop 的run
      */
     protected abstract void run();
 
@@ -749,6 +756,10 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         return isTerminated();
     }
 
+    /**
+     * 给NioEventLoop 添加任务
+     * @param task
+     */
     @Override
     public void execute(Runnable task) {
         if (task == null) {
@@ -757,8 +768,11 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
         boolean inEventLoop = inEventLoop();
         addTask(task);
+
         if (!inEventLoop) {
+            // 执行 task
             startThread();
+
             if (isShutdown()) {
                 boolean reject = false;
                 try {
@@ -874,6 +888,11 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         }
     }
 
+    /**
+     *
+     * @param oldState
+     * @return
+     */
     private boolean ensureThreadStarted(int oldState) {
         if (oldState == ST_NOT_STARTED) {
             try {
@@ -892,11 +911,16 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         return false;
     }
 
+    /**
+     * ThreadPerTaskExecutor创建一个线程nioEventLoop执行 taskQueue中的任务
+     */
     private void doStartThread() {
         assert thread == null;
-        executor.execute(new Runnable() {
+
+        Runnable r = new Runnable() {
             @Override
             public void run() {
+                //把当前线程赋值给 NioEventLoop
                 thread = Thread.currentThread();
                 if (interrupted) {
                     thread.interrupt();
@@ -905,6 +929,9 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                 boolean success = false;
                 updateLastExecutionTime();
                 try {
+                    /**
+                     *  执行 NioEventLoop.run()  调用外部类的run()
+                     */
                     SingleThreadEventExecutor.this.run();
                     success = true;
                 } catch (Throwable t) {
@@ -957,9 +984,14 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                     }
                 }
             }
-        });
+        };
+        // 这里才会新开启一个线程
+        executor.execute(r);
     }
 
+    /**
+     *
+     */
     private static final class DefaultThreadProperties implements ThreadProperties {
         private final Thread t;
 

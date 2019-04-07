@@ -68,7 +68,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     final AbstractChannelHandlerContext tail;
 
     /**
-     *
+     * pipeline 所属的channel
      */
     private final Channel channel;
     private final ChannelFuture succeededFuture;
@@ -916,9 +916,13 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
+    /**
+     * DefaultChannelPipeline 激活 active()
+     */
     @Override
     public final ChannelPipeline fireChannelActive() {
         System.out.println(Thread.currentThread().getName());
+
         AbstractChannelHandlerContext.invokeChannelActive(head);
         return this;
     }
@@ -1259,6 +1263,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
+     * Inbound
+     *
      * A special catch-all handler that handles both bytes and messages.
      */
     final class TailContext extends AbstractChannelHandlerContext implements ChannelInboundHandler {
@@ -1322,7 +1328,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     *
+     * Outbound
      */
     final class HeadContext extends AbstractChannelHandlerContext implements ChannelOutboundHandler, ChannelInboundHandler {
 
@@ -1358,8 +1364,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
 
         @Override
-        public void connect(
-                ChannelHandlerContext ctx,
+        public void connect(ChannelHandlerContext ctx,
                 SocketAddress remoteAddress, SocketAddress localAddress,
                 ChannelPromise promise) {
             unsafe.connect(remoteAddress, localAddress, promise);
@@ -1416,6 +1421,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             }
         }
 
+        /**
+         * HeadContext ChannelActive()
+         */
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
             ctx.fireChannelActive();
@@ -1440,6 +1448,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             readIfIsAutoRead();
         }
 
+        /**
+         * HeadContext readIfIsAutoRead()
+         */
         private void readIfIsAutoRead() {
             if (channel.config().isAutoRead()) {
                 channel.read();

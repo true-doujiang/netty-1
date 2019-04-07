@@ -83,6 +83,13 @@ public class DefaultThreadFactory implements ThreadFactory {
         }
     }
 
+    /**
+     *
+     * @param poolName
+     * @param daemon
+     * @param priority
+     * @param threadGroup
+     */
     public DefaultThreadFactory(String poolName, boolean daemon, int priority, ThreadGroup threadGroup) {
         if (poolName == null) {
             throw new NullPointerException("poolName");
@@ -105,6 +112,7 @@ public class DefaultThreadFactory implements ThreadFactory {
 
     @Override
     public Thread newThread(Runnable r) {
+        // 这个线程会赋值配NioEventLoop 中的 thread
         Thread t = newThread(FastThreadLocalRunnable.wrap(r), prefix + nextId.incrementAndGet());
         try {
             if (t.isDaemon() != daemon) {
@@ -120,6 +128,12 @@ public class DefaultThreadFactory implements ThreadFactory {
         return t;
     }
 
+    /**
+     *
+     * @param r
+     * @param name
+     * @return
+     */
     protected Thread newThread(Runnable r, String name) {
         return new FastThreadLocalThread(threadGroup, r, name);
     }

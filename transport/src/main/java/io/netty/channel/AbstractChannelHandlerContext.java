@@ -83,6 +83,14 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     private volatile int handlerState = INIT;
 
+    /**
+     *
+     * @param pipeline
+     * @param executor new 的时候 set to null
+     * @param name
+     * @param inbound
+     * @param outbound
+     */
     AbstractChannelHandlerContext(DefaultChannelPipeline pipeline, EventExecutor executor, String name,
                                   boolean inbound, boolean outbound) {
         this.name = ObjectUtil.checkNotNull(name, "name");
@@ -109,6 +117,10 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return channel().config().getAllocator();
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public EventExecutor executor() {
         if (executor == null) {
@@ -124,7 +136,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
-     * fire   Registered
+     * fire Registered  三个方法一条线
      */
     @Override
     public ChannelHandlerContext fireChannelRegistered() {
@@ -163,7 +175,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
-     * fire   Unregistered
+     * fire  Unregistered   三个方法一条线
      */
     @Override
     public ChannelHandlerContext fireChannelUnregistered() {
@@ -198,7 +210,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
-     *  fire  Active
+     *  fire  Active  三个方法一条线
      */
     @Override
     public ChannelHandlerContext fireChannelActive() {
@@ -239,7 +251,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
-     *  fire  InActive
+     *  fire  InActive  三个方法一条线
      */
     @Override
     public ChannelHandlerContext fireChannelInactive() {
@@ -274,7 +286,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
-     *  fire   ExceptionCaught
+     *  fire   ExceptionCaught  三个方法一条线
      */
     @Override
     public ChannelHandlerContext fireExceptionCaught(final Throwable cause) {
@@ -328,7 +340,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
-     * fire  UserEventTriggered
+     * fire  UserEventTriggered  三个方法一条线
      */
     @Override
     public ChannelHandlerContext fireUserEventTriggered(final Object event) {
@@ -364,7 +376,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
-     *  fire   Read
+     *  fire Read  三个方法一条线
      */
     @Override
     public ChannelHandlerContext fireChannelRead(final Object msg) {
@@ -402,7 +414,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
-     *  fire    ReadComplete
+     *  fire ReadComplete   三个方法一条线
      */
     @Override
     public ChannelHandlerContext fireChannelReadComplete() {
@@ -436,7 +448,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
-     * fire  ChannelWritabilityChanged
+     * fire  ChannelWritabilityChanged  三个方法一条线
      */
     @Override
     public ChannelHandlerContext fireChannelWritabilityChanged() {
@@ -512,6 +524,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
             return promise;
         }
 
+        // 从后往前找 应该找到HeadContext
         final AbstractChannelHandlerContext next = findContextOutbound();
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {
@@ -578,7 +591,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     private void invokeConnect(SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise) {
         if (invokeHandler()) {
             try {
-                ((ChannelOutboundHandler) handler()).connect(this, remoteAddress, localAddress, promise);
+                ChannelOutboundHandler outboundHandler = (ChannelOutboundHandler) handler();
+                outboundHandler.connect(this, remoteAddress, localAddress, promise);
+                //((ChannelOutboundHandler) handler()).connect(this, remoteAddress, localAddress, promise);
             } catch (Throwable t) {
                 notifyOutboundHandlerException(t, promise);
             }
@@ -622,7 +637,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     private void invokeDisconnect(ChannelPromise promise) {
         if (invokeHandler()) {
             try {
-                ((ChannelOutboundHandler) handler()).disconnect(this, promise);
+                ChannelOutboundHandler outboundHandler = (ChannelOutboundHandler) handler();
+                outboundHandler.disconnect(this, promise);
+                //((ChannelOutboundHandler) handler()).disconnect(this, promise);
             } catch (Throwable t) {
                 notifyOutboundHandlerException(t, promise);
             }
@@ -657,7 +674,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     private void invokeClose(ChannelPromise promise) {
         if (invokeHandler()) {
             try {
-                ((ChannelOutboundHandler) handler()).close(this, promise);
+                ChannelOutboundHandler outboundHandler = (ChannelOutboundHandler) handler();
+                outboundHandler.close(this, promise);
+                //((ChannelOutboundHandler) handler()).close(this, promise);
             } catch (Throwable t) {
                 notifyOutboundHandlerException(t, promise);
             }
@@ -692,7 +711,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     private void invokeDeregister(ChannelPromise promise) {
         if (invokeHandler()) {
             try {
-                ((ChannelOutboundHandler) handler()).deregister(this, promise);
+                ChannelOutboundHandler outboundHandler = (ChannelOutboundHandler) handler();
+                outboundHandler.deregister(this, promise);
+                //((ChannelOutboundHandler) handler()).deregister(this, promise);
             } catch (Throwable t) {
                 notifyOutboundHandlerException(t, promise);
             }
@@ -721,10 +742,15 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return this;
     }
 
+    /**
+     *
+     */
     private void invokeRead() {
         if (invokeHandler()) {
             try {
-                ((ChannelOutboundHandler) handler()).read(this);
+                ChannelOutboundHandler outboundHandler = (ChannelOutboundHandler) handler();
+                outboundHandler.read(this);
+                //((ChannelOutboundHandler) handler()).read(this);
             } catch (Throwable t) {
                 notifyHandlerException(t);
             }
@@ -755,7 +781,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     private void invokeWrite0(Object msg, ChannelPromise promise) {
         try {
-            ((ChannelOutboundHandler) handler()).write(this, msg, promise);
+            ChannelOutboundHandler outboundHandler = (ChannelOutboundHandler) handler();
+            outboundHandler.write(this, msg, promise);
+            //((ChannelOutboundHandler) handler()).write(this, msg, promise);
         } catch (Throwable t) {
             notifyOutboundHandlerException(t, promise);
         }
@@ -788,7 +816,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     private void invokeFlush0() {
         try {
-            ((ChannelOutboundHandler) handler()).flush(this);
+            ChannelOutboundHandler outboundHandler = (ChannelOutboundHandler) handler();
+            outboundHandler.flush(this);
+            //((ChannelOutboundHandler) handler()).flush(this);
         } catch (Throwable t) {
             notifyHandlerException(t);
         }
