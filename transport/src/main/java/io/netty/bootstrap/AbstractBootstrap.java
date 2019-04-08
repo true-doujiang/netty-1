@@ -312,7 +312,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             /**
              * 事件监听器
              */
-            regFuture.addListener(new ChannelFutureListener() {
+            ChannelFutureListener listener = new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
                     Throwable cause = future.cause();
@@ -324,11 +324,12 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
                         // Registration was successful, so set the correct executor to use.
                         // See https://github.com/netty/netty/issues/2586
                         promise.registered();
-
+                        // 端口绑定
                         doBind0(regFuture, channel, localAddress, promise);
                     }
                 }
-            });
+            };
+            ChannelFuture channelFuture = regFuture.addListener(listener);
             return promise;
         }
     }
@@ -389,8 +390,8 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
 
         // This method is invoked before channelRegistered() is triggered.  Give user handlers a chance to set up
         // the pipeline in its channelRegistered() implementation.
-        System.out.println("====" + channel.eventLoop().inEventLoop()); //true
-        channel.eventLoop().execute(new Runnable() {
+        System.out.println("====" + channel.eventLoop().inEventLoop()); //不断点：true   断点：false
+        Runnable r = new Runnable() {
             @Override
             public void run() {
                 if (regFuture.isSuccess()) {
@@ -400,7 +401,11 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
                     promise.setFailure(regFuture.cause());
                 }
             }
-        });
+        };
+        /**
+         *  绑定端口任务
+         */
+        channel.eventLoop().execute(r);
     }
 
     /**

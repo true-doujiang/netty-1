@@ -105,8 +105,10 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     /**
      * The NIO {@link Selector}.
+     * nettySelector
      */
     private Selector selector;
+    // nio selector
     private Selector unwrappedSelector;
     /**
      * 里面有个SelectionKey[] keys 属性， 什么时候放进的SelectionKey TODO
@@ -770,6 +772,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         try {
             int selectCnt = 0;
             long currentTimeNanos = System.nanoTime();
+            // 本次循环最少应该到这个时间截止，如果没到这个时间就select结束了，有可能是nio 空轮训bug
             long selectDeadLineNanos = currentTimeNanos + delayNanos(currentTimeNanos);
 
             for (;;) {
@@ -822,8 +825,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 if (time - TimeUnit.MILLISECONDS.toNanos(timeoutMillis) >= currentTimeNanos) {
                     // timeoutMillis elapsed without anything selected.
                     selectCnt = 1;
-                } else if (SELECTOR_AUTO_REBUILD_THRESHOLD > 0 &&
-                        selectCnt >= SELECTOR_AUTO_REBUILD_THRESHOLD) {
+                } else if (SELECTOR_AUTO_REBUILD_THRESHOLD > 0 && selectCnt >= SELECTOR_AUTO_REBUILD_THRESHOLD) {
                     // The code exists in an extra method to ensure the method is not too big to inline as this
                     // branch is not very likely to get hit very frequently.
                     selector = selectRebuildSelector(selectCnt);
@@ -836,14 +838,12 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
             if (selectCnt > MIN_PREMATURE_SELECTOR_RETURNS) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Selector.select() returned prematurely {} times in a row for Selector {}.",
-                            selectCnt - 1, selector);
+                    logger.debug("Selector.select() returned prematurely {} times in a row for Selector {}.", selectCnt - 1, selector);
                 }
             }
         } catch (CancelledKeyException e) {
             if (logger.isDebugEnabled()) {
-                logger.debug(CancelledKeyException.class.getSimpleName() + " raised by a Selector {} - JDK bug?",
-                        selector, e);
+                logger.debug(CancelledKeyException.class.getSimpleName() + " raised by a Selector {} - JDK bug?", selector, e);
             }
             // Harmless exception - log anyway
         }
@@ -853,8 +853,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         // The selector returned prematurely many times in a row.
         // Rebuild the selector to work around the problem.
         logger.warn(
-                "Selector.select() returned prematurely {} times in a row; rebuilding Selector {}.",
-                selectCnt, selector);
+                "Selector.select() returned prematurely {} times in a row; rebuilding Selector {}.", selectCnt, selector);
 
         rebuildSelector();
         Selector selector = this.selector;

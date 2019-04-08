@@ -47,6 +47,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     private volatile Object result;
     private final EventExecutor executor;
     /**
+     * 事件监听器
      * One or more listeners. Can be a {@link GenericFutureListener} or a {@link DefaultFutureListeners}.
      * If {@code null}, it means either 1) no listeners were added yet or 2) all listeners were notified.
      *

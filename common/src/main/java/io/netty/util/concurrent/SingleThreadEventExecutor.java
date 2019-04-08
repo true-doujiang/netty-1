@@ -349,6 +349,8 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     }
 
     /**
+     * 取出 NioEventLoop taskQueue 中的任务执行
+     *
      * Poll all tasks from the task queue and run them via {@link Runnable#run()} method.
      *
      * @return {@code true} if and only if at least one task was run
@@ -395,11 +397,13 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     }
 
     /**
+     * 取出 NioEventLoop taskQueue 中的任务执行
+     *
      * Poll all tasks from the task queue and run them via {@link Runnable#run()} method.  This method stops running
      * the tasks in the task queue and returns if it ran longer than {@code timeoutNanos}.
      */
     protected boolean runAllTasks(long timeoutNanos) {
-        fetchFromScheduledTaskQueue();//TODO
+        fetchFromScheduledTaskQueue();
         Runnable task = pollTask();
         System.out.println("NioEventLoop select() 期间 timeoutNanos= " + timeoutNanos + " 检测其它线程丢给它的task: " + task);
         if (task == null) {
@@ -877,6 +881,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
     private void startThread() {
         if (state == ST_NOT_STARTED) {
+            // cas 操作判断线程是否启动
             if (STATE_UPDATER.compareAndSet(this, ST_NOT_STARTED, ST_STARTED)) {
                 try {
                     doStartThread();
