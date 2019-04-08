@@ -143,6 +143,13 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
         return scheduledTask != null && scheduledTask.deadlineNanos() <= nanoTime();
     }
 
+    /**
+     *
+     * @param command
+     * @param delay
+     * @param unit
+     * @return
+     */
     @Override
     public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
         ObjectUtil.checkNotNull(command, "command");
@@ -151,9 +158,8 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
             delay = 0;
         }
         validateScheduled0(delay, unit);
-
-        return schedule(new ScheduledFutureTask<Void>(
-                this, command, null, ScheduledFutureTask.deadlineNanos(unit.toNanos(delay))));
+        ScheduledFutureTask task = new ScheduledFutureTask<Void>(this, command, null, ScheduledFutureTask.deadlineNanos(unit.toNanos(delay)));
+        return schedule(task);
     }
 
     @Override

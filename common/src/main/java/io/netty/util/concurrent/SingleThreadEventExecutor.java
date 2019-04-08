@@ -54,6 +54,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     private static final InternalLogger logger =
             InternalLoggerFactory.getInstance(SingleThreadEventExecutor.class);
 
+    // NioEventLoop中的Thread 状态
     private static final int ST_NOT_STARTED = 1;
     private static final int ST_STARTED = 2;
     private static final int ST_SHUTTING_DOWN = 3;
@@ -774,7 +775,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         addTask(task);
 
         if (!inEventLoop) {
-            // 执行 task
+            // 启动NioEventLoop 中Thread   执行 task
             startThread();
 
             if (isShutdown()) {

@@ -27,6 +27,9 @@ import java.util.NoSuchElementException;
  */
 final class SelectedSelectionKeySet extends AbstractSet<SelectionKey> {
 
+    /**
+     * 闪电侠提的issure 之后 netty作者修改成现在的代码
+     */
     SelectionKey[] keys;
     int size;
 

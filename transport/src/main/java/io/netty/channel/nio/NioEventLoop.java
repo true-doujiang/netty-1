@@ -119,6 +119,8 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     private final SelectorProvider provider;
 
     /**
+     * selector的唤醒状态
+     *
      * Boolean that controls determines if a blocked Selector.select should
      * break out of its selection process. In our case we use a timeout for
      * the select method and the select method will block for that time unless
@@ -634,6 +636,11 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     * 处理 IO 事件
+     * @param k
+     * @param ch
+     */
     private void processSelectedKey(SelectionKey k, AbstractNioChannel ch) {
         /**
          * NioUnsafe 负责 接入新客户端，读写数据
