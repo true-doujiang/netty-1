@@ -376,7 +376,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
-     *  fire Read  三个方法一条线
+     * fire Read  三个方法一条线
+     * @param msg：Object 对于服务端 msg是 NioSocketChannel     对于客户端 msg 是 数据
+     * @return
      */
     @Override
     public ChannelHandlerContext fireChannelRead(final Object msg) {
@@ -982,7 +984,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
-     * 这是挑选outbound  第一个肯定是HeadContext，从第二个开始才是用户添加的 所以用do while
+     * 这是挑选inbound  第一个肯定是HeadContext，从第二个开始才是用户添加的 所以用do while
      */
     private AbstractChannelHandlerContext findContextInbound() {
         AbstractChannelHandlerContext ctx = this;

@@ -32,6 +32,7 @@ public final class Server {
             workerGroup = new NioEventLoopGroup();
 
             ServerHandler serverHandler = new ServerHandler();
+            System.out.println("serverHandler = " + serverHandler);
 
             ChannelInitializer<SocketChannel> childHandler = new ChannelInitializer<SocketChannel>() {
                 @Override
@@ -43,6 +44,7 @@ public final class Server {
                     //..
                 }
             };
+            System.out.println("childHandler = " + childHandler);
 
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)

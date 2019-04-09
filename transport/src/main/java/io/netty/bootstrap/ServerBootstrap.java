@@ -204,6 +204,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                 });
             }
         };
+        System.out.println("initializerHandler = " + initializerHandler);
         p.addLast(initializerHandler);
     }
 
