@@ -946,7 +946,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     *
+     * NioServerSocketChannel 新连接接入时触发
      * @param msg
      * @return
      */

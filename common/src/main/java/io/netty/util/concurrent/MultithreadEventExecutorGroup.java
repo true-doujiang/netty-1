@@ -38,7 +38,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
     private final Set<EventExecutor> readonlyChildren;
     private final AtomicInteger terminatedChildren = new AtomicInteger();
     private final Promise<?> terminationFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);
-
+    // NioEventLoopGroup中的 NioEventLoop 选择器 放在这里的
     private final EventExecutorChooserFactory.EventExecutorChooser chooser;
 
     /**

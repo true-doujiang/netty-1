@@ -269,7 +269,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             final Channel child = (Channel) msg;
 
             child.pipeline().addLast(childHandler);
-
+            System.out.println("给客户端channel= " + child + " add 用户代码中的 childHandler= " + childHandler);
             setChannelOptions(child, childOptions, logger);
 
             for (Entry<AttributeKey<?>, Object> e: childAttrs) {
@@ -308,7 +308,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             // a chance to do something with it
             ctx.fireExceptionCaught(cause);
         }
-    }
+    } //ServerBootstrapAcceptor
 
     @Override
     @SuppressWarnings("CloneDoesntCallSuperClone")

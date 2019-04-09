@@ -6,6 +6,9 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ *  inBound
+ */
 public class ServerHandler extends ChannelInboundHandlerAdapter {
 
     /**

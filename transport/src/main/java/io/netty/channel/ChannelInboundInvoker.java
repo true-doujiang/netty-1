@@ -16,7 +16,7 @@
 package io.netty.channel;
 
 /**
- * Registered、 Active、 ExceptionCaught、 EventTriggered、Read
+ * 触发事件 Registered、 Active、 ExceptionCaught、 EventTriggered、Read
  */
 public interface ChannelInboundInvoker {
 
