@@ -49,6 +49,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Be aware that this class is marked as {@link Sharable} and so the implementation must be safe to be re-used.
  *
  * @param <C>   A sub-type of {@link Channel}
+ *
+ * 特殊 ChannelHandler 每次添加到pipeline中后会执行 initChannel(ch) 配置ch的pipeline
  */
 @Sharable
 public abstract class ChannelInitializer<C extends Channel> extends ChannelInboundHandlerAdapter {
@@ -59,6 +61,8 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
     private final Set<ChannelHandlerContext> initMap = Collections.newSetFromMap(new ConcurrentHashMap<ChannelHandlerContext, Boolean>());
 
     /**
+     * 这个ChannelHandler 一旦被注册后 initChannel(ch) 就会被调用
+     *
      * This method will be called once the {@link Channel} was registered. After the method returns this instance
      * will be removed from the {@link ChannelPipeline} of the {@link Channel}.
      *
@@ -99,6 +103,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
     }
 
     /**
+     *
      * {@inheritDoc} If override this method ensure you call super!
      */
     @Override
@@ -121,6 +126,12 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
         initMap.remove(ctx);
     }
 
+    /**
+     *
+     * @param ctx
+     * @return
+     * @throws Exception
+     */
     @SuppressWarnings("unchecked")
     private boolean initChannel(ChannelHandlerContext ctx) throws Exception {
         if (initMap.add(ctx)) { // Guard against re-entrance.
@@ -134,7 +145,9 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
             } finally {
                 ChannelPipeline pipeline = ctx.pipeline();
                 if (pipeline.context(this) != null) {
-                    // 删除 new ChannelInitializer<Channel>() { ......}
+                    /**
+                     *  删除 new ChannelInitializer<Channel>() { ......}
+                     */
                     pipeline.remove(this);
                 }
             }

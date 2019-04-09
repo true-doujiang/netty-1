@@ -1270,6 +1270,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     /**
      * Inbound
      *
+     * AbstractChannelHandlerContext 继承 ChannelHandlerContext 继承 ChannelInboundInvoker 和 ChannelOutboundInvoker
+     *
      * A special catch-all handler that handles both bytes and messages.
      */
     final class TailContext extends AbstractChannelHandlerContext implements ChannelInboundHandler {
@@ -1334,6 +1336,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     /**
      * Outbound
+     *
+     * AbstractChannelHandlerContext 继承 ChannelHandlerContext 继承 ChannelInboundInvoker 和 ChannelOutboundInvoker
      */
     final class HeadContext extends AbstractChannelHandlerContext implements ChannelOutboundHandler, ChannelInboundHandler {
 
@@ -1345,11 +1349,17 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             setAddComplete();
         }
 
+        /******************************
+         * ChannelHandlerContext 定义
+         * ****************************/
         @Override
         public ChannelHandler handler() {
             return this;
         }
 
+        /******************************
+         * ChannelHandler 定义
+         * ****************************/
         @Override
         public void handlerAdded(ChannelHandlerContext ctx) {
             // NOOP
@@ -1360,9 +1370,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             // NOOP
         }
 
-        /**
-         * HeadContext 绑定端口
-         */
+        /******************************
+         * ChannelOutboundHandler 定义
+         * ****************************/
         @Override
         public void bind(ChannelHandlerContext ctx, SocketAddress localAddress, ChannelPromise promise) {
             unsafe.bind(localAddress, promise);
@@ -1405,6 +1415,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             unsafe.flush();
         }
 
+        /****************************************
+         * 以下 ChannelInboundHandler 定义
+         * **************************************
+         */
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
             ctx.fireExceptionCaught(cause);
@@ -1426,9 +1440,6 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             }
         }
 
-        /**
-         * HeadContext ChannelActive()
-         */
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
             ctx.fireChannelActive();
@@ -1454,7 +1465,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
 
         /**
-         * HeadContext readIfIsAutoRead()
+         * HeadContext 私有方法 readIfIsAutoRead()
          */
         private void readIfIsAutoRead() {
             if (channel.config().isAutoRead()) {

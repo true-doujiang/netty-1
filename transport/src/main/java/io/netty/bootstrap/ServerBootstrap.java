@@ -184,6 +184,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
          * 再给服务端NioServerSocketChannel的pipeline添加一个HandlerContext(initializerHandler)
          */
         ChannelInitializer initializerHandler = new ChannelInitializer<Channel>() {
+            // 这个init 哪里调用的
             @Override
             public void initChannel(final Channel ch) throws Exception {
                 final ChannelPipeline pipeline = ch.pipeline();

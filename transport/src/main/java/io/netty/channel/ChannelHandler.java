@@ -189,6 +189,8 @@ public interface ChannelHandler {
     void handlerRemoved(ChannelHandlerContext ctx) throws Exception;
 
     /**
+     *  废弃
+     *
      * Gets called if a {@link Throwable} was thrown.
      *
      * @deprecated is part of {@link ChannelInboundHandler}

@@ -34,6 +34,11 @@ public final class Server {
             ServerHandler serverHandler = new ServerHandler();
             System.out.println("serverHandler = " + serverHandler);
 
+            /**
+             * 这个特殊的handler，会被放到NioServerSocketChannel的pipeline中[ServerBootstrapAcceptor]
+             * 每次有新连接接入时，NioServerSocketChannel会把它放到NioSocketChannel的pipeline中，并执行initChannel()
+             * 通过initChannel() 给NioSocketChannel的pipeline添加Handler
+             */
             ChannelInitializer<SocketChannel> childHandler = new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel ch) {
