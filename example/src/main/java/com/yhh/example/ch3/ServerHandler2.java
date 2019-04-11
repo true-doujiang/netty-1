@@ -1,15 +1,9 @@
-package com.yhh.example.chap02;
+package com.yhh.example.ch3;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
-import java.util.concurrent.TimeUnit;
-
-/**
- *  inBound
- */
-public class ServerHandler extends ChannelInboundHandlerAdapter {
+public class ServerHandler2 extends ChannelInboundHandlerAdapter {
 
     /**
      * 这些方法都是在 AbstractChannelHandlerContext 中调用的
@@ -17,18 +11,17 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        System.out.println(Thread.currentThread().getName() + " channelActive");
-        Channel channel = ctx.pipeline().channel();
+        System.out.println(Thread.currentThread().getName() + " channelActive2");
     }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) {
-        System.out.println(Thread.currentThread().getName() + " channelRegistered");
+        System.out.println(Thread.currentThread().getName() + " channelRegistered2");
     }
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
-        System.out.println(Thread.currentThread().getName() + " handlerAdded");
+        System.out.println(Thread.currentThread().getName() + " handlerAdded2");
     }
 
     /**
@@ -37,7 +30,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         super.channelRead(ctx, msg);
-        System.out.println(Thread.currentThread().getName() + " channelRead msg=" + msg);
+        System.out.println(Thread.currentThread().getName() + " channelRead2");
 //
 //        new Thread(new Runnable() {
 //            @Override

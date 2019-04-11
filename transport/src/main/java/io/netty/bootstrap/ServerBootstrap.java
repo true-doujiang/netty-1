@@ -198,6 +198,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                 ch.eventLoop().execute(new Runnable() {
                     @Override
                     public void run() {
+                        // ServerBootstrapAcceptor 一个特殊的Handler
                         ServerBootstrapAcceptor acceptorHandler =
                                 new ServerBootstrapAcceptor(ch, currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs);
                         pipeline.addLast(acceptorHandler);
@@ -233,14 +234,16 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
     }
 
     /**
-     *
+     * inBound
      */
     private static class ServerBootstrapAcceptor extends ChannelInboundHandlerAdapter {
-
+        // workerGroup
         private final EventLoopGroup childGroup;
+        // childHandler 用户代码设置到外部类，外部类传进来
         private final ChannelHandler childHandler;
         private final Entry<ChannelOption<?>, Object>[] childOptions;
         private final Entry<AttributeKey<?>, Object>[] childAttrs;
+
         private final Runnable enableAutoReadTask;
 
         ServerBootstrapAcceptor(
@@ -278,14 +281,17 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             }
 
             try {
-                childGroup.register(child).addListener(new ChannelFutureListener() {
+                ChannelFuture register = childGroup.register(child);
+                // 注册完成添加 监听器
+                ChannelFutureListener listener = new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture future) throws Exception {
                         if (!future.isSuccess()) {
                             forceClose(child, future.cause());
                         }
                     }
-                });
+                };
+                register.addListener(listener);
             } catch (Throwable t) {
                 forceClose(child, t);
             }

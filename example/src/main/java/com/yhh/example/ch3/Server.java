@@ -1,6 +1,6 @@
-package com.yhh.example.chap02;
+package com.yhh.example.ch3;
 
-import com.yhh.example.chap06.AuthHandler;
+import com.yhh.example.ch6.AuthHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;

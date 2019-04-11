@@ -1,4 +1,4 @@
-package com.yhh.example.chap06;
+package com.yhh.example.ch6;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
