@@ -48,6 +48,7 @@ import java.util.List;
  * are of type {@link ReferenceCounted}. This is needed as the {@link MessageToMessageDecoder} will call
  * {@link ReferenceCounted#release()} on decoded messages.
  *
+ * inBound
  */
 public abstract class MessageToMessageDecoder<I> extends ChannelInboundHandlerAdapter {
 
@@ -85,6 +86,9 @@ public abstract class MessageToMessageDecoder<I> extends ChannelInboundHandlerAd
                 @SuppressWarnings("unchecked")
                 I cast = (I) msg;
                 try {
+                    /**
+                     *
+                     */
                     decode(ctx, cast, out);
                 } finally {
                     ReferenceCountUtil.release(cast);

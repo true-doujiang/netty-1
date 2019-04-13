@@ -68,10 +68,13 @@ import java.util.List;
  * Some methods such as {@link ByteBuf#readBytes(int)} will cause a memory leak if the returned buffer
  * is not released or added to the <tt>out</tt> {@link List}. Use derived buffers like {@link ByteBuf#readSlice(int)}
  * to avoid leaking memory.
+ *
+ * inBound
  */
 public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter {
 
     /**
+     *
      * Cumulate {@link ByteBuf}s by merge them into one {@link ByteBuf}'s, using memory copies.
      */
     public static final Cumulator MERGE_CUMULATOR = new Cumulator() {
@@ -148,6 +151,7 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
     private static final byte STATE_CALLING_CHILD_DECODE = 1;
     private static final byte STATE_HANDLER_REMOVED_PENDING = 2;
 
+    //
     ByteBuf cumulation;
     private Cumulator cumulator = MERGE_CUMULATOR;
     private boolean singleDecode;
@@ -448,6 +452,9 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
                     break;
                 }
 
+                /**
+                 *
+                 */
                 if (outSize == out.size()) {
                     if (oldInputLength == in.readableBytes()) {
                         break;
@@ -482,6 +489,8 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
      * @param in            the {@link ByteBuf} from which to read data
      * @param out           the {@link List} to which decoded messages should be added
      * @throws Exception    is thrown if an error occurs
+     *
+     *
      */
     protected abstract void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception;
 

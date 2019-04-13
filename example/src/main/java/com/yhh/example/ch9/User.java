@@ -1,6 +1,7 @@
 package com.yhh.example.ch9;
 
 public class User {
+
     private int age;
     private String name;
 

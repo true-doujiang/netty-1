@@ -19,13 +19,15 @@ public final class Server {
 
         try {
             ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).childHandler(new ChannelInitializer<SocketChannel>() {
-                @Override
-                public void initChannel(SocketChannel ch) {
-                    ch.pipeline().addLast(new Encoder());
-                    ch.pipeline().addLast(new BizHandler());
-                }
-            });
+            b.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        public void initChannel(SocketChannel ch) {
+                            ch.pipeline().addLast(new Encoder());
+                            ch.pipeline().addLast(new BizHandler());
+                        }
+                    });
 
             ChannelFuture f = b.bind(8888).sync();
 

@@ -7,6 +7,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  * @author
  */
 public class BizHandler extends ChannelInboundHandlerAdapter {
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         //...

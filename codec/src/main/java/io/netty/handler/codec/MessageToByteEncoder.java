@@ -42,6 +42,8 @@ import io.netty.util.internal.TypeParameterMatcher;
  *         }
  *     }
  * </pre>
+ *
+ * outBound
  */
 public abstract class MessageToByteEncoder<I> extends ChannelOutboundHandlerAdapter {
 
@@ -104,6 +106,9 @@ public abstract class MessageToByteEncoder<I> extends ChannelOutboundHandlerAdap
                 I cast = (I) msg;
                 buf = allocateBuffer(ctx, cast, preferDirect);
                 try {
+                    /**
+                     *
+                     */
                     encode(ctx, cast, buf);
                 } finally {
                     ReferenceCountUtil.release(cast);

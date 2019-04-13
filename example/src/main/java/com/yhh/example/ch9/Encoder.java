@@ -13,8 +13,11 @@ import io.netty.handler.codec.MessageToByteEncoder;
  */
 
 
-
+/**
+ *
+ */
 public class Encoder extends MessageToByteEncoder<User> {
+
     @Override
     protected void encode(ChannelHandlerContext ctx, User user, ByteBuf out) throws Exception {
 
