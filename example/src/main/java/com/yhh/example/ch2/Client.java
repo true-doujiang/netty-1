@@ -7,9 +7,9 @@ import java.net.Socket;
  * @author 闪电侠
  */
 public class Client {
-    private static final String HOST = "127.0.0.1";
-    private static final int PORT = 8888;
-    private static final int SLEEP_TIME = 5000;
+    private static final String HOST = "39.106.63.228";
+    private static final int PORT = 8080;
+    private static final int SLEEP_TIME = 1000;
 
     public static void main(String[] args) throws IOException {
         final Socket socket = new Socket(HOST, PORT);
@@ -18,9 +18,10 @@ public class Client {
             @Override
             public void run() {
                 System.out.println("客户端启动成功!");
+                int i = 1;
                 while (true) {
                     try {
-                        String message = "hello world";
+                        String message = "hello world " + (i++);
                         System.out.println("客户端发送数据: " + message);
                         socket.getOutputStream().write(message.getBytes());
                     } catch (Exception e) {

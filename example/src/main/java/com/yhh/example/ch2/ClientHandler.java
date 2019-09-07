@@ -26,7 +26,7 @@ public class ClientHandler {
     private void doStart() {
         try {
             InputStream inputStream = socket.getInputStream();
-            socket.setSoTimeout(100);
+            socket.setSoTimeout(1100);
             while (true) {
                 byte[] data = new byte[MAX_DATA_LEN];
                 int len;
