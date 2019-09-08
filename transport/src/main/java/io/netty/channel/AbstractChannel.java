@@ -39,6 +39,8 @@ import java.util.concurrent.RejectedExecutionException;
 
 /**
  * A skeletal {@link Channel} implementation.
+ *
+ * 子类会分 AbstractNio 和 AbstractOio
  */
 public abstract class AbstractChannel extends DefaultAttributeMap implements Channel {
 
@@ -452,6 +454,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         return pipeline.voidPromise();
     }
 
+
+
+
     /**
      *  Unsafe 实现类
      *  1. channel 注册到 selector 上
@@ -499,13 +504,16 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
          */
         @Override
         public final void register(EventLoop eventLoop, final ChannelPromise promise) {
+
             if (eventLoop == null) {
                 throw new NullPointerException("eventLoop");
             }
+
             if (isRegistered()) {
                 promise.setFailure(new IllegalStateException("registered to an event loop already"));
                 return;
             }
+
             if (!isCompatible(eventLoop)) {
                 promise.setFailure(new IllegalStateException("incompatible event loop type: " + eventLoop.getClass().getName()));
                 return;
@@ -1130,6 +1138,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         protected Executor prepareToClose() {
             return null;
         }
+
     } // AbstractUnsafe over
 
     /**
