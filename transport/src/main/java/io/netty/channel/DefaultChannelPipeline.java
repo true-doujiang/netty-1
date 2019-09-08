@@ -45,13 +45,14 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
  */
 public class DefaultChannelPipeline implements ChannelPipeline {
 
+
     static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultChannelPipeline.class);
+
 
     private static final String HEAD_NAME = generateName0(HeadContext.class);
     private static final String TAIL_NAME = generateName0(TailContext.class);
 
-    private static final FastThreadLocal<Map<Class<?>, String>> nameCaches =
-            new FastThreadLocal<Map<Class<?>, String>>() {
+    private static final FastThreadLocal<Map<Class<?>, String>> nameCaches = new FastThreadLocal<Map<Class<?>, String>>() {
         @Override
         protected Map<Class<?>, String> initialValue() {
             return new WeakHashMap<Class<?>, String>();
@@ -59,8 +60,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     };
 
     private static final AtomicReferenceFieldUpdater<DefaultChannelPipeline, MessageSizeEstimator.Handle> ESTIMATOR =
-            AtomicReferenceFieldUpdater.newUpdater(
-                    DefaultChannelPipeline.class, MessageSizeEstimator.Handle.class, "estimatorHandle");
+            AtomicReferenceFieldUpdater.newUpdater(DefaultChannelPipeline.class, MessageSizeEstimator.Handle.class, "estimatorHandle");
+
     /**
      *
      */
@@ -68,14 +69,16 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     final AbstractChannelHandlerContext tail;
 
     /**
-     * pipeline 所属的channel
+     * channel 的整个生命周期内会绑定一个 ChannelPipeline
      */
     private final Channel channel;
+
     private final ChannelFuture succeededFuture;
     private final VoidChannelPromise voidPromise;
     private final boolean touch = ResourceLeakDetector.isEnabled();
 
     private Map<EventExecutorGroup, EventExecutor> childExecutors;
+
     private volatile MessageSizeEstimator.Handle estimatorHandle;
     private boolean firstRegistration = true;
 
@@ -111,6 +114,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         head.next = tail;
         tail.prev = head;
     }
+
 
     final MessageSizeEstimator.Handle estimatorHandle() {
         MessageSizeEstimator.Handle handle = estimatorHandle;
@@ -156,6 +160,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
         return childExecutor;
     }
+
+
+
 
     @Override
     public final Channel channel() {
@@ -834,6 +841,11 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return buf.toString();
     }
 
+
+
+
+    // -----------------------ChannelInboundInvoker
+
     @Override
     public final ChannelPipeline fireChannelRegistered() {
         AbstractChannelHandlerContext.invokeChannelRegistered(head);
@@ -845,6 +857,181 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         AbstractChannelHandlerContext.invokeChannelUnregistered(head);
         return this;
     }
+
+    /**
+     * DefaultChannelPipeline 激活 active()
+     */
+    @Override
+    public final ChannelPipeline fireChannelActive() {
+        System.out.println(Thread.currentThread().getName());
+
+        AbstractChannelHandlerContext.invokeChannelActive(head);
+        return this;
+    }
+
+    @Override
+    public final ChannelPipeline fireChannelInactive() {
+        AbstractChannelHandlerContext.invokeChannelInactive(head);
+        return this;
+    }
+
+    @Override
+    public final ChannelPipeline fireExceptionCaught(Throwable cause) {
+        AbstractChannelHandlerContext.invokeExceptionCaught(head, cause);
+        return this;
+    }
+
+    @Override
+    public final ChannelPipeline fireUserEventTriggered(Object event) {
+        AbstractChannelHandlerContext.invokeUserEventTriggered(head, event);
+        return this;
+    }
+
+    /**
+     * NioServerSocketChannel 新连接接入时触发
+     * @param msg
+     * @return
+     */
+    @Override
+    public final ChannelPipeline fireChannelRead(Object msg) {
+        AbstractChannelHandlerContext.invokeChannelRead(head, msg);
+        return this;
+    }
+
+    @Override
+    public final ChannelPipeline fireChannelReadComplete() {
+        AbstractChannelHandlerContext.invokeChannelReadComplete(head);
+        return this;
+    }
+
+    @Override
+    public final ChannelPipeline fireChannelWritabilityChanged() {
+        AbstractChannelHandlerContext.invokeChannelWritabilityChanged(head);
+        return this;
+    }
+
+
+    // ----------------------ChannelOutboundInvoker
+
+    @Override
+    public final ChannelFuture bind(SocketAddress localAddress) {
+        return tail.bind(localAddress);
+    }
+
+    @Override
+    public final ChannelFuture bind(SocketAddress localAddress, ChannelPromise promise) {
+        return tail.bind(localAddress, promise);
+    }
+
+    @Override
+    public final ChannelFuture connect(SocketAddress remoteAddress) {
+        return tail.connect(remoteAddress);
+    }
+
+    @Override
+    public final ChannelFuture connect(SocketAddress remoteAddress, SocketAddress localAddress) {
+        return tail.connect(remoteAddress, localAddress);
+    }
+
+    @Override
+    public final ChannelFuture connect(SocketAddress remoteAddress, ChannelPromise promise) {
+        return tail.connect(remoteAddress, promise);
+    }
+
+    @Override
+    public final ChannelFuture connect(
+            SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise) {
+        return tail.connect(remoteAddress, localAddress, promise);
+    }
+
+    @Override
+    public final ChannelFuture disconnect() {
+        return tail.disconnect();
+    }
+
+    @Override
+    public final ChannelFuture disconnect(ChannelPromise promise) {
+        return tail.disconnect(promise);
+    }
+
+    @Override
+    public final ChannelFuture close() {
+        return tail.close();
+    }
+
+    @Override
+    public final ChannelFuture close(ChannelPromise promise) {
+        return tail.close(promise);
+    }
+
+    @Override
+    public final ChannelFuture deregister(final ChannelPromise promise) {
+        return tail.deregister(promise);
+    }
+
+    @Override
+    public final ChannelFuture deregister() {
+        return tail.deregister();
+    }
+
+    @Override
+    public final ChannelPipeline read() {
+        tail.read();
+        return this;
+    }
+
+    @Override
+    public final ChannelFuture write(Object msg) {
+        return tail.write(msg);
+    }
+
+    @Override
+    public final ChannelFuture write(Object msg, ChannelPromise promise) {
+        return tail.write(msg, promise);
+    }
+
+    @Override
+    public final ChannelFuture writeAndFlush(Object msg, ChannelPromise promise) {
+        return tail.writeAndFlush(msg, promise);
+    }
+
+    @Override
+    public final ChannelFuture writeAndFlush(Object msg) {
+        return tail.writeAndFlush(msg);
+    }
+
+    @Override
+    public final ChannelPromise newPromise() {
+        return new DefaultChannelPromise(channel);
+    }
+
+    @Override
+    public final ChannelProgressivePromise newProgressivePromise() {
+        return new DefaultChannelProgressivePromise(channel);
+    }
+
+    @Override
+    public final ChannelFuture newSucceededFuture() {
+        return succeededFuture;
+    }
+
+    @Override
+    public final ChannelFuture newFailedFuture(Throwable cause) {
+        return new FailedChannelFuture(channel, null, cause);
+    }
+
+    @Override
+    public final ChannelPromise voidPromise() {
+        return voidPromise;
+    }
+
+    @Override
+    public final ChannelPipeline flush() {
+        tail.flush();
+        return this;
+    }
+
+
 
     /**
      * Removes all handlers from the pipeline one by one from tail (exclusive) to head (exclusive) to trigger
@@ -916,178 +1103,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
-    /**
-     * DefaultChannelPipeline 激活 active()
-     */
-    @Override
-    public final ChannelPipeline fireChannelActive() {
-        System.out.println(Thread.currentThread().getName());
 
-        AbstractChannelHandlerContext.invokeChannelActive(head);
-        return this;
-    }
-
-    @Override
-    public final ChannelPipeline fireChannelInactive() {
-        AbstractChannelHandlerContext.invokeChannelInactive(head);
-        return this;
-    }
-
-    @Override
-    public final ChannelPipeline fireExceptionCaught(Throwable cause) {
-        AbstractChannelHandlerContext.invokeExceptionCaught(head, cause);
-        return this;
-    }
-
-    @Override
-    public final ChannelPipeline fireUserEventTriggered(Object event) {
-        AbstractChannelHandlerContext.invokeUserEventTriggered(head, event);
-        return this;
-    }
-
-    /**
-     * NioServerSocketChannel 新连接接入时触发
-     * @param msg
-     * @return
-     */
-    @Override
-    public final ChannelPipeline fireChannelRead(Object msg) {
-        AbstractChannelHandlerContext.invokeChannelRead(head, msg);
-        return this;
-    }
-
-    @Override
-    public final ChannelPipeline fireChannelReadComplete() {
-        AbstractChannelHandlerContext.invokeChannelReadComplete(head);
-        return this;
-    }
-
-    @Override
-    public final ChannelPipeline fireChannelWritabilityChanged() {
-        AbstractChannelHandlerContext.invokeChannelWritabilityChanged(head);
-        return this;
-    }
-
-    @Override
-    public final ChannelFuture bind(SocketAddress localAddress) {
-        return tail.bind(localAddress);
-    }
-
-    @Override
-    public final ChannelFuture connect(SocketAddress remoteAddress) {
-        return tail.connect(remoteAddress);
-    }
-
-    @Override
-    public final ChannelFuture connect(SocketAddress remoteAddress, SocketAddress localAddress) {
-        return tail.connect(remoteAddress, localAddress);
-    }
-
-    @Override
-    public final ChannelFuture disconnect() {
-        return tail.disconnect();
-    }
-
-    @Override
-    public final ChannelFuture close() {
-        return tail.close();
-    }
-
-    @Override
-    public final ChannelFuture deregister() {
-        return tail.deregister();
-    }
-
-    @Override
-    public final ChannelPipeline flush() {
-        tail.flush();
-        return this;
-    }
-
-    /**
-     * 绑定端口
-     */
-    @Override
-    public final ChannelFuture bind(SocketAddress localAddress, ChannelPromise promise) {
-        return tail.bind(localAddress, promise);
-    }
-
-    @Override
-    public final ChannelFuture connect(SocketAddress remoteAddress, ChannelPromise promise) {
-        return tail.connect(remoteAddress, promise);
-    }
-
-    @Override
-    public final ChannelFuture connect(
-            SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise) {
-        return tail.connect(remoteAddress, localAddress, promise);
-    }
-
-    @Override
-    public final ChannelFuture disconnect(ChannelPromise promise) {
-        return tail.disconnect(promise);
-    }
-
-    @Override
-    public final ChannelFuture close(ChannelPromise promise) {
-        return tail.close(promise);
-    }
-
-    @Override
-    public final ChannelFuture deregister(final ChannelPromise promise) {
-        return tail.deregister(promise);
-    }
-
-    @Override
-    public final ChannelPipeline read() {
-        tail.read();
-        return this;
-    }
-
-    @Override
-    public final ChannelFuture write(Object msg) {
-        return tail.write(msg);
-    }
-
-    @Override
-    public final ChannelFuture write(Object msg, ChannelPromise promise) {
-        return tail.write(msg, promise);
-    }
-
-    @Override
-    public final ChannelFuture writeAndFlush(Object msg, ChannelPromise promise) {
-        return tail.writeAndFlush(msg, promise);
-    }
-
-    @Override
-    public final ChannelFuture writeAndFlush(Object msg) {
-        return tail.writeAndFlush(msg);
-    }
-
-    @Override
-    public final ChannelPromise newPromise() {
-        return new DefaultChannelPromise(channel);
-    }
-
-    @Override
-    public final ChannelProgressivePromise newProgressivePromise() {
-        return new DefaultChannelProgressivePromise(channel);
-    }
-
-    @Override
-    public final ChannelFuture newSucceededFuture() {
-        return succeededFuture;
-    }
-
-    @Override
-    public final ChannelFuture newFailedFuture(Throwable cause) {
-        return new FailedChannelFuture(channel, null, cause);
-    }
-
-    @Override
-    public final ChannelPromise voidPromise() {
-        return voidPromise;
-    }
 
     private void checkDuplicateName(String name) {
         if (context0(name) != null) {
@@ -1267,10 +1283,15 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
+
+
+
+
+
+
+
     /**
      * Inbound
-     *
-     * AbstractChannelHandlerContext 继承 ChannelHandlerContext 继承 ChannelInboundInvoker 和 ChannelOutboundInvoker
      *
      * A special catch-all handler that handles both bytes and messages.
      */
@@ -1335,9 +1356,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     * Outbound
+     * Outbound Inbound
      *
-     * AbstractChannelHandlerContext 继承 ChannelHandlerContext 继承 ChannelInboundInvoker 和 ChannelOutboundInvoker
      */
     final class HeadContext extends AbstractChannelHandlerContext implements ChannelOutboundHandler, ChannelInboundHandler {
 
@@ -1347,14 +1367,6 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             super(pipeline, null, HEAD_NAME, true, true);
             unsafe = pipeline.channel().unsafe();
             setAddComplete();
-        }
-
-        /******************************
-         * ChannelHandlerContext 定义
-         * ****************************/
-        @Override
-        public ChannelHandler handler() {
-            return this;
         }
 
         /******************************
@@ -1369,6 +1381,15 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         public void handlerRemoved(ChannelHandlerContext ctx) {
             // NOOP
         }
+
+        /******************************
+         * ChannelHandlerContext 定义
+         * ****************************/
+        @Override
+        public ChannelHandler handler() {
+            return this;
+        }
+
 
         /******************************
          * ChannelOutboundHandler 定义

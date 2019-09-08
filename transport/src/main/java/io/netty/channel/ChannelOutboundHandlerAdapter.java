@@ -54,8 +54,7 @@ public class ChannelOutboundHandlerAdapter extends ChannelHandlerAdapter impleme
      * Sub-classes may override this method to change behavior.
      */
     @Override
-    public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise)
-            throws Exception {
+    public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
         ctx.disconnect(promise);
     }
 
@@ -66,8 +65,7 @@ public class ChannelOutboundHandlerAdapter extends ChannelHandlerAdapter impleme
      * Sub-classes may override this method to change behavior.
      */
     @Override
-    public void close(ChannelHandlerContext ctx, ChannelPromise promise)
-            throws Exception {
+    public void close(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
         ctx.close(promise);
     }
 

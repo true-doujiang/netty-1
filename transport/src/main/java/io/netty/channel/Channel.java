@@ -73,6 +73,8 @@ import java.net.SocketAddress;
  * It is important to call {@link #close()} or {@link #close(ChannelPromise)} to release all
  * resources once you are done with the {@link Channel}. This ensures all resources are
  * released in a proper way, i.e. filehandles.
+ *
+ * Comparable用于比较channel，不会存在俩个一样的channel
  */
 public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparable<Channel> {
 
@@ -187,11 +189,16 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
      */
     ByteBufAllocator alloc();
 
+
+    // --------------ChannelOutboundInvoker---------start
     @Override
     Channel read();
 
     @Override
     Channel flush();
+
+    // --------------ChannelOutboundInvoker---------end
+
 
     /**
      * Unsafe 接口

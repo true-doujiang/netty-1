@@ -594,6 +594,11 @@ public interface ChannelPipeline extends ChannelInboundInvoker, ChannelOutboundI
      */
     Map<String, ChannelHandler> toMap();
 
+
+
+
+    // --------- ChannelInboundInvoker ------------
+
     @Override
     ChannelPipeline fireChannelRegistered();
 
@@ -620,6 +625,9 @@ public interface ChannelPipeline extends ChannelInboundInvoker, ChannelOutboundI
 
     @Override
     ChannelPipeline fireChannelWritabilityChanged();
+
+
+
 
     @Override
     ChannelPipeline flush();

@@ -68,13 +68,15 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     private final boolean inbound;
     private final boolean outbound;
-    private final DefaultChannelPipeline pipeline;
     private final String name;
     private final boolean ordered;
+
+    private final DefaultChannelPipeline pipeline;
 
     // Will be set to null if no child executor should be used, otherwise it will be set to the
     // child executor.
     final EventExecutor executor;
+
     private ChannelFuture succeededFuture;
 
     // Lazily instantiated tasks used to trigger events to a handler with different executor.
@@ -93,9 +95,12 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
      */
     AbstractChannelHandlerContext(DefaultChannelPipeline pipeline, EventExecutor executor, String name,
                                   boolean inbound, boolean outbound) {
+
         this.name = ObjectUtil.checkNotNull(name, "name");
+
         this.pipeline = pipeline;
         this.executor = executor;
+
         this.inbound = inbound;
         this.outbound = outbound;
         // Its ordered if its driven by the EventLoop or the given Executor is an instanceof OrderedEventExecutor.
@@ -135,7 +140,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return name;
     }
 
+
     /**
+     * ChannelInboundInvoker
      * fire Registered  三个方法一条线
      */
     @Override
@@ -175,6 +182,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
+     * ChannelInboundInvoker
      * fire  Unregistered   三个方法一条线
      */
     @Override
@@ -210,6 +218,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
+     * ChannelInboundInvoker
      *  fire  Active  三个方法一条线
      */
     @Override
@@ -251,6 +260,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
+     * ChannelInboundInvoker
      *  fire  InActive  三个方法一条线
      */
     @Override
@@ -286,6 +296,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
+     * ChannelInboundInvoker
      *  fire   ExceptionCaught  三个方法一条线
      */
     @Override
@@ -340,6 +351,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
+     * ChannelInboundInvoker
      * fire  UserEventTriggered  三个方法一条线
      */
     @Override
@@ -376,6 +388,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
+     * ChannelInboundInvoker
      * fire Read  三个方法一条线
      * @param msg：Object 对于服务端 msg是 NioSocketChannel     对于客户端 msg 是 数据
      * @return
@@ -416,6 +429,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
+     * ChannelInboundInvoker
      *  fire ReadComplete   三个方法一条线
      */
     @Override
@@ -450,6 +464,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
+     * ChannelInboundInvoker
      * fire  ChannelWritabilityChanged  三个方法一条线
      */
     @Override
@@ -483,34 +498,13 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+
+
+    // -------------- ChannelOutboundInvoker
+
     @Override
     public ChannelFuture bind(SocketAddress localAddress) {
         return bind(localAddress, newPromise());
-    }
-
-    @Override
-    public ChannelFuture connect(SocketAddress remoteAddress) {
-        return connect(remoteAddress, newPromise());
-    }
-
-    @Override
-    public ChannelFuture connect(SocketAddress remoteAddress, SocketAddress localAddress) {
-        return connect(remoteAddress, localAddress, newPromise());
-    }
-
-    @Override
-    public ChannelFuture disconnect() {
-        return disconnect(newPromise());
-    }
-
-    @Override
-    public ChannelFuture close() {
-        return close(newPromise());
-    }
-
-    @Override
-    public ChannelFuture deregister() {
-        return deregister(newPromise());
     }
 
     /**
@@ -556,6 +550,31 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         } else {
             bind(localAddress, promise);
         }
+    }
+
+    @Override
+    public ChannelFuture connect(SocketAddress remoteAddress) {
+        return connect(remoteAddress, newPromise());
+    }
+
+    @Override
+    public ChannelFuture connect(SocketAddress remoteAddress, SocketAddress localAddress) {
+        return connect(remoteAddress, localAddress, newPromise());
+    }
+
+    @Override
+    public ChannelFuture disconnect() {
+        return disconnect(newPromise());
+    }
+
+    @Override
+    public ChannelFuture close() {
+        return close(newPromise());
+    }
+
+    @Override
+    public ChannelFuture deregister() {
+        return deregister(newPromise());
     }
 
     @Override
@@ -983,6 +1002,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return false;
     }
 
+
+    // -----------------------------start
+
     /**
      * 这是挑选inbound  第一个肯定是HeadContext，从第二个开始才是用户添加的 所以用do while
      */
@@ -995,7 +1017,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
-     * 这是挑选inbound  最后一个肯定是TailContext，从倒数第二个开始才是用户添加的 所以用do while
+     * 这是挑选outbound  最后一个肯定是TailContext，从倒数第二个开始才是用户添加的 所以用do while
      */
     private AbstractChannelHandlerContext findContextOutbound() {
         AbstractChannelHandlerContext ctx = this;
@@ -1004,6 +1026,10 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         } while (!ctx.outbound);
         return ctx;
     }
+
+    // -----------------------------end
+
+
 
     @Override
     public ChannelPromise voidPromise() {
@@ -1113,6 +1139,8 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     public String toString() {
         return StringUtil.simpleClassName(ChannelHandlerContext.class) + '(' + name + ", " + channel() + ')';
     }
+
+
 
     /**
      *
@@ -1247,18 +1275,21 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     private static final class Tasks {
 
         private final AbstractChannelHandlerContext next;
+
         private final Runnable invokeChannelReadCompleteTask = new Runnable() {
             @Override
             public void run() {
                 next.invokeChannelReadComplete();
             }
         };
+
         private final Runnable invokeReadTask = new Runnable() {
             @Override
             public void run() {
                 next.invokeRead();
             }
         };
+
         private final Runnable invokeChannelWritableStateChangedTask = new Runnable() {
             @Override
             public void run() {

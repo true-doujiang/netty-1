@@ -18,7 +18,8 @@ package io.netty.channel;
 import java.net.SocketAddress;
 
 /**
- * 绑定端口、链接端口、断开连接....read 、write 、flush
+ * 出站处理 从pipeline的尾到头执行
+ *  bind、connect、read 、write 、flush
  *
  * {@link ChannelHandler} which will get notified for IO-outbound-operations.
  */

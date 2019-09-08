@@ -22,7 +22,9 @@ import java.net.ConnectException;
 import java.net.SocketAddress;
 
 /**
- * 绑定端口、 连接端口 、 断开、
+ * 触发事件 bind、 connect 、 close、read、 write、 writeAndFlush
+ *
+ * 对应 ChannelOutboundHandler
  */
 public interface ChannelOutboundInvoker {
 

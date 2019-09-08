@@ -127,6 +127,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
     }
 
     /**
+     * channelRegistered  handlerAdded 后调用该方法对channel的pipeline操作
      *
      * @param ctx
      * @return
@@ -153,6 +154,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
             }
             return true;
         }
+
         return false;
     }
 

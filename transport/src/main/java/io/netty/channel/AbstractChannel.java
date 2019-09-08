@@ -59,6 +59,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      * 创建NioServerSocketChannel   set to null
      */
     private final Channel parent;
+
     /**
      * 三大件
      */
@@ -71,6 +72,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     private volatile SocketAddress localAddress;
     private volatile SocketAddress remoteAddress;
+
     /**
      * 注册 selector 的时候 初始化了
      */
@@ -78,6 +80,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     // 当前的channel是否注册到selector 上了
     private volatile boolean registered;
+
     private boolean closeInitiated;
     private Throwable initialCloseCause;
 
@@ -94,7 +97,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     protected AbstractChannel(Channel parent) {
         this.parent = parent;
         id = newId();
-        unsafe = newUnsafe(); //抽象方法
+        unsafe = newUnsafe();  //抽象方法
         pipeline = newChannelPipeline();
     }
 
@@ -107,13 +110,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     protected AbstractChannel(Channel parent, ChannelId id) {
         this.parent = parent;
         this.id = id;
-        unsafe = newUnsafe();
+        unsafe = newUnsafe();  //抽象方法
         pipeline = newChannelPipeline();
-    }
-
-    @Override
-    public final ChannelId id() {
-        return id;
     }
 
     /**
@@ -131,6 +129,12 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      */
     protected DefaultChannelPipeline newChannelPipeline() {
         return new DefaultChannelPipeline(this);
+    }
+
+
+    @Override
+    public final ChannelId id() {
+        return id;
     }
 
     @Override
@@ -199,7 +203,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /**
-     * @deprecated no use-case for this.
+     * @deprecated no use-case for this. 废弃
      */
     @Deprecated
     protected void invalidateLocalAddress() {
@@ -223,7 +227,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /**
-     * @deprecated no use-case for this.
+     * @deprecated no use-case for this.  废弃
      */
     @Deprecated
     protected void invalidateRemoteAddress() {
@@ -234,6 +238,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     public boolean isRegistered() {
         return registered;
     }
+
+
+
+    // --------- ChannelOutboundInvoker
 
     @Override
     public ChannelFuture bind(SocketAddress localAddress) {
@@ -263,12 +271,6 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     @Override
     public ChannelFuture deregister() {
         return pipeline.deregister();
-    }
-
-    @Override
-    public Channel flush() {
-        pipeline.flush();
-        return this;
     }
 
     /**
@@ -353,6 +355,12 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     @Override
     public ChannelFuture closeFuture() {
         return closeFuture;
+    }
+
+    @Override
+    public Channel flush() {
+        pipeline.flush();
+        return this;
     }
 
     @Override
