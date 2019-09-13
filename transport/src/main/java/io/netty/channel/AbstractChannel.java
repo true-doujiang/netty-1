@@ -127,6 +127,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     /**
      * 创建 Pipeline
+     *
      * Returns a new {@link DefaultChannelPipeline} instance.
      */
     protected DefaultChannelPipeline newChannelPipeline() {
@@ -458,7 +459,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
 
     /**
-     *  Unsafe 实现类
+     *  Unsafe 实现类 功能:
      *  1. channel 注册到 selector 上
      *  2. channel 绑定端口
      *
@@ -529,6 +530,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 register0(promise);
             } else {
                 try {
+                    // 放到线程池中执行
                     Runnable r = new Runnable() {
                         @Override
                         public void run() {
@@ -559,8 +561,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 boolean firstRegistration = neverRegistered;
                 /**
                  * 把JDK 的ServerSocketChannel 或者 SocketChannel 注册到 Selector上 默认不关心任何事件
+                 *
+                 * 调用AbstractChannel的抽象方法
                  */
                 doRegister();
+
                 neverRegistered = false;
                 // registered 置为true
                 registered = true;
@@ -618,8 +623,12 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             boolean wasActive = isActive();
             try {
-                //
+
+                /**
+                 * 调用AbstractChannel的抽象方法
+                 */
                 doBind(localAddress);
+
             } catch (Throwable t) {
                 safeSetFailure(promise, t);
                 closeIfClosed();
@@ -650,7 +659,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             boolean wasActive = isActive();
             try {
+
                 doDisconnect();
+
             } catch (Throwable t) {
                 safeSetFailure(promise, t);
                 closeIfClosed();
@@ -910,6 +921,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             }
 
             try {
+                //
                 doBeginRead();
             } catch (final Exception e) {
                 invokeLater(new Runnable() {
@@ -1141,6 +1153,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     } // AbstractUnsafe over
 
+
+
+
     /**
      * Return {@code true} if the given {@link EventLoop} is compatible with this instance.
      */
@@ -1156,7 +1171,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      */
     protected abstract SocketAddress remoteAddress0();
 
-    /**
+    /********************************************************
+     * 具体子类实现 被 AbstractUnsafe 调用
+     * *******************************************************
+     *
      * Is called after the {@link Channel} is registered with its {@link EventLoop} as part of the register process.
      *
      * Sub-classes may override this method
@@ -1165,7 +1183,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         // NOOP
     }
 
-    /**
+    /************************************************
+     * 具体子类实现  被 AbstractUnsafe 调用
+     * ************************************************
+     *
      * Bind the {@link Channel} to the {@link SocketAddress}
      */
     protected abstract void doBind(SocketAddress localAddress) throws Exception;
@@ -1198,7 +1219,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         // NOOP
     }
 
-    /**
+    /************************************************
+     * 具体子类实现  被 AbstractUnsafe 调用
+     * ************************************************
+     *
      * Schedule a read operation.
      */
     protected abstract void doBeginRead() throws Exception;

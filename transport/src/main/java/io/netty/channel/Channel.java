@@ -112,6 +112,8 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
     boolean isRegistered();
 
     /**
+     * 有具体的NioSocketChannel NioServerSocketChannel实现 调用JDK底层的channel的API
+     *
      * Return {@code true} if the {@link Channel} is active and so connected.
      */
     boolean isActive();
@@ -236,6 +238,8 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
         SocketAddress remoteAddress();
 
         /**
+         * 服务端channel注册到selector、客户端channel注册到selector
+         *
          * Register the {@link Channel} of the {@link ChannelPromise} and notify
          * the {@link ChannelFuture} once the registration was complete.
          */

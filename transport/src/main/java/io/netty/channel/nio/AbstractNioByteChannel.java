@@ -39,9 +39,15 @@ import static io.netty.channel.internal.ChannelUtils.WRITE_STATUS_SNDBUF_FULL;
 
 /**
  * {@link AbstractNioChannel} base class for {@link Channel}s that operate on bytes.
+ *
+ *
+ * 客户端channel父类
  */
 public abstract class AbstractNioByteChannel extends AbstractNioChannel {
+
+
     private static final ChannelMetadata METADATA = new ChannelMetadata(false, 16);
+
     private static final String EXPECTED_TYPES =
             " (expected: " + StringUtil.simpleClassName(ByteBuf.class) + ", " +
             StringUtil.simpleClassName(FileRegion.class) + ')';
@@ -94,10 +100,13 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                 ((SocketChannelConfig) config).isAllowHalfClosure();
     }
 
+
+
     /**
      * AbstractNioUnsafe 实现类
      */
     protected class NioByteUnsafe extends AbstractNioUnsafe {
+
 
         private void closeOnRead(ChannelPipeline pipeline) {
             if (!isInputShutdown0()) {
@@ -132,15 +141,17 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         }
 
         /**
-         * 读取客户端数据
+         * 客户端读取数据
          */
         @Override
         public final void read() {
+
             final ChannelConfig config = config();
             if (shouldBreakReadReady(config)) {
                 clearReadPending();
                 return;
             }
+
             final ChannelPipeline pipeline = pipeline();
             final ByteBufAllocator allocator = config.getAllocator();
             final RecvByteBufAllocator.Handle allocHandle = recvBufAllocHandle();
@@ -151,7 +162,10 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             try {
                 do {
                     byteBuf = allocHandle.allocate(allocator);
-                    allocHandle.lastBytesRead(doReadBytes(byteBuf));
+                    //
+                    int i = doReadBytes(byteBuf);
+                    allocHandle.lastBytesRead(i);
+
                     if (allocHandle.lastBytesRead() <= 0) {
                         // nothing was read. release the buffer.
                         byteBuf.release();
@@ -193,7 +207,8 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                 }
             }
         }
-    }
+
+    } //NioByteUnsafe over
 
     /**
      * Write objects to the OS.
@@ -256,6 +271,11 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         return WRITE_STATUS_SNDBUF_FULL;
     }
 
+    /**
+     *
+     * @param in
+     * @throws Exception
+     */
     @Override
     protected void doWrite(ChannelOutboundBuffer in) throws Exception {
         int writeSpinCount = config().getWriteSpinCount();
@@ -317,6 +337,8 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
     protected abstract long doWriteFileRegion(FileRegion region) throws Exception;
 
     /**
+     * NioSocketChannel 实现  客户端读取数据
+     *
      * Read bytes into the given {@link ByteBuf} and return the amount.
      */
     protected abstract int doReadBytes(ByteBuf buf) throws Exception;

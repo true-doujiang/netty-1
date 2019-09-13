@@ -84,6 +84,9 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
         return (EventLoop) super.next();
     }
 
+    /**
+     * NioEventLoopGroup 具体实现
+     */
     @Override
     protected abstract EventLoop newChild(Executor executor, Object... args) throws Exception;
 

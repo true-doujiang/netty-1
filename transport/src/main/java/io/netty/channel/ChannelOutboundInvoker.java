@@ -104,6 +104,11 @@ public interface ChannelOutboundInvoker {
      */
     ChannelFuture deregister();
 
+
+
+    // --------bind、connect、deregister 同上只是加了一个 ChannelPromise参数 ------
+
+
     /**
      * Request to bind to the given {@link SocketAddress} and notify the {@link ChannelFuture} once the operation
      * completes, either because the operation was successful or because of an error.
@@ -190,6 +195,9 @@ public interface ChannelOutboundInvoker {
      * {@link Channel}.
      */
     ChannelFuture deregister(ChannelPromise promise);
+
+
+    // -----------------------------
 
     /**
      * Request to Read data from the {@link Channel} into the first inbound buffer, triggers an

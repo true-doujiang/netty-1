@@ -48,6 +48,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
  */
 public abstract class SingleThreadEventExecutor extends AbstractScheduledEventExecutor implements OrderedEventExecutor {
 
+
     static final int DEFAULT_MAX_PENDING_EXECUTOR_TASKS = Math.max(16,
             SystemPropertyUtil.getInt("io.netty.eventexecutor.maxPendingTasks", Integer.MAX_VALUE));
 
@@ -87,7 +88,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     @SuppressWarnings("unused")
     private volatile ThreadProperties threadProperties;
     /**
-     *  ThreadPerTaskExecutor
+     *  ThreadPerTaskExecutor: 给我一个任务我就新创建一个FastThreadLocalThread线程去执行任务
      */
     private final Executor executor;
     private volatile boolean interrupted;
@@ -767,6 +768,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      */
     @Override
     public void execute(Runnable task) {
+
         if (task == null) {
             throw new NullPointerException("task");
         }
@@ -924,6 +926,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         assert thread == null;
 
         Runnable r = new Runnable() {
+
             @Override
             public void run() {
                 //把当前线程赋值给 NioEventLoop
@@ -936,6 +939,8 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                 updateLastExecutionTime();
                 try {
                     /**
+                     *  内部类调用外部类的方法 语法就是这样的
+                     *
                      *  执行 NioEventLoop.run()  调用外部类的run()
                      */
                     SingleThreadEventExecutor.this.run();
@@ -991,6 +996,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                 }
             }
         };
+
         // 这里才会新开启一个线程
         executor.execute(r);
     }

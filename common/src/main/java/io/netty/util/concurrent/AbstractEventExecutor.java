@@ -29,8 +29,12 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract base class for {@link EventExecutor} implementations.
+ *
+ * EventExecutor extends EventExecutorGroup
  */
 public abstract class AbstractEventExecutor extends AbstractExecutorService implements EventExecutor {
+
+
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractEventExecutor.class);
 
     static final long DEFAULT_SHUTDOWN_QUIET_PERIOD = 2;

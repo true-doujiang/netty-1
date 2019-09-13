@@ -105,12 +105,14 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     /**
      * The NIO {@link Selector}.
-     * nettySelector
+     * netty selector
      */
     private Selector selector;
     // nio selector
     private Selector unwrappedSelector;
     /**
+     * netty自定义的selectedKeySet 用于替换nio中的selectedKeySet  偷天换日
+     *
      * 里面有个SelectionKey[] keys 属性， 什么时候放进的SelectionKey TODO
      * SelectedSelectionKeySetSelector在做select() 操作时放进去的
      */
@@ -144,13 +146,16 @@ public final class NioEventLoop extends SingleThreadEventLoop {
      */
     NioEventLoop(NioEventLoopGroup parent, Executor executor, SelectorProvider selectorProvider,
                  SelectStrategy strategy, RejectedExecutionHandler rejectedExecutionHandler) {
+
         super(parent, executor, false, DEFAULT_MAX_PENDING_TASKS, rejectedExecutionHandler);
+
         if (selectorProvider == null) {
             throw new NullPointerException("selectorProvider");
         }
         if (strategy == null) {
             throw new NullPointerException("selectStrategy");
         }
+
         provider = selectorProvider;
 
         final SelectorTuple selectorTuple = openSelector();

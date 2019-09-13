@@ -200,6 +200,8 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         ((AbstractNioUnsafe) unsafe()).removeReadOp();
     }
 
+
+
     /**
      * NioUnsafe 接口
      *
@@ -217,6 +219,10 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         void finishConnect();
 
         /**
+         * 俩个实现类
+         * NioByteUnsafe    客户端读取数据
+         * NioMessageUnsafe 服务端读取新的连接
+         *
          * Read from underlying {@link SelectableChannel}
          */
         void read();
@@ -252,6 +258,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         @Override
         public final void connect(
                 final SocketAddress remoteAddress, final SocketAddress localAddress, final ChannelPromise promise) {
+
             if (!promise.setUncancellable() || !ensureOpen(promise)) {
                 return;
             }
@@ -383,7 +390,10 @@ public abstract class AbstractNioChannel extends AbstractChannel {
             SelectionKey selectionKey = selectionKey();
             return selectionKey.isValid() && (selectionKey.interestOps() & SelectionKey.OP_WRITE) != 0;
         }
+
     }
+    // -----------------------AbstractNioUnsafe over
+    //private void aaaaaaaaaaaaaaaaaaaaaaaaaaa(){}
 
     @Override
     protected boolean isCompatible(EventLoop loop) {
@@ -391,6 +401,8 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     }
 
     /**
+     * 实现AbstractChannel的 doRegister() 注册，无论是客户端 or 服务端 都需要注册，所以放在Nio共同的抽象类中注册
+     *
      * 把JDK 的ServerSocketChannel 或者 SocketChannel 注册到 Selector上 默认不关心任何事件
      */
     @Override
@@ -424,7 +436,9 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     }
 
     /**
-     * 给channel注册要关心的事件
+     * 实现 AbstractChannel的doBeginRead()   给channel事先保存的事件 真正注册事件到selector
+     * 但是对于AbstractNioMessageChannel(服务端) 又重写了一下，但基本没有，还是调用回来了
+     * 对于客户单AbstractNioByteChannel 没有重写
      */
     @Override
     protected void doBeginRead() throws Exception {

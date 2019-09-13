@@ -110,10 +110,14 @@ public class DefaultThreadFactory implements ThreadFactory {
                 Thread.currentThread().getThreadGroup() : System.getSecurityManager().getThreadGroup());
     }
 
+    /**
+     *
+     */
     @Override
     public Thread newThread(Runnable r) {
         // 这个线程会赋值配NioEventLoop 中的 thread
         Thread t = newThread(FastThreadLocalRunnable.wrap(r), prefix + nextId.incrementAndGet());
+
         try {
             if (t.isDaemon() != daemon) {
                 t.setDaemon(daemon);
@@ -128,12 +132,6 @@ public class DefaultThreadFactory implements ThreadFactory {
         return t;
     }
 
-    /**
-     *
-     * @param r
-     * @param name
-     * @return
-     */
     protected Thread newThread(Runnable r, String name) {
         return new FastThreadLocalThread(threadGroup, r, name);
     }
