@@ -41,7 +41,7 @@ public abstract class AbstractEventExecutor extends AbstractExecutorService impl
     static final long DEFAULT_SHUTDOWN_TIMEOUT = 15;
 
     /**
-     *
+     * 从NioEventLoop 一直调用父类构造器 到 这里 parent就是 用户代码中 new NioEventLoopGroup(1)
      */
     private final EventExecutorGroup parent;
     private final Collection<EventExecutor> selfCollection = Collections.<EventExecutor>singleton(this);

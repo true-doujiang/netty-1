@@ -202,8 +202,9 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                 }
             }
         }
-    }
 
+    }
+    //----------- NioMessageUnsafe over
 
     /**
      * Returns {@code true} if we should continue the write loop on a write error.

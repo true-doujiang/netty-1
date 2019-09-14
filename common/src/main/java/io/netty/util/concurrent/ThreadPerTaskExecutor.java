@@ -36,7 +36,7 @@ public final class ThreadPerTaskExecutor implements Executor {
      */
     @Override
     public void execute(Runnable command) {
-        //每次给threadFactory一个command threadFactory就会创建一个线程去执行command
+        //每次给threadFactory一个command threadFactory就会创建一个线程去执行command 并启动
         threadFactory.newThread(command).start();
     }
 }

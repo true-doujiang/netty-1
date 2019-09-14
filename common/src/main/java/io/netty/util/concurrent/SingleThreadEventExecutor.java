@@ -99,7 +99,6 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     private final int maxPendingTasks;
     private final RejectedExecutionHandler rejectedExecutionHandler;
 
-    //
     private long lastExecutionTime;
 
     @SuppressWarnings({ "FieldMayBeFinal", "unused" })
@@ -188,6 +187,8 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      * {@link LinkedBlockingQueue} but if your sub-class of {@link SingleThreadEventExecutor} will not do any blocking
      * calls on the this {@link Queue} it may make sense to {@code @Override} this and return some more performant
      * implementation that does not support blocking operations at all.
+     *
+     * NioEventLoop重写了
      */
     protected Queue<Runnable> newTaskQueue(int maxPendingTasks) {
         return new LinkedBlockingQueue<Runnable>(maxPendingTasks);
@@ -763,7 +764,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     }
 
     /**
-     * 给NioEventLoop 添加任务
+     * 给NioEventLoop 添加任务   AbstractChannel.register() 调用 添加一个注册任务
      * @param task
      */
     @Override
@@ -774,6 +775,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         }
 
         boolean inEventLoop = inEventLoop();
+        // 添加到 taskQueue 这个队列中   还有一个tailQueue队列
         addTask(task);
 
         if (!inEventLoop) {

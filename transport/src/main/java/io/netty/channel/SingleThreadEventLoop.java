@@ -35,6 +35,7 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
     protected static final int DEFAULT_MAX_PENDING_TASKS = Math.max(16,
             SystemPropertyUtil.getInt("io.netty.eventLoop.maxPendingTasks", Integer.MAX_VALUE));
 
+    //
     private final Queue<Runnable> tailTasks;
 
     protected SingleThreadEventLoop(EventLoopGroup parent, ThreadFactory threadFactory, boolean addTaskWakesUp) {
@@ -55,7 +56,9 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
     protected SingleThreadEventLoop(EventLoopGroup parent, Executor executor,
                                     boolean addTaskWakesUp, int maxPendingTasks,
                                     RejectedExecutionHandler rejectedExecutionHandler) {
+
         super(parent, executor, addTaskWakesUp, maxPendingTasks, rejectedExecutionHandler);
+
         // 干什么用的 tailTasks: MpscUnboundedArrayQueue
         tailTasks = newTaskQueue(maxPendingTasks);
     }
@@ -83,7 +86,12 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
     @Override
     public ChannelFuture register(final ChannelPromise promise) {
         ObjectUtil.checkNotNull(promise, "promise");
-        promise.channel().unsafe().register(this, promise);
+        Channel channel = promise.channel();
+        Channel.Unsafe unsafe = channel.unsafe();
+
+        // unsafe 是 AbstractChannel.AbstractUnsafe
+        unsafe.register(this, promise);
+        //promise.channel().unsafe().register(this, promise);
         return promise;
     }
 

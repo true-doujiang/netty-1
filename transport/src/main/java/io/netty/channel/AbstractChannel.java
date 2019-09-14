@@ -1151,7 +1151,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             return null;
         }
 
-    } // AbstractUnsafe over
+    }
+    // ------------------ AbstractUnsafe over
 
 
 
