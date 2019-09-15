@@ -237,6 +237,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
     /**
      * inBound
+     * 这个ChannelHandler放在服务端channel的Pipeline中 专门对新接入客户单的channel处理
      */
     private static class ServerBootstrapAcceptor extends ChannelInboundHandlerAdapter {
         // workerGroup
@@ -275,9 +276,11 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
             final Channel childChannel = (Channel) msg;
 
-            childChannel.pipeline().addLast(childHandler);
+            //childChannel.pipeline().addLast(childHandler);
+            childChannel.pipeline().addLast(null, "childHandler", childHandler);
 
-            System.out.println("给客户端channel= " + childChannel + " add 用户代码中的 childHandler= " + childHandler);
+            System.out.println(Thread.currentThread().getName() + " 给客户端channel= " + childChannel + " add 用户代码中的 " +
+                    "childHandler= " + childHandler);
 
             setChannelOptions(childChannel, childOptions, logger);
 
@@ -321,7 +324,6 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             ctx.fireExceptionCaught(cause);
         }
     }
-
     //--------------------ServerBootstrapAcceptor
 
     @Override

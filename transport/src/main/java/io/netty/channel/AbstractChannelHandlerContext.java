@@ -70,7 +70,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     private final boolean outbound;
     private final String name;
     private final boolean ordered;
-
+    // 虽然 HandlerContext 上没有channel 但是可以通过pipeline 找到
     private final DefaultChannelPipeline pipeline;
 
     // Will be set to null if no child executor should be used, otherwise it will be set to the

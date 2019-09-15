@@ -1287,12 +1287,6 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
 
-
-
-
-
-
-
     /**
      * Inbound
      *
@@ -1347,8 +1341,12 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             onUnhandledInboundException(cause);
         }
 
+        /**
+         *  作为 InBound的最后一个 打个警告日志
+         */
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            System.out.println(Thread.currentThread().getName() + " 作为 InBound的最后一个 打个警告日志");
             onUnhandledInboundMessage(msg);
         }
 

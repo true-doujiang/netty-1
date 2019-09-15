@@ -51,7 +51,7 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
     protected MultithreadEventLoopGroup(int nThreads, Executor executor, Object... args) {
         //super(nThreads == 0 ? DEFAULT_EVENT_LOOP_THREADS : nThreads, executor, args);
         // 2个NioEventLoop  不根据CPU核心计算了
-        super(nThreads == 0 ? 2 : nThreads, executor, args);
+        super(nThreads == 0 ? 1 : nThreads, executor, args);
     }
 
     /**
