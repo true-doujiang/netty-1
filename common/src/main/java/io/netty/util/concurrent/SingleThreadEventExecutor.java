@@ -81,15 +81,14 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             AtomicReferenceFieldUpdater.newUpdater(
                     SingleThreadEventExecutor.class, ThreadProperties.class, "threadProperties");
 
-    // 别的别的线程往这里丢任务
+    // 别的别的线程往这里丢任务,当前线程 也会丢任务
     private final Queue<Runnable> taskQueue;
-
+    // ThreadPerTaskExecutor 创建的线程 就赋值给我了 我就是NioEventLoop中的线程，引擎
     private volatile Thread thread;
     @SuppressWarnings("unused")
     private volatile ThreadProperties threadProperties;
-    /**
-     *  ThreadPerTaskExecutor: 给我一个任务我就新创建一个FastThreadLocalThread线程去执行任务
-     */
+
+    // ThreadPerTaskExecutor: 给我一个任务我就新创建一个FastThreadLocalThread线程去执行任务
     private final Executor executor;
     private volatile boolean interrupted;
 
@@ -338,6 +337,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             reject();
         }
         boolean offer = taskQueue.offer(task);
+        System.out.println(Thread.currentThread().getName() + " taskQueue 添加任务 offer:" + offer + " task = " + task);
         return offer;
     }
 
@@ -386,11 +386,13 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      */
     protected final boolean runAllTasksFrom(Queue<Runnable> taskQueue) {
         Runnable task = pollTaskFrom(taskQueue);
-        System.out.println("NioEventLoop select() 期间 检测其它线程丢给它的task: " + task);
+
         if (task == null) {
             return false;
         }
+
         for (;;) {
+            System.out.println(Thread.currentThread().getName() + " NioEventLoop run() taskQueue 取出任务执行1  task: " + task);
             safeExecute(task);
             task = pollTaskFrom(taskQueue);
             if (task == null) {
@@ -408,7 +410,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     protected boolean runAllTasks(long timeoutNanos) {
         fetchFromScheduledTaskQueue();
         Runnable task = pollTask();
-        System.out.println("NioEventLoop select() 期间 timeoutNanos= " + timeoutNanos + " 检测其它线程丢给它的task: " + task);
+
         if (task == null) {
             afterRunningAllTasks();
             return false;
@@ -417,9 +419,11 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         final long deadline = ScheduledFutureTask.nanoTime() + timeoutNanos;
         long runTasks = 0;
         long lastExecutionTime;
-        for (;;) {
-            safeExecute(task);
 
+        for (;;) {
+            System.out.println(Thread.currentThread().getName() + " NioEventLoop run() taskQueue 取出任务执行2  task: " + task);
+            // 执行任务  task.run()
+            safeExecute(task);
             runTasks ++;
 
             // Check timeout every 64 tasks because nanoTime() is relatively expensive.
@@ -764,7 +768,8 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     }
 
     /**
-     * 给NioEventLoop 添加任务   AbstractChannel.register() 调用 添加一个注册任务
+     * 给NioEventLoop 添加任务   AbstractChannel.register() 调用  注册任务
+     *                           AbstractBootstrap.doBind0() 调用 绑定端口任务
      * @param task
      */
     @Override
@@ -779,6 +784,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         addTask(task);
 
         if (!inEventLoop) {
+
             // 启动NioEventLoop 中Thread   执行 task
             startThread();
 
@@ -802,6 +808,103 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         if (!addTaskWakesUp && wakesUpForTask(task)) {
             wakeup(inEventLoop);
         }
+    }
+
+    private void startThread() {
+        if (state == ST_NOT_STARTED) {
+            // cas 操作判断线程是否启动
+            if (STATE_UPDATER.compareAndSet(this, ST_NOT_STARTED, ST_STARTED)) {
+                try {
+                    doStartThread();
+                } catch (Throwable cause) {
+                    STATE_UPDATER.set(this, ST_NOT_STARTED);
+                    PlatformDependent.throwException(cause);
+                }
+            }
+        }
+    }
+
+    /**
+     * ThreadPerTaskExecutor创建一个线程nioEventLoop执行 taskQueue中的任务
+     */
+    private void doStartThread() {
+        assert thread == null;
+
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+
+                //把当前线程赋值给 NioEventLoop 从此NioEventLoop有了线程可以跑了
+                thread = Thread.currentThread();
+
+                if (interrupted) {
+                    thread.interrupt();
+                }
+
+                boolean success = false;
+                updateLastExecutionTime();
+                try {
+                    /**
+                     *  内部类调用外部类的方法 语法就是这样的
+                     *
+                     *  执行 NioEventLoop.run()  调用外部类的run()
+                     */
+                    SingleThreadEventExecutor.this.run();
+                    success = true;
+                } catch (Throwable t) {
+                    logger.warn("Unexpected exception from an event executor: ", t);
+                } finally {
+                    for (;;) {
+                        int oldState = state;
+                        if (oldState >= ST_SHUTTING_DOWN || STATE_UPDATER.compareAndSet(
+                                SingleThreadEventExecutor.this, oldState, ST_SHUTTING_DOWN)) {
+                            break;
+                        }
+                    }
+
+                    // Check if confirmShutdown() was called at the end of the loop.
+                    if (success && gracefulShutdownStartTime == 0) {
+                        if (logger.isErrorEnabled()) {
+                            logger.error("Buggy " + EventExecutor.class.getSimpleName() + " implementation; " +
+                                    SingleThreadEventExecutor.class.getSimpleName() + ".confirmShutdown() must " +
+                                    "be called before run() implementation terminates.");
+                        }
+                    }
+
+                    try {
+                        // Run all remaining tasks and shutdown hooks.
+                        for (;;) {
+                            if (confirmShutdown()) {
+                                break;
+                            }
+                        }
+                    } finally {
+                        try {
+                            cleanup();
+                        } finally {
+                            // Lets remove all FastThreadLocals for the Thread as we are about to terminate and notify
+                            // the future. The user may block on the future and once it unblocks the JVM may terminate
+                            // and start unloading classes.
+                            // See https://github.com/netty/netty/issues/6596.
+                            FastThreadLocal.removeAll();
+
+                            STATE_UPDATER.set(SingleThreadEventExecutor.this, ST_TERMINATED);
+                            threadLock.release();
+                            if (!taskQueue.isEmpty()) {
+                                if (logger.isWarnEnabled()) {
+                                    logger.warn("An event executor terminated with " +
+                                            "non-empty task queue (" + taskQueue.size() + ')');
+                                }
+                            }
+                            terminationFuture.setSuccess(null);
+                        }
+                    }
+                }
+            }
+        };
+
+        // ThreadPerTaskExecutor  这里才会新开启一个线程
+        executor.execute(r);
     }
 
     @Override
@@ -884,19 +987,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
     private static final long SCHEDULE_PURGE_INTERVAL = TimeUnit.SECONDS.toNanos(1);
 
-    private void startThread() {
-        if (state == ST_NOT_STARTED) {
-            // cas 操作判断线程是否启动
-            if (STATE_UPDATER.compareAndSet(this, ST_NOT_STARTED, ST_STARTED)) {
-                try {
-                    doStartThread();
-                } catch (Throwable cause) {
-                    STATE_UPDATER.set(this, ST_NOT_STARTED);
-                    PlatformDependent.throwException(cause);
-                }
-            }
-        }
-    }
+
 
     /**
      *
@@ -921,87 +1012,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         return false;
     }
 
-    /**
-     * ThreadPerTaskExecutor创建一个线程nioEventLoop执行 taskQueue中的任务
-     */
-    private void doStartThread() {
-        assert thread == null;
 
-        Runnable r = new Runnable() {
-
-            @Override
-            public void run() {
-                //把当前线程赋值给 NioEventLoop
-                thread = Thread.currentThread();
-                if (interrupted) {
-                    thread.interrupt();
-                }
-
-                boolean success = false;
-                updateLastExecutionTime();
-                try {
-                    /**
-                     *  内部类调用外部类的方法 语法就是这样的
-                     *
-                     *  执行 NioEventLoop.run()  调用外部类的run()
-                     */
-                    SingleThreadEventExecutor.this.run();
-                    success = true;
-                } catch (Throwable t) {
-                    logger.warn("Unexpected exception from an event executor: ", t);
-                } finally {
-                    for (;;) {
-                        int oldState = state;
-                        if (oldState >= ST_SHUTTING_DOWN || STATE_UPDATER.compareAndSet(
-                                SingleThreadEventExecutor.this, oldState, ST_SHUTTING_DOWN)) {
-                            break;
-                        }
-                    }
-
-                    // Check if confirmShutdown() was called at the end of the loop.
-                    if (success && gracefulShutdownStartTime == 0) {
-                        if (logger.isErrorEnabled()) {
-                            logger.error("Buggy " + EventExecutor.class.getSimpleName() + " implementation; " +
-                                    SingleThreadEventExecutor.class.getSimpleName() + ".confirmShutdown() must " +
-                                    "be called before run() implementation terminates.");
-                        }
-                    }
-
-                    try {
-                        // Run all remaining tasks and shutdown hooks.
-                        for (;;) {
-                            if (confirmShutdown()) {
-                                break;
-                            }
-                        }
-                    } finally {
-                        try {
-                            cleanup();
-                        } finally {
-                            // Lets remove all FastThreadLocals for the Thread as we are about to terminate and notify
-                            // the future. The user may block on the future and once it unblocks the JVM may terminate
-                            // and start unloading classes.
-                            // See https://github.com/netty/netty/issues/6596.
-                            FastThreadLocal.removeAll();
-
-                            STATE_UPDATER.set(SingleThreadEventExecutor.this, ST_TERMINATED);
-                            threadLock.release();
-                            if (!taskQueue.isEmpty()) {
-                                if (logger.isWarnEnabled()) {
-                                    logger.warn("An event executor terminated with " +
-                                            "non-empty task queue (" + taskQueue.size() + ')');
-                                }
-                            }
-                            terminationFuture.setSuccess(null);
-                        }
-                    }
-                }
-            }
-        };
-
-        // 这里才会新开启一个线程
-        executor.execute(r);
-    }
 
     /**
      *

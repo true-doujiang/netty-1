@@ -410,7 +410,10 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         boolean selected = false;
         for (;;) {
             try {
-                selectionKey = javaChannel().register(eventLoop().unwrappedSelector(), 0, this);
+
+                NioEventLoop nioEventLoop = eventLoop();
+                // attachment this : NioServerSocketChannel 或者 NioSocketChannel
+                selectionKey = javaChannel().register(nioEventLoop.unwrappedSelector(), 0, this);
                 return;
             } catch (CancelledKeyException e) {
                 if (!selected) {

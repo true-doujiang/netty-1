@@ -180,34 +180,36 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             currentChildAttrs = childAttrs.entrySet().toArray(newAttrArray(0));
         }
 
-        /**
-         * 再给服务端NioServerSocketChannel的pipeline添加一个HandlerContext(initializerHandler)
-         */
+        // 再给服务端NioServerSocketChannel的pipeline添加一个HandlerContext(initializerHandler)
         ChannelInitializer initializerHandler = new ChannelInitializer<Channel>() {
-            // 这个init 哪里调用的
             @Override
             public void initChannel(final Channel ch) throws Exception {
                 final ChannelPipeline pipeline = ch.pipeline();
                 ChannelHandler handler = config.handler();
 
                 if (handler != null) {
-                    pipeline.addLast(handler);  // 如果给服务端配置了Handler 则这个时候添加到服务端ch的pipeline
+                    //pipeline.addLast(handler);  // 如果给服务端配置了Handler 则这个时候添加到服务端ch的pipeline
+                    pipeline.addLast(null, "serverHandler", handler);
                 }
 
                 // ch 是服务端 配置ServerBootstrapAcceptor 用于给新接入的客户端channel分配线程
-                ch.eventLoop().execute(new Runnable() {
+                Runnable r = new Runnable() {
                     @Override
                     public void run() {
                         // ServerBootstrapAcceptor 一个特殊的Handler
-                        ServerBootstrapAcceptor acceptorHandler =
-                                new ServerBootstrapAcceptor(ch, currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs);
-                        pipeline.addLast(acceptorHandler);
+                        ServerBootstrapAcceptor acceptorHandler = new ServerBootstrapAcceptor(ch, currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs);
+                        //pipeline.addLast(acceptorHandler);
+                        pipeline.addLast(null, "acceptorHandler", acceptorHandler);
                     }
-                });
+                };
+                System.out.println(Thread.currentThread().getName() + " 执行ChannelPipeline开始添加的initializerHandler.initChannel() 并添加任务 r = " + r);
+                ch.eventLoop().execute(r);
             }
         };
+
         System.out.println("initializerHandler = " + initializerHandler);
-        p.addLast(initializerHandler);
+        //p.addLast(initializerHandler);
+        p.addLast(null, "initializerHandler", initializerHandler);
     }
 
     @Override
@@ -241,6 +243,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         private final EventLoopGroup childGroup;
         // childHandler 用户代码设置到外部类，外部类传进来
         private final ChannelHandler childHandler;
+
         private final Entry<ChannelOption<?>, Object>[] childOptions;
         private final Entry<AttributeKey<?>, Object>[] childAttrs;
 
@@ -270,30 +273,32 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         @Override
         @SuppressWarnings("unchecked")
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
-            final Channel child = (Channel) msg;
+            final Channel childChannel = (Channel) msg;
 
-            child.pipeline().addLast(childHandler);
-            System.out.println("给客户端channel= " + child + " add 用户代码中的 childHandler= " + childHandler);
-            setChannelOptions(child, childOptions, logger);
+            childChannel.pipeline().addLast(childHandler);
+
+            System.out.println("给客户端channel= " + childChannel + " add 用户代码中的 childHandler= " + childHandler);
+
+            setChannelOptions(childChannel, childOptions, logger);
 
             for (Entry<AttributeKey<?>, Object> e: childAttrs) {
-                child.attr((AttributeKey<Object>) e.getKey()).set(e.getValue());
+                childChannel.attr((AttributeKey<Object>) e.getKey()).set(e.getValue());
             }
 
             try {
-                ChannelFuture register = childGroup.register(child);
+                ChannelFuture register = childGroup.register(childChannel);
                 // 注册完成添加 监听器
                 ChannelFutureListener listener = new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture future) throws Exception {
                         if (!future.isSuccess()) {
-                            forceClose(child, future.cause());
+                            forceClose(childChannel, future.cause());
                         }
                     }
                 };
                 register.addListener(listener);
             } catch (Throwable t) {
-                forceClose(child, t);
+                forceClose(childChannel, t);
             }
         }
 
@@ -315,7 +320,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             // a chance to do something with it
             ctx.fireExceptionCaught(cause);
         }
-    } //ServerBootstrapAcceptor
+    }
+
+    //--------------------ServerBootstrapAcceptor
 
     @Override
     @SuppressWarnings("CloneDoesntCallSuperClone")

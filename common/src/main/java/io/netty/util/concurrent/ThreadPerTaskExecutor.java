@@ -32,11 +32,15 @@ public final class ThreadPerTaskExecutor implements Executor {
 
     /**
      * 创建一个线程 并启动
+     * 每次给threadFactory一个command threadFactory就会创建一个线程去执行command 并启动
+     * 而且这个线程复制到了NioEventLoop.thread上    NioEventLoop开始没有线程的
      * @param command
      */
     @Override
     public void execute(Runnable command) {
-        //每次给threadFactory一个command threadFactory就会创建一个线程去执行command 并启动
-        threadFactory.newThread(command).start();
+        Thread t = threadFactory.newThread(command);
+        System.out.println(Thread.currentThread().getName() + " 创建一个Thread 并启动 t = " + t);
+        t.start();
+
     }
 }

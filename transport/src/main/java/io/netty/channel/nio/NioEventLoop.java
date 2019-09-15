@@ -452,29 +452,34 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     @Override
     protected void run() {
-        System.out.println("NioEventLoop.run() 为了断点stop ");
+
+        System.out.println(Thread.currentThread().getName() + " NioEventLoop.run() 1 start  ");
+
         for (;;) {
+
             try {
                 try {
                     int i = selectStrategy.calculateStrategy(selectNowSupplier, hasTasks());
-                    //System.out.println("NioEventLoop " + this + " switch = " + i + " " + new Date().getSeconds());
+
+                    System.out.println(Thread.currentThread().getName() + " NioEventLoop.run() 2  i = " + i);
+
                     switch (i) {
-                    case SelectStrategy.CONTINUE:
-                        continue;
+                        case SelectStrategy.CONTINUE:
+                            continue;
 
-                    case SelectStrategy.BUSY_WAIT:
-                        // fall-through to SELECT since the busy-wait is not supported with NIO
+                        case SelectStrategy.BUSY_WAIT:
+                            // fall-through to SELECT since the busy-wait is not supported with NIO
 
-                    case SelectStrategy.SELECT:
-                        //nio select() 操作
-                        select(wakenUp.getAndSet(false));
-                        //这边一大段注释 删掉了
+                        case SelectStrategy.SELECT:
+                            //nio select() 操作
+                            select(wakenUp.getAndSet(false));
+                            //这边一大段注释 删掉了
 
-                        if (wakenUp.get()) {
-                            selector.wakeup();
-                        }
-                        // fall through
-                    default:
+                            if (wakenUp.get()) {
+                                selector.wakeup();
+                            }
+                            // fall through
+                        default:
                     }
                 } catch (IOException e) {
                     // If we receive an IOException here its because the Selector is messed up. Let's rebuild
@@ -492,22 +497,25 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     try {
                         processSelectedKeys();
                     } finally {
-                        // Ensure we always run tasks.
+                        // Ensure we always run tasks.  父类.父类中
                         runAllTasks();
                     }
                 } else {
                     final long ioStartTime = System.nanoTime();
                     try {
+                        // 这个负责已经经接入channel的 IO 处理
                         processSelectedKeys();
                     } finally {
                         // Ensure we always run tasks.
                         final long ioTime = System.nanoTime() - ioStartTime;
+                        // 这个新接入channel 任务处理  TODO ??
                         runAllTasks(ioTime * (100 - ioRatio) / ioRatio);
                     }
                 }
             } catch (Throwable t) {
                 handleLoopException(t);
             }
+
             // Always handle shutdown even if the loop processing threw an exception.
             try {
                 if (isShuttingDown()) {
@@ -519,7 +527,8 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             } catch (Throwable t) {
                 handleLoopException(t);
             }
-        }
+
+        }// for end
     }
 
     private static void handleLoopException(Throwable t) {
@@ -609,6 +618,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     *
+     */
     private void processSelectedKeysOptimized() {
         for (int i = 0; i < selectedKeys.size; ++i) {
             final SelectionKey k = selectedKeys.keys[i];
@@ -808,7 +820,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 }
 
                 int selectedKeys = selector.select(timeoutMillis);
-                System.out.println(this + " timeoutMillis=" + timeoutMillis + " selectedKeys = " + selectedKeys);
+
+                System.out.println(Thread.currentThread().getName() + " NioEventLoop.run() select() timeoutMillis=" + timeoutMillis + " selectedKeys = " + selectedKeys);
+
                 selectCnt ++;
 
                 if (selectedKeys != 0 || oldWakenUp || wakenUp.get() || hasTasks() || hasScheduledTasks()) {

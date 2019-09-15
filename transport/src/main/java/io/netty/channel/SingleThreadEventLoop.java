@@ -121,7 +121,10 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
             reject();
         }
 
-        if (!tailTasks.offer(task)) {
+        boolean offer = tailTasks.offer(task);
+        System.out.println(Thread.currentThread().getName() + " tailTaskQueue 添加任务 offer: " + offer  + " task = " + task);
+
+        if (!offer) {
             reject(task);
         }
 

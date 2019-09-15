@@ -2,10 +2,7 @@ package com.yhh.example.ch3;
 
 import com.yhh.example.ch6.AuthHandler;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -60,9 +57,12 @@ public final class Server {
                     .handler(serverHandler) //配置服务端pipeline
                     .childHandler(childHandler);
 
-            ChannelFuture f = b.bind(8888).sync();
+            ChannelFuture bindCF = b.bind(8080);
+            ChannelFuture syncCF = bindCF.sync();
 
-            f.channel().closeFuture().sync();
+            Channel channel = syncCF.channel();
+            ChannelFuture channelFuture = channel.closeFuture();
+            channelFuture.sync();
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();

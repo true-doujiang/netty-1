@@ -57,13 +57,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     private static final NotYetConnectedException FLUSH0_NOT_YET_CONNECTED_EXCEPTION = ThrowableUtil.unknownStackTrace(
             new NotYetConnectedException(), AbstractUnsafe.class, "flush0()");
 
-    /**
-     * 创建NioServerSocketChannel   set to null
-     */
+    // TODO
     private final Channel parent;
 
     /**
-     * 三大件
+     * 三大件 每个channel都会有三大件   还有一个NioEventLoop
      */
     private final ChannelId id;
     private final Unsafe unsafe;
@@ -77,6 +75,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     /**
      * 注册 selector 的时候 初始化了
+     * 每个channel上都会有个NioEventLoop 只有这样 channel才能有生命力啊，引擎
      */
     private volatile EventLoop eventLoop;
 
@@ -502,6 +501,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         /**
          * 把JDK 的ServerSocketChannel 或者 SocketChannel 注册到 Selector上
+         * 实际上这里只是向taskQueue中添加一个要注册的任务，真正注册早着呢
+         * AbstractBootstrap.initAndRegister() 一路跳过来的
          */
         @Override
         public final void register(EventLoop eventLoop, final ChannelPromise promise) {
@@ -522,7 +523,6 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             /**
              * 配channel绑定一个NioEventLoop
-             *
              * 注册的线程一定要在 NioEventLoop 线程上
              */
             AbstractChannel.this.eventLoop = eventLoop;
@@ -537,7 +537,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                             register0(promise);
                         }
                     };
-                    System.out.println("把channel注册的任务 丢给 NioEventLoop : " + r);
+                    System.out.println(Thread.currentThread().getName() + " AbstractUnsafe.register() 添加注册任务 r = " + r);
                     // 把channel注册的任务 丢给 NioEventLoop
                     eventLoop.execute(r);
                 } catch (Throwable t) {
@@ -567,15 +567,18 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 doRegister();
 
                 neverRegistered = false;
-                // registered 置为true
+                // registered 置为true , 但是 没有 注册关注的事件
                 registered = true;
 
+                // 这个就是执行 ServerBootstrap 中 init(Channel) 添加的 initializerHandler
                 // Ensure we call handlerAdded(...) before we actually notify the promise. This is needed as the
                 // user may already fire events through the pipeline in the ChannelFutureListener.
-                pipeline.invokeHandlerAddedIfNeeded();
+                pipeline.invokeHandlerAddedIfNeeded();  //handlerAdded()被执行
 
                 safeSetSuccess(promise);
-                pipeline.fireChannelRegistered();
+                //
+                pipeline.fireChannelRegistered();   //channelRegistered()被执行
+
                 // Only fire a channelActive if the channel has never been registered. This prevents firing
                 // multiple channel actives if the channel is deregistered and re-registered.
                 if (isActive()) {
@@ -623,12 +626,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             boolean wasActive = isActive();
             try {
-
-                /**
-                 * 调用AbstractChannel的抽象方法
-                 */
+                // 调用AbstractChannel的抽象方法
                 doBind(localAddress);
-
             } catch (Throwable t) {
                 safeSetFailure(promise, t);
                 closeIfClosed();
@@ -643,6 +642,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                         pipeline.fireChannelActive();
                     }
                 };
+                System.out.println(Thread.currentThread().getName() + " 端口真正绑定完成了 添加  pipeline.fireChannelActive() 的任务 r = " + r);
                 invokeLater(r);
             }
 
@@ -1117,7 +1117,6 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 //         -> handlerA.channelInactive() - (2) another inbound handler method called while in (1) yet
                 //
                 // which means the execution of two inbound handler methods of the same handler overlap undesirably.
-                System.out.println(eventLoop().inEventLoop());
                 eventLoop().execute(task);
             } catch (RejectedExecutionException e) {
                 logger.warn("Can't invoke task later as EventLoop rejected it", e);

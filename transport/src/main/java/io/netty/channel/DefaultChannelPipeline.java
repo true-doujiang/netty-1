@@ -62,15 +62,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     private static final AtomicReferenceFieldUpdater<DefaultChannelPipeline, MessageSizeEstimator.Handle> ESTIMATOR =
             AtomicReferenceFieldUpdater.newUpdater(DefaultChannelPipeline.class, MessageSizeEstimator.Handle.class, "estimatorHandle");
 
-    /**
-     *
-     */
     final AbstractChannelHandlerContext head;
     final AbstractChannelHandlerContext tail;
 
-    /**
-     * channel 的整个生命周期内会绑定一个 ChannelPipeline
-     */
+    // channel 的整个生命周期内会绑定一个 ChannelPipeline
     private final Channel channel;
 
     private final ChannelFuture succeededFuture;
@@ -89,7 +84,6 @@ public class DefaultChannelPipeline implements ChannelPipeline {
      * We only keep the head because it is expected that the list is used infrequently and its size is small.
      * Thus full iterations to do insertions is assumed to be a good compromised to saving memory and tail management
      * complexity.
-     *
      * TODO
      */
     private PendingHandlerCallback pendingHandlerCallbackHead;
@@ -161,9 +155,6 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return childExecutor;
     }
 
-
-
-
     @Override
     public final Channel channel() {
         return channel;
@@ -217,6 +208,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return addLast(null, name, handler);
     }
 
+    // 添加节点
     @Override
     public final ChannelPipeline addLast(EventExecutorGroup group, String name, ChannelHandler handler) {
         final AbstractChannelHandlerContext newCtx;
@@ -225,13 +217,15 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             // 把 ChannelHandler 包装成 ChannelHandlerContext
             newCtx = newContext(group, filterName(name, handler), handler);
 
+            // 链表插入操作
             addLast0(newCtx);
 
             // If the registered is false it means that the channel was not registered on an eventLoop yet.
             // In this case we add the context to the pipeline and add a task that will call
-            // ChannelHandler.handlerAdded(...) once the channel is registered.
+            // ChannelHandler.handlerAdded(...) once the channel is registered.   注释写的很清楚了
             if (!registered) {
                 newCtx.setAddPending();
+                // 初始化 pendingHandlerCallbackHead 变量
                 callHandlerCallbackLater(newCtx, true);
                 return this;
             }
@@ -627,6 +621,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
+    /**
+     *
+     */
     private void callHandlerAdded0(final AbstractChannelHandlerContext ctx) {
         try {
             ctx.callHandlerAdded();
@@ -654,6 +651,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
+    /**
+     *
+     */
     private void callHandlerRemoved0(final AbstractChannelHandlerContext ctx) {
         // Notify the complete removal.
         try {
@@ -1172,6 +1172,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
+    /**
+     * 就是对 pipeline 的变量 pendingHandlerCallbackHead 做初始化
+     */
     private void callHandlerCallbackLater(AbstractChannelHandlerContext ctx, boolean added) {
         assert !registered;
 
@@ -1504,9 +1507,11 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             ctx.fireChannelWritabilityChanged();
         }
     }
+    // --------------HeadContext over
+
 
     /**
-     *
+     * 接口 下面俩个实现类
      */
     private abstract static class PendingHandlerCallback implements Runnable {
         //
@@ -1521,7 +1526,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     *
+     * AddedTask
      */
     private final class PendingHandlerAddedTask extends PendingHandlerCallback {
 
@@ -1556,7 +1561,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     *
+     * RemovedTask
      */
     private final class PendingHandlerRemovedTask extends PendingHandlerCallback {
 
@@ -1589,4 +1594,6 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             }
         }
     }
+
+
 }

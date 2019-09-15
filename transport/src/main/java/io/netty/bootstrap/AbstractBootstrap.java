@@ -49,20 +49,14 @@ import java.util.Map;
  */
 public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C extends Channel> implements Cloneable {
 
-    /**
-     * bossGroup
-     */
+    // bossGroup
     volatile EventLoopGroup group;
-    /**
-     * 创建 NioServerSocketChannel的 ReflectiveChannelFactory
-     */
+
+    // 创建 NioServerSocketChannel的 ReflectiveChannelFactory
     @SuppressWarnings("deprecation")
     private volatile ChannelFactory<? extends C> channelFactory;
 
     private volatile SocketAddress localAddress;
-    /**
-     *
-     */
     private final Map<ChannelOption<?>, Object> options = new LinkedHashMap<ChannelOption<?>, Object>();
     private final Map<AttributeKey<?>, Object> attrs = new LinkedHashMap<AttributeKey<?>, Object>();
     /**
@@ -292,26 +286,34 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         return doBind(localAddress);
     }
 
+    /**
+     * 1. 创建 & 初始化 & 注册 服务端channel
+     * 2. 绑定端口
+     */
     private ChannelFuture doBind(final SocketAddress localAddress) {
-        // 创建 & 初始化 & 注册 服务端channel
+        // 1. 创建 & 初始化 & 注册 服务端channel
         final ChannelFuture regFuture = initAndRegister();
-
         final Channel channel = regFuture.channel();
+
         if (regFuture.cause() != null) {
             return regFuture;
         }
 
+        // 不断点  false
+        System.out.println(Thread.currentThread().getName() + " 1 doBind() isDone= " + regFuture.isDone());
+
+        // 2. 绑定端口
         if (regFuture.isDone()) {
             // At this point we know that the registration was complete and successful.
             ChannelPromise promise = channel.newPromise();
             doBind0(regFuture, channel, localAddress, promise);
             return promise;
         } else {
+
             // Registration future is almost always fulfilled already, but just in case it's not.
             final PendingRegistrationPromise promise = new PendingRegistrationPromise(channel);
-            /**
-             * 事件监听器
-             */
+
+            // 绑定端口放到 事件监听器中
             ChannelFutureListener listener = new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
@@ -329,6 +331,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
                     }
                 }
             };
+
             ChannelFuture channelFuture = regFuture.addListener(listener);
             return promise;
         }
@@ -340,7 +343,9 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     final ChannelFuture initAndRegister() {
         Channel channel = null;
         try {
+            // 1. 反射创建 NioServerSocketChannel 或者  NioSocketChannel
             channel = channelFactory.newChannel();
+            // 2. 抽象方法  在 ServerBootstrap 或者 Bootstrap 中初始化
             init(channel);
         } catch (Throwable t) {
             if (channel != null) {
@@ -353,15 +358,14 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             return new DefaultChannelPromise(new FailedChannel(), GlobalEventExecutor.INSTANCE).setFailure(t);
         }
 
-        /**
-         * 把创建好的 channel 注册到Selector 上，在
-         */
-        // ChannelFuture regFuture = config().group().register(channel);
+        // 3. 把创建好的 channel 注册到Selector 上，在
         AbstractBootstrapConfig bootstrapConfig = config();
         // MultithreadEventLoopGroup
         EventLoopGroup eventLoopGroup = bootstrapConfig.group();
         // eventLoopGroup 用户代码中的boss 或者 worker
+        // 它会选择一个NioEventLoop 把这个channel 注册到NioEventLoop上的selector上
         ChannelFuture regFuture = eventLoopGroup.register(channel);
+
         if (regFuture.cause() != null) {
             if (channel.isRegistered()) {
                 channel.close();
@@ -382,15 +386,18 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         return regFuture;
     }
 
-    abstract void init(Channel channel) throws Exception;
 
+    /**
+     *  绑定端口
+     */
     private static void doBind0(
             final ChannelFuture regFuture, final Channel channel,
             final SocketAddress localAddress, final ChannelPromise promise) {
 
         // This method is invoked before channelRegistered() is triggered.  Give user handlers a chance to set up
         // the pipeline in its channelRegistered() implementation.
-        System.out.println("====" + channel.eventLoop().inEventLoop()); //不断点：true   断点：false
+        System.out.println(Thread.currentThread().getName() + " 2 doBind0()  isDone= " + channel.eventLoop().inEventLoop()); //不断点：true   断点：false
+
         Runnable r = new Runnable() {
             @Override
             public void run() {
@@ -402,11 +409,15 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
                 }
             }
         };
-        /**
-         *  绑定端口任务
-         */
+
+        // 添加绑定端口任务
+        System.out.println(Thread.currentThread().getName() + " 添加绑定端口任务 r = " + r);
         channel.eventLoop().execute(r);
     }
+
+
+    abstract void init(Channel channel) throws Exception;
+
 
     /**
      * the {@link ChannelHandler} to use for serving the requests.

@@ -86,12 +86,8 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     private volatile int handlerState = INIT;
 
     /**
-     *
      * @param pipeline
      * @param executor new 的时候 set to null
-     * @param name
-     * @param inbound
-     * @param outbound
      */
     AbstractChannelHandlerContext(DefaultChannelPipeline pipeline, EventExecutor executor, String name,
                                   boolean inbound, boolean outbound) {
@@ -117,19 +113,14 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return pipeline;
     }
 
-    @Override
-    public ByteBufAllocator alloc() {
-        return channel().config().getAllocator();
-    }
-
     /**
      *
-     * @return
      */
     @Override
     public EventExecutor executor() {
         if (executor == null) {
-            return channel().eventLoop();
+            Channel channel = channel();
+            return channel.eventLoop();
         } else {
             return executor;
         }
@@ -140,6 +131,10 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return name;
     }
 
+    @Override
+    public ByteBufAllocator alloc() {
+        return channel().config().getAllocator();
+    }
 
     /**
      * ChannelInboundInvoker

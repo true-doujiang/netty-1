@@ -12,21 +12,20 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     /**
      * 这些方法都是在 AbstractChannelHandlerContext 中调用的
      */
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) {
+        System.out.println(Thread.currentThread().getName() + " ServerHandler handlerAdded");
+    }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        System.out.println(Thread.currentThread().getName() + " channelActive");
+        System.out.println(Thread.currentThread().getName() + " ServerHandler channelActive");
         Channel channel = ctx.pipeline().channel();
     }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) {
-        System.out.println(Thread.currentThread().getName() + " channelRegistered");
-    }
-
-    @Override
-    public void handlerAdded(ChannelHandlerContext ctx) {
-        System.out.println(Thread.currentThread().getName() + " handlerAdded");
+        System.out.println(Thread.currentThread().getName() + " ServerHandler channelRegistered");
     }
 
     /**
@@ -35,7 +34,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         super.channelRead(ctx, msg);
-        System.out.println(Thread.currentThread().getName() + " channelRead msg=" + msg);
+        System.out.println(Thread.currentThread().getName() + " ServerHandler channelRead msg=" + msg);
 //
 //        new Thread(new Runnable() {
 //            @Override
