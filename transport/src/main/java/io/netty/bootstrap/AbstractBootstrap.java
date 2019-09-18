@@ -59,9 +59,8 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     private volatile SocketAddress localAddress;
     private final Map<ChannelOption<?>, Object> options = new LinkedHashMap<ChannelOption<?>, Object>();
     private final Map<AttributeKey<?>, Object> attrs = new LinkedHashMap<AttributeKey<?>, Object>();
-    /**
-     * 用户代码设置的服务端 handler
-     */
+
+    // 用户代码设置的服务端 handler
     private volatile ChannelHandler handler;
 
     AbstractBootstrap() {

@@ -44,20 +44,15 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ServerBootstrap.class);
 
-    /**
-     *
-     */
+    // 针对接入的客户端channel
     private final Map<ChannelOption<?>, Object> childOptions = new LinkedHashMap<ChannelOption<?>, Object>();
     private final Map<AttributeKey<?>, Object> childAttrs = new LinkedHashMap<AttributeKey<?>, Object>();
 
     private final ServerBootstrapConfig config = new ServerBootstrapConfig(this);
-    /**
-     * workerGroup
-     */
+
+    // workerGroup 负责IO 读写
     private volatile EventLoopGroup childGroup;
-    /**
-     * 用户代码中设置
-     */
+    // 用户代码中 childHandler(xx) 设置的
     private volatile ChannelHandler childHandler;
 
     public ServerBootstrap() { }
@@ -152,6 +147,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
      */
     @Override
     void init(Channel channel) throws Exception {
+        // 服务端 配置 属性
         final Map<ChannelOption<?>, Object> options = options0();
         synchronized (options) {
             setChannelOptions(channel, options, logger);
@@ -168,11 +164,13 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
         ChannelPipeline p = channel.pipeline();
 
+
         // worker group
         final EventLoopGroup currentChildGroup = childGroup;
         final ChannelHandler currentChildHandler = childHandler;
         final Entry<ChannelOption<?>, Object>[] currentChildOptions;
         final Entry<AttributeKey<?>, Object>[] currentChildAttrs;
+        // 客户端 配置 属性
         synchronized (childOptions) {
             currentChildOptions = childOptions.entrySet().toArray(newOptionArray(0));
         }
