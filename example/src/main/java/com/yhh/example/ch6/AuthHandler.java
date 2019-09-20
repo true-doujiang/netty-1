@@ -11,7 +11,8 @@ public class AuthHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        //
+        System.out.println(Thread.currentThread().getName() + " AuthHandler: " + msg);
+        ctx.fireChannelRead(msg);
     }
 
     @Override

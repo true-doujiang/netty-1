@@ -54,18 +54,48 @@ public final class Server {
                     .attr(AttributeKey.newInstance("myServerAttr"), "myServervalue")
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     .childAttr(AttributeKey.newInstance("childAttr"), "childAttrValue")
-                    .handler(serverHandler) //配置服务端pipeline
+                    .handler(serverHandler)
                     .childHandler(childHandler);
 
             ChannelFuture bindCF = b.bind(8080);
+
+            //false
+            System.out.println(Thread.currentThread().getName() + " bindCF.isDone = " + bindCF.isDone());
+            bindCF.addListener(future -> {
+               if (future.isSuccess()) {
+                   System.out.println(Thread.currentThread().getName() + " 端口绑定成功!");
+               } else {
+                   System.err.println(Thread.currentThread().getName() + " 端口绑定失败!");
+               }
+            });
+
             ChannelFuture syncCF = bindCF.sync();
+            // true
+            System.out.println(Thread.currentThread().getName() + " syncCF.isDone = " + bindCF.isDone());
 
             Channel channel = syncCF.channel();
-            ChannelFuture channelFuture = channel.closeFuture();
-            channelFuture.sync();
+
+
+
+            // 关闭的future 是等不到了
+            ChannelFuture closeFuture = channel.closeFuture();
+            System.out.println(Thread.currentThread().getName() + " closeFuture.isDone = " + closeFuture.isDone());
+            closeFuture.addListener(future -> {
+                if (future.isSuccess()) {
+                    System.out.println(Thread.currentThread().getName() + " 关闭成功!");
+                } else {
+                    System.err.println(Thread.currentThread().getName() + " 关闭失败!");
+                }
+            });
+
+            // 阻塞这里
+            ChannelFuture syncCF2 = closeFuture.sync();
+            System.out.println(Thread.currentThread().getName() + " syncCF2.isDone = " + syncCF2.isDone());
+
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
+            System.out.println(Thread.currentThread().getName() + " shutdownGracefully");
         }
 
        // test();

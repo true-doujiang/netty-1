@@ -269,6 +269,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             };
         }
 
+        /**
+         * channelRead() 就没有调用父类方法 pipeline到此结束   TailContext节点就没有执行，我说最后一个警告怎么没有打印呢
+         */
         @Override
         @SuppressWarnings("unchecked")
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
@@ -287,8 +290,8 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             }
 
             try {
+                // 对客户单channel 做类似服务端channel同样操作流程
                 ChannelFuture register = childGroup.register(childChannel);
-                // 注册完成添加 监听器
                 ChannelFutureListener listener = new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture future) throws Exception {

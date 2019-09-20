@@ -33,6 +33,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
+        // 一定要调用父类的方法  否则pipeline就到此结束 下个节点就不会执行了 ServerBootstrapAcceptor
         super.channelRead(ctx, msg);
         System.out.println(Thread.currentThread().getName() + " ServerHandler channelRead msg=" + msg);
 //
