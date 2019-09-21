@@ -46,9 +46,6 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
         super(parent, ch, readInterestOp);
     }
 
-
-
-
     /**
      *
      */

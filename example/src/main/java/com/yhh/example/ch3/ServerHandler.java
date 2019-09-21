@@ -27,6 +27,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         System.out.println(Thread.currentThread().getName() + " ServerHandler channelActive");
+        ctx.fireChannelActive();
         Channel channel = ctx.pipeline().channel();
     }
 

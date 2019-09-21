@@ -271,6 +271,21 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             };
         }
 
+        // 我自己加的
+        @Override
+        public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+            System.out.println(Thread.currentThread().getName() + " ServerBootstrapAcceptor.handlerAdded(ctx)");
+        }
+
+        // 我自己加的
+        @Override
+        public void channelActive(ChannelHandlerContext ctx) {
+            System.out.println(Thread.currentThread().getName() + " ServerBootstrapAcceptor.channelActive(ctx)");
+            ctx.fireChannelActive();
+        }
+
+
+
         /**
          * channelRead() 就没有调用父类方法 pipeline到此结束   TailContext节点就没有执行，我说最后一个警告怎么没有打印呢
          */

@@ -402,7 +402,6 @@ public abstract class AbstractNioChannel extends AbstractChannel {
 
     /**
      * 实现AbstractChannel的 doRegister() 注册，无论是客户端 or 服务端 都需要注册，所以放在Nio共同的抽象类中注册
-     *
      * 把JDK 的ServerSocketChannel 或者 SocketChannel 注册到 Selector上 默认不关心任何事件
      */
     @Override

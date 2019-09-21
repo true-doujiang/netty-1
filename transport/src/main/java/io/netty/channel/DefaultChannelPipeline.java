@@ -844,7 +844,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
 
 
-    // -----------------------ChannelInboundInvoker
+    // -----------------------ChannelInboundInvoker-----------start-
+    // 都是把head节点传进去  入站是从头节点往后执行
 
     @Override
     public final ChannelPipeline fireChannelRegistered() {
@@ -858,13 +859,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return this;
     }
 
-    /**
-     * DefaultChannelPipeline 激活 active()
-     */
     @Override
     public final ChannelPipeline fireChannelActive() {
-        System.out.println(Thread.currentThread().getName());
-
         AbstractChannelHandlerContext.invokeChannelActive(head);
         return this;
     }
@@ -888,8 +884,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     * NioServerSocketChannel 新连接接入时触发
-     * @param msg
+     * @param msg 若是服务端读msg为NioSocketChannel 若是客户端读msg为ByteBuf
      * @return
      */
     @Override
@@ -911,7 +906,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
 
-    // ----------------------ChannelOutboundInvoker
+    // ----------------------ChannelOutboundInvoker-------start-
 
     @Override
     public final ChannelFuture bind(SocketAddress localAddress) {
@@ -1312,6 +1307,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
+            System.out.println(Thread.currentThread().getName() + " 我把中间的ServerHandler、ServerBootstrapAcceptor" +
+                    " 的 channelActive(ctx) 串联起来了所以才会流转到最后一个 InBound");
             onUnhandledInboundChannelActive();
         }
 
@@ -1464,6 +1461,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
+            System.out.println(Thread.currentThread().getName() + " HeadContext.channelActive(ctx)");
             ctx.fireChannelActive();
 
             readIfIsAutoRead();

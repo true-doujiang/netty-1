@@ -561,8 +561,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 boolean firstRegistration = neverRegistered;
                 /**
                  * 把JDK 的ServerSocketChannel 或者 SocketChannel 注册到 Selector上 默认不关心任何事件
-                 *
-                 * 调用AbstractChannel的抽象方法
+                 * 调用AbstractChannel的抽象方法  AbstractNioChannel 重写了
                  */
                 doRegister();
 
@@ -587,8 +586,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     } else if (config().isAutoRead()) {
                         // This channel was registered before and autoRead() is set. This means we need to begin read
                         // again so that we process inbound data.
-                        //
                         // See https://github.com/netty/netty/issues/4805
+                        // 注册真正感兴趣的事件
                         beginRead();
                     }
                 }
@@ -912,6 +911,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             });
         }
 
+        /**
+         *
+         */
         @Override
         public final void beginRead() {
             assertEventLoop();

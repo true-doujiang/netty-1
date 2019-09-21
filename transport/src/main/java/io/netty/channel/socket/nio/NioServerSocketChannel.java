@@ -128,6 +128,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
     }
 
     /**
+     * AbstractChannel 中定义的抽象方法
      * 绑定端口号
      */
     @Override
@@ -156,6 +157,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
 
         try {
             if (ch != null) {
+                // this: NioServerSocketChannel
                 buf.add(new NioSocketChannel(this, ch));
                 return 1;
             }

@@ -141,6 +141,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         }
 
         /**
+         * NioUnsafe 接口中定义
          * 客户端读取数据
          */
         @Override
@@ -180,9 +181,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
                     allocHandle.incMessagesRead(1);
                     readPending = false;
-                    /**
-                     *
-                     */
+                    // 触发一系列channelHandler 包括解码器
                     pipeline.fireChannelRead(byteBuf);
                     byteBuf = null;
                 } while (allocHandle.continueReading());
@@ -208,7 +207,8 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             }
         }
 
-    } //NioByteUnsafe over
+    }
+    // ------------- NioByteUnsafe over ------------
 
     /**
      * Write objects to the OS.
