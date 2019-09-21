@@ -414,6 +414,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         if (invokeHandler()) {
             try {
                 ChannelInboundHandler inboundHandler = (ChannelInboundHandler) handler();
+                // 上面都是1个参数  我是2个参数
                 inboundHandler.channelRead(this, msg);
                 //((ChannelInboundHandler) handler()).channelRead(this, msg);
             } catch (Throwable t) {
