@@ -46,7 +46,7 @@ public final class Server {
                     //..
                 }
             };
-            System.out.println("childHandler = " + childHandler);
+            System.out.println(Thread.currentThread().getName() + " childHandler = " + childHandler);
 
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
