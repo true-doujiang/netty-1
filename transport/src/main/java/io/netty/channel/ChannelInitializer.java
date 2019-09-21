@@ -60,19 +60,36 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
     // ServerBootstrap. This way we can reduce the memory usage compared to use Attributes.
     private final Set<ChannelHandlerContext> initMap = Collections.newSetFromMap(new ConcurrentHashMap<ChannelHandlerContext, Boolean>());
 
-    /**
-     * 这个ChannelHandler 一旦被注册后 initChannel(ch) 就会被调用
-     *
-     * This method will be called once the {@link Channel} was registered. After the method returns this instance
-     * will be removed from the {@link ChannelPipeline} of the {@link Channel}.
-     *
-     * @param ch            the {@link Channel} which was registered.
-     * @throws Exception    is thrown if an error occurs. In that case it will be handled by
-     *                      {@link #exceptionCaught(ChannelHandlerContext, Throwable)} which will by default close
-     *                      the {@link Channel}.
-     */
-    protected abstract void initChannel(C ch) throws Exception;
 
+    /**
+     * ChannelHandler 中定义
+     * {@inheritDoc} If override this method ensure you call super!
+     */
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+
+        System.out.println(Thread.currentThread().getName() + " ChannelInitializer = " + this + " handlerAdded(ctx) 执行");
+
+        if (ctx.channel().isRegistered()) {
+            // This should always be true with our current DefaultChannelPipeline implementation.
+            // The good thing about calling initChannel(...) in handlerAdded(...) is that there will be no ordering
+            // surprises if a ChannelInitializer will add another ChannelInitializer. This is as all handlers
+            // will be added in the expected order.
+            if (initChannel(ctx)) {
+                // We are done with init the Channel, removing the initializer now.
+                removeState(ctx);
+            }
+        }
+    }
+
+    @Override
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        initMap.remove(ctx);
+    }
+
+    /**
+     * ChannelInboundHandler 接口定义
+     */
     @Override
     @SuppressWarnings("unchecked")
     public final void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -82,7 +99,6 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
             // we called initChannel(...) so we need to call now pipeline.fireChannelRegistered() to ensure we not
             // miss an event.
             ctx.pipeline().fireChannelRegistered();
-
             // We are done with init the Channel, removing all the state for the Channel now.
             removeState(ctx);
         } else {
@@ -102,36 +118,10 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
         ctx.close();
     }
 
-    /**
-     *
-     * {@inheritDoc} If override this method ensure you call super!
-     */
-    @Override
-    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        if (ctx.channel().isRegistered()) {
-            // This should always be true with our current DefaultChannelPipeline implementation.
-            // The good thing about calling initChannel(...) in handlerAdded(...) is that there will be no ordering
-            // surprises if a ChannelInitializer will add another ChannelInitializer. This is as all handlers
-            // will be added in the expected order.
-            if (initChannel(ctx)) {
 
-                // We are done with init the Channel, removing the initializer now.
-                removeState(ctx);
-            }
-        }
-    }
-
-    @Override
-    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        initMap.remove(ctx);
-    }
 
     /**
      * channelRegistered  handlerAdded 后调用该方法对channel的pipeline操作
-     *
-     * @param ctx
-     * @return
-     * @throws Exception
      */
     @SuppressWarnings("unchecked")
     private boolean initChannel(ChannelHandlerContext ctx) throws Exception {
@@ -146,9 +136,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
             } finally {
                 ChannelPipeline pipeline = ctx.pipeline();
                 if (pipeline.context(this) != null) {
-                    /**
-                     *  删除 new ChannelInitializer<Channel>() { ......}
-                     */
+                    // 删除 new ChannelInitializer<Channel>() { ......}
                     pipeline.remove(this);
                 }
             }
@@ -157,6 +145,19 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
 
         return false;
     }
+
+    /**
+     *
+     * This method will be called once the {@link Channel} was registered. After the method returns this instance
+     * will be removed from the {@link ChannelPipeline} of the {@link Channel}.
+     *
+     * @param ch            the {@link Channel} which was registered.
+     * @throws Exception    is thrown if an error occurs. In that case it will be handled by
+     *                      {@link #exceptionCaught(ChannelHandlerContext, Throwable)} which will by default close
+     *                      the {@link Channel}.
+     */
+    protected abstract void initChannel(C ch) throws Exception;
+
 
     private void removeState(final ChannelHandlerContext ctx) {
         // The removal may happen in an async fashion if the EventExecutor we use does something funky.

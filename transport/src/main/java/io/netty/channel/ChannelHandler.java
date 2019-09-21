@@ -177,7 +177,7 @@ import java.lang.annotation.Target;
  */
 
 /**
- *
+ * 就定义2 个方法  handlerAdded   handlerRemoved
  */
 public interface ChannelHandler {
 
@@ -193,11 +193,9 @@ public interface ChannelHandler {
     void handlerRemoved(ChannelHandlerContext ctx) throws Exception;
 
     /**
-     *  废弃
-     *
      * Gets called if a {@link Throwable} was thrown.
      *
-     * @deprecated is part of {@link ChannelInboundHandler}
+     * @deprecated is part of {@link ChannelInboundHandler}  废弃 ChannelInboundHandler 重写定义了一遍
      */
     @Deprecated
     void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception;

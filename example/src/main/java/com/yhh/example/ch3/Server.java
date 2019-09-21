@@ -29,7 +29,7 @@ public final class Server {
             workerGroup = new NioEventLoopGroup();
 
             ServerHandler serverHandler = new ServerHandler();
-            System.out.println("serverHandler = " + serverHandler);
+            System.out.println(Thread.currentThread().getName() + " serverHandler = " + serverHandler);
 
             /**
              * 这个特殊的handler，会被放到NioServerSocketChannel的pipeline中[ServerBootstrapAcceptor]

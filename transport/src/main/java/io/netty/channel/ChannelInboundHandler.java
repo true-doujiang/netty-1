@@ -16,11 +16,11 @@
 package io.netty.channel;
 
 /**
- * 入站处理 从pipeline的头到尾执行
- * channelRegistered、channelActive、 channelRead、channelReadComplete、 exceptionCaught
- *
  * {@link ChannelHandler} which adds callbacks for state changes. This allows the user
  * to hook in to state changes easily.
+ *
+ * 入站处理 从pipeline的头到尾执行
+ * channelRegistered、channelActive、 channelRead、channelReadComplete、 exceptionCaught
  */
 public interface ChannelInboundHandler extends ChannelHandler {
 

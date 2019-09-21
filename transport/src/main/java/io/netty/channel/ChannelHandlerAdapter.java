@@ -22,6 +22,8 @@ import java.util.Map;
 
 /**
  * Skeleton implementation of a {@link ChannelHandler}.
+ *
+ * 简单的对 ChannelHandler做个实现 下面分了 Inbound Outbound
  */
 public abstract class ChannelHandlerAdapter implements ChannelHandler {
 

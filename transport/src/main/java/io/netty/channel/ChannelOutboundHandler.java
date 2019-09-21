@@ -24,6 +24,7 @@ import java.net.SocketAddress;
  * {@link ChannelHandler} which will get notified for IO-outbound-operations.
  */
 public interface ChannelOutboundHandler extends ChannelHandler {
+
     /**
      * Called once a bind operation is made.
      *

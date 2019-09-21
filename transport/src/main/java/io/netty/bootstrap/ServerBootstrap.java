@@ -180,6 +180,8 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
         // 再给服务端NioServerSocketChannel的pipeline添加一个HandlerContext(initializerHandler)
         ChannelInitializer initializerHandler = new ChannelInitializer<Channel>() {
+
+            // ChannelInitializer 父类中有 handlerAdded(ctx) 它调用了initChannel(ch)
             @Override
             public void initChannel(final Channel ch) throws Exception {
                 final ChannelPipeline pipeline = ch.pipeline();
@@ -205,7 +207,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             }
         };
 
-        System.out.println("initializerHandler = " + initializerHandler);
+        System.out.println(Thread.currentThread().getName() + " initializerHandler = " + initializerHandler);
         //p.addLast(initializerHandler);
         p.addLast(null, "initializerHandler", initializerHandler);
     }
