@@ -394,6 +394,11 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         }
     }
 
+    /**
+     *
+     * @param in
+     * @throws Exception
+     */
     @Override
     protected void doWrite(ChannelOutboundBuffer in) throws Exception {
         SocketChannel ch = javaChannel();
@@ -462,6 +467,9 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         return new NioSocketChannelUnsafe();
     }
 
+    /**
+     *
+     */
     private final class NioSocketChannelUnsafe extends NioByteUnsafe {
         @Override
         protected Executor prepareToClose() {

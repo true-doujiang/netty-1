@@ -184,7 +184,6 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     /**
      *
-     * @return
      */
     private SelectorTuple openSelector() {
         final Selector unwrappedSelector;
