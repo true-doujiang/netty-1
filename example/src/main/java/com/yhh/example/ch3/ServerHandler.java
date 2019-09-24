@@ -34,6 +34,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 
     /**
      * AbstractChannelHandlerContext 中调用的
+     * 服务端的 读到的 msg 是 NioSocketChannel
      */
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {

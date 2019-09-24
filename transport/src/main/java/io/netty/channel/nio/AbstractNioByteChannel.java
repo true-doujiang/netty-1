@@ -152,7 +152,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                 clearReadPending();
                 return;
             }
-
+            // 内部类调用外部类方法
             final ChannelPipeline pipeline = pipeline();
             final ByteBufAllocator allocator = config.getAllocator();
             final RecvByteBufAllocator.Handle allocHandle = recvBufAllocHandle();
@@ -162,6 +162,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             boolean close = false;
             try {
                 do {
+                    // PooledUnsafeDirectByteBuf
                     byteBuf = allocHandle.allocate(allocator);
                     //
                     int i = doReadBytes(byteBuf);
