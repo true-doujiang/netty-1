@@ -24,7 +24,7 @@ import java.net.SocketAddress;
 /**
  * 触发事件 bind、 connect 、 close、read、 write、 writeAndFlush
  *
- * 对应 ChannelOutboundHandler
+ * 对应 ChannelOutboundHandler   用户触发他的事件
  */
 public interface ChannelOutboundInvoker {
 

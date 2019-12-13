@@ -62,7 +62,8 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
 
 
     /**
-     * ChannelHandler 中定义
+     * ChannelHandler 中定义    todo  这个先执行还是channelRegistered() 先执行 ？
+     *
      * {@inheritDoc} If override this method ensure you call super!
      */
     @Override
@@ -93,6 +94,9 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
     @Override
     @SuppressWarnings("unchecked")
     public final void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+
+        System.out.println(Thread.currentThread().getName() + " ChannelInitializer = " + this + " channelRegistered(ctx) 执行");
+
         // Normally this method will never be called as handlerAdded(...) should call initChannel(...) and remove
         // the handler.
         if (initChannel(ctx)) {
@@ -125,7 +129,8 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
      */
     @SuppressWarnings("unchecked")
     private boolean initChannel(ChannelHandlerContext ctx) throws Exception {
-        if (initMap.add(ctx)) { // Guard against re-entrance.
+        // Guard against re-entrance.
+        if (initMap.add(ctx)) {
             try {
                 Channel channel = ctx.channel();
                 initChannel((C) channel);
@@ -147,6 +152,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
     }
 
     /**
+     * channel 一旦注册到selector后必须被调用
      *
      * This method will be called once the {@link Channel} was registered. After the method returns this instance
      * will be removed from the {@link ChannelPipeline} of the {@link Channel}.

@@ -107,12 +107,15 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
     boolean isOpen();
 
     /**
+     * AbstractChannel 中定义的 registered
+     * channel 注册到 selector 上后 置位 true
+     *
      * Returns {@code true} if the {@link Channel} is registered with an {@link EventLoop}.
      */
     boolean isRegistered();
 
     /**
-     * 有具体的NioSocketChannel NioServerSocketChannel实现 调用JDK底层的channel的API
+     * 由 NioSocketChannel NioServerSocketChannel 实现 调用JDK底层的channel的API
      *
      * Return {@code true} if the {@link Channel} is active and so connected.
      */

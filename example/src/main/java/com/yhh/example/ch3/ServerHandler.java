@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 /**
+ *  ChannelInitializer 也 extends ChannelInboundHandlerAdapter
  *  inBound
  */
 public class ServerHandler extends ChannelInboundHandlerAdapter {
