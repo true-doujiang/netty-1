@@ -76,6 +76,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     /**
      * 注册 selector 的时候 初始化了
      * 每个channel上都会有个NioEventLoop 只有这样 channel才能有生命力啊，引擎
+     * 要把观念转过来 不是 channel 依赖于NioEventLoop 而是 NioEventLoop依赖于channel
      */
     private volatile EventLoop eventLoop;
 
@@ -538,7 +539,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                         }
                     };
                     System.out.println(Thread.currentThread().getName() + " AbstractUnsafe.register() 添加注册任务 r = " + r);
-                    // 把channel注册的任务 丢给 NioEventLoop
+                    /**
+                     *  把channel注册的任务 丢给 NioEventLoop的 taskQueue 并判断在不在NioEventLoop的线程 若不是则启动NioEventLoop线程
+                     *  并执行任务了
+                     */
                     eventLoop.execute(r);
                 } catch (Throwable t) {
                     logger.warn(

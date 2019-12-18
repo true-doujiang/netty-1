@@ -83,13 +83,15 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
     // 别的别的线程往这里丢任务,当前线程 也会丢任务
     private final Queue<Runnable> taskQueue;
-    // ThreadPerTaskExecutor 创建的线程 就赋值给我了 我就是NioEventLoop中的线程，引擎
-    private volatile Thread thread;
+
     @SuppressWarnings("unused")
     private volatile ThreadProperties threadProperties;
 
+    // ThreadPerTaskExecutor 创建的线程 就赋值给我了 我就是NioEventLoop中的线程，引擎
+    private volatile Thread thread;
     // ThreadPerTaskExecutor: 给我一个任务我就新创建一个FastThreadLocalThread线程去执行任务
     private final Executor executor;
+
     private volatile boolean interrupted;
 
     private final Semaphore threadLock = new Semaphore(0);
@@ -830,7 +832,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     private void doStartThread() {
         assert thread == null;
 
-        Runnable r = new Runnable() {
+        Runnable r = new Thread("doStartThread-task") {
             @Override
             public void run() {
 
@@ -903,7 +905,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             }
         };
 
-        // ThreadPerTaskExecutor  这里才会新开启一个线程
+        // ThreadPerTaskExecutor 这里才会创建一个线程 赋值给 NioEventLoop 此时NioEventLoop才有活力
         executor.execute(r);
     }
 

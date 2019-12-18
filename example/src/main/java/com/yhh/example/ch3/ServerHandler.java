@@ -15,21 +15,29 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
-        System.out.println(Thread.currentThread().getName() + " ServerHandler handlerAdded");
+        System.out.println(Thread.currentThread().getName() + " ===== ServerHandler handlerAdded");
+
+        Channel channel = ctx.pipeline().channel();
+        System.out.println(Thread.currentThread().getName() + " ===== ServerHandler handlerAdded() channel = " + channel);
     }
 
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) {
-        System.out.println(Thread.currentThread().getName() + " ServerHandler channelRegistered");
+        System.out.println(Thread.currentThread().getName() + " ===== ServerHandler channelRegistered");
+
+        Channel channel = ctx.pipeline().channel();
+        System.out.println(Thread.currentThread().getName() + " ===== ServerHandler channelRegistered() channel = " + channel);
     }
 
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        System.out.println(Thread.currentThread().getName() + " ServerHandler channelActive");
+        System.out.println(Thread.currentThread().getName() + "  ===== ServerHandler channelActive");
         ctx.fireChannelActive();
+
         Channel channel = ctx.pipeline().channel();
+        System.out.println(Thread.currentThread().getName() + " ===== ServerHandler channelActive() channel = " + channel);
     }
 
 
@@ -41,7 +49,12 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         // 一定要调用父类的方法  否则pipeline就到此结束 下个节点就不会执行了 ServerBootstrapAcceptor
         super.channelRead(ctx, msg);
-        System.out.println(Thread.currentThread().getName() + " ServerHandler channelRead msg=" + msg);
+        System.out.println(Thread.currentThread().getName() + " ===== ServerHandler channelRead msg=" + msg);
+
+
+        Channel channel = ctx.pipeline().channel();
+        System.out.println(Thread.currentThread().getName() + " ===== ServerHandler channelRead() channel = " + channel);
+
 //
 //        new Thread(new Runnable() {
 //            @Override

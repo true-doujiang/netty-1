@@ -51,6 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <C>   A sub-type of {@link Channel}
  *
  * 特殊 ChannelHandler 每次添加到pipeline中后会执行 initChannel(ch) 配置ch的pipeline
+ * abstract void initChannel(ch) 有具体的子类实现   有很多的匿名内部类
  */
 @Sharable
 public abstract class ChannelInitializer<C extends Channel> extends ChannelInboundHandlerAdapter {

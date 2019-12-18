@@ -7,8 +7,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.AttributeKey;
-//import org.junit.Test;
-
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -36,7 +34,7 @@ public final class Server {
              * 每次有新连接接入时，NioServerSocketChannel会把它放到NioSocketChannel的pipeline中，并执行initChannel()
              * 通S过initChannel() 给NioSocketChannel的pipeline添加Handler
              */
-            ChannelInitializer<SocketChannel> childHandler = new ChannelInitializer<SocketChannel>() {
+            ChannelInitializer<SocketChannel> childInitialHandler = new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel ch) {
                     // 给每个新链接进来的SocketChannel 绑定一个Handler
@@ -46,7 +44,7 @@ public final class Server {
                     //..
                 }
             };
-            System.out.println(Thread.currentThread().getName() + " childHandler = " + childHandler);
+            System.out.println(Thread.currentThread().getName() + " childInitialHandler = " + childInitialHandler);
 
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
@@ -55,7 +53,7 @@ public final class Server {
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     .childAttr(AttributeKey.newInstance("childAttr"), "childAttrValue")
                     .handler(serverHandler)
-                    .childHandler(childHandler);
+                    .childHandler(childInitialHandler);
 
             ChannelFuture bindCF = b.bind(8080);
 
