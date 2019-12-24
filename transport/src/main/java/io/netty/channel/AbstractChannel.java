@@ -541,7 +541,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                         }
                     };
 
-                    System.out.println(Thread.currentThread().getName() + " AbstractUnsafe.register() 添加注册任务 r = " + r);
+                    System.out.println(Thread.currentThread().getName() + " AbstractUnsafe.register() 添加 register-task r = " + r);
 
                     /**
                      *  把channel注册的任务 丢给 NioEventLoop的 taskQueue 并判断在不在NioEventLoop的线程 若不是则启动NioEventLoop线程
@@ -644,13 +644,14 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             // 传播ChannelActive事件
             if (!wasActive && isActive()) {
-                Runnable r = new Runnable() {
+                Runnable r = new Thread("bind-port-success-task") {
                     @Override
                     public void run() {
+                        System.out.println(Thread.currentThread().getName() + " bind-port-success-task 被执行了");
                         pipeline.fireChannelActive();
                     }
                 };
-                System.out.println(Thread.currentThread().getName() + " 端口真正绑定完成了 添加  pipeline.fireChannelActive() 的任务 r = " + r);
+                System.out.println(Thread.currentThread().getName() + " 端口真正绑定完成了 添加  bind-port-success-task  r = " + r);
                 invokeLater(r);
             }
 

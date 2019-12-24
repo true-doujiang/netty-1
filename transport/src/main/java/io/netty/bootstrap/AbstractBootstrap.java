@@ -397,9 +397,10 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         // the pipeline in its channelRegistered() implementation.
         System.out.println(Thread.currentThread().getName() + " 2 doBind0()  isDone= " + channel.eventLoop().inEventLoop()); //不断点：true   断点：false
 
-        Runnable r = new Runnable() {
+        Runnable r = new Thread("bind-port-task") {
             @Override
             public void run() {
+                System.out.println(Thread.currentThread().getName() + " bind-port-task 被执行了");
                 if (regFuture.isSuccess()) {
                     ChannelFuture bind = channel.bind(localAddress, promise);
                     bind.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
@@ -410,7 +411,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         };
 
         // 添加绑定端口任务
-        System.out.println(Thread.currentThread().getName() + " 添加绑定端口任务 r = " + r);
+        System.out.println(Thread.currentThread().getName() + " 添加 bind-port-task r = " + r);
         channel.eventLoop().execute(r);
     }
 

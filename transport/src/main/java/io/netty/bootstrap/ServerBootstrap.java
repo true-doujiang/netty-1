@@ -193,16 +193,17 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                 }
 
                 // ch 是服务端 配置ServerBootstrapAcceptor 用于给新接入的客户端channel分配线程
-                Runnable r = new Runnable() {
+                Runnable r = new Thread("init-pipeline-task") {
                     @Override
                     public void run() {
+                        System.out.println(Thread.currentThread().getName() + " init-pipeline-task 被执行了");
                         // ServerBootstrapAcceptor 一个特殊的Handler
                         ServerBootstrapAcceptor acceptorHandler = new ServerBootstrapAcceptor(ch, currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs);
                         //pipeline.addLast(acceptorHandler);
                         pipeline.addLast(null, "acceptorHandler", acceptorHandler);
                     }
                 };
-                System.out.println(Thread.currentThread().getName() + " 执行ChannelPipeline开始添加的initializerHandler.initChannel() 并添加任务 r = " + r);
+                System.out.println(Thread.currentThread().getName() + " 执行ChannelPipeline开始添加的initializerHandler.initChannel() 并添加 init-pipeline-task  r = " + r);
                 ch.eventLoop().execute(r);
             }
         };
