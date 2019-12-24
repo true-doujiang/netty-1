@@ -814,7 +814,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
     private void startThread() {
         if (state == ST_NOT_STARTED) {
-            // cas 操作判断线程是否启动
+            // cas 操作判断线程是否启动  并设置state=2
             if (STATE_UPDATER.compareAndSet(this, ST_NOT_STARTED, ST_STARTED)) {
                 try {
                     doStartThread();
@@ -836,6 +836,8 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             @Override
             public void run() {
 
+                System.out.println(Thread.currentThread().getName() + " 刚创建一个thread 就执行我，并把这个线程赋值给thread属性");
+
                 //把当前线程赋值给 NioEventLoop 从此NioEventLoop有了线程可以跑了
                 thread = Thread.currentThread();
 
@@ -856,6 +858,10 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                 } catch (Throwable t) {
                     logger.warn("Unexpected exception from an event executor: ", t);
                 } finally {
+
+                    System.out.println(Thread.currentThread().getName() + " " + this + " 的thread 成功赋值  从此有了生命力, " +
+                            "但是我永远不会执行到，因为上面的run() 是个死循环");
+
                     for (;;) {
                         int oldState = state;
                         if (oldState >= ST_SHUTTING_DOWN || STATE_UPDATER.compareAndSet(
@@ -902,10 +908,12 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                         }
                     }
                 }
+                // ------ finally end ------
             }
         };
 
-        // ThreadPerTaskExecutor 这里才会创建一个线程 赋值给 NioEventLoop 此时NioEventLoop才有活力
+        // ThreadPerTaskExecutor 这里才会创建一个线程 并执行  doStartThread-task
+        // 在执行任务的过程中 把当前线程 赋值给 NioEventLoop.thread  此时NioEventLoop才有活力
         executor.execute(r);
     }
 

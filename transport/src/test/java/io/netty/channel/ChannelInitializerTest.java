@@ -307,10 +307,10 @@ public class ChannelInitializerTest {
                 return execService.awaitTermination(timeout, unit);
             }
 
-            @Override
-            public void execute(Runnable command) {
-                execService.execute(command);
-            }
+//            @Override
+//            public void execute(Runnable command) {
+//                execService.execute(command);
+//            }
         };
 
         final CountDownLatch latch = new CountDownLatch(1);

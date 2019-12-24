@@ -530,20 +530,25 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             if (eventLoop.inEventLoop()) {
                 register0(promise);
             } else {
+
                 try {
                     // 放到线程池中执行
-                    Runnable r = new Runnable() {
+                    Runnable r = new Thread("register-task") {
                         @Override
                         public void run() {
+                            System.out.println(Thread.currentThread().getName() + " register-task 被执行了");
                             register0(promise);
                         }
                     };
+
                     System.out.println(Thread.currentThread().getName() + " AbstractUnsafe.register() 添加注册任务 r = " + r);
+
                     /**
                      *  把channel注册的任务 丢给 NioEventLoop的 taskQueue 并判断在不在NioEventLoop的线程 若不是则启动NioEventLoop线程
                      *  并执行任务了
                      */
                     eventLoop.execute(r);
+
                 } catch (Throwable t) {
                     logger.warn(
                             "Force-closing a channel whose registration task was not accepted by an event loop: {}",

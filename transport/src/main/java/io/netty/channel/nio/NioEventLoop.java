@@ -452,7 +452,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     @Override
     protected void run() {
 
-        System.out.println(Thread.currentThread().getName() + " NioEventLoop.run() 1 start  ");
+        System.out.println(Thread.currentThread().getName() + " " + this + " NioEventLoop.run() 1 start 从此进入死循环 ");
 
         for (;;) {
 
