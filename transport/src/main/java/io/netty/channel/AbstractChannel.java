@@ -541,7 +541,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                         }
                     };
 
-                    System.out.println(Thread.currentThread().getName() + " AbstractUnsafe.register() 添加 register-task r = " + r);
+                    System.out.println(Thread.currentThread().getName() + " AbstractUnsafe.register() ====添加==== register-task r = " + r);
 
                     /**
                      *  把channel注册的任务 丢给 NioEventLoop的 taskQueue 并判断在不在NioEventLoop的线程 若不是则启动NioEventLoop线程
@@ -560,6 +560,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             }
         }
 
+        /**
+         * 在 nioEventLoopGroup-2-1 线程中执行
+         * @param promise
+         */
         private void register0(ChannelPromise promise) {
             try {
                 // check if the channel is still open as it could be closed in the mean time when the register
@@ -578,10 +582,13 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 // registered 置为true , 但是 没有 注册关注的事件
                 registered = true;
 
-                // 这个就是执行 ServerBootstrap 中 init(Channel) 添加的 initializerHandler
+                /**
+                 *  这个就是执行 ServerBootstrap 中 init(Channel) 添加的 initializerHandler
+                 *  handlerAdded()被执行
+                 */
                 // Ensure we call handlerAdded(...) before we actually notify the promise. This is needed as the
                 // user may already fire events through the pipeline in the ChannelFutureListener.
-                pipeline.invokeHandlerAddedIfNeeded();  //handlerAdded()被执行
+                pipeline.invokeHandlerAddedIfNeeded();
 
                 safeSetSuccess(promise);
                 //
@@ -651,7 +658,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                         pipeline.fireChannelActive();
                     }
                 };
-                System.out.println(Thread.currentThread().getName() + " 端口真正绑定完成了 添加  bind-port-success-task  r = " + r);
+                System.out.println(Thread.currentThread().getName() + " 端口真正绑定完成了 ====添加==== bind-port-success-task  r = " + r);
                 invokeLater(r);
             }
 

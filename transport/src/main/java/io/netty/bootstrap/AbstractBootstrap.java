@@ -299,7 +299,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         }
 
         // 不断点  false
-        System.out.println(Thread.currentThread().getName() + " 1 doBind() isDone= " + regFuture.isDone());
+        System.out.println(Thread.currentThread().getName() + " 1 doBind() isDone = " + regFuture.isDone());
 
         // 2. 绑定端口
         if (regFuture.isDone()) {
@@ -411,7 +411,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         };
 
         // 添加绑定端口任务
-        System.out.println(Thread.currentThread().getName() + " 添加 bind-port-task r = " + r);
+        System.out.println(Thread.currentThread().getName() + " ====添加==== bind-port-task r = " + r);
         channel.eventLoop().execute(r);
     }
 

@@ -394,7 +394,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         }
 
         for (;;) {
-            System.out.println(Thread.currentThread().getName() + " NioEventLoop run() taskQueue 取出任务执行1  task: " + task);
+            System.out.println(Thread.currentThread().getName() + " NioEventLoop run() taskQueue -----取出任务执行1  task: " + task);
             safeExecute(task);
             task = pollTaskFrom(taskQueue);
             if (task == null) {
@@ -423,7 +423,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         long lastExecutionTime;
 
         for (;;) {
-            System.out.println(Thread.currentThread().getName() + " NioEventLoop run() taskQueue 取出任务执行2  task: " + task);
+            System.out.println(Thread.currentThread().getName() + " NioEventLoop run() taskQueue -----取出任务执行2  task: " + task);
             // 执行任务  task.run()
             safeExecute(task);
             runTasks ++;
@@ -832,7 +832,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     private void doStartThread() {
         assert thread == null;
 
-        Runnable r = new Thread("doStartThread-task") {
+        Runnable r = new Thread("new thread runnable") {
             @Override
             public void run() {
 
