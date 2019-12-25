@@ -209,7 +209,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         };
 
         System.out.println(Thread.currentThread().getName() + " ServerBootstrap initializerHandler = " + initializerHandler);
-        // 添加一个特殊的 ChannelHandler
+        // 添加一个特殊的 ChannelHandler 这个hander会被添加到 DefaultChannelPipeline 的 pendingHandlerCallbackHead
         //p.addLast(initializerHandler);
         p.addLast(null, "initializerHandler", initializerHandler);
     }
