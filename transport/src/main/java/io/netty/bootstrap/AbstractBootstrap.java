@@ -322,6 +322,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
                         // IllegalStateException once we try to access the EventLoop of the Channel.
                         promise.setFailure(cause);
                     } else {
+                        // 到此说明channel 注册成功， 开始绑定端口
                         // Registration was successful, so set the correct executor to use.
                         // See https://github.com/netty/netty/issues/2586
                         promise.registered();

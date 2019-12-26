@@ -203,7 +203,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                         pipeline.addLast(null, "acceptorHandler", acceptorHandler);
                     }
                 };
+
                 System.out.println(Thread.currentThread().getName() + " 执行ChannelPipeline开始添加的initializerHandler.initChannel() ====添加==== init-pipeline-task  r = " + r);
+
                 ch.eventLoop().execute(r);
             }
         };

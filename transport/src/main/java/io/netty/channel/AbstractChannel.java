@@ -1203,7 +1203,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /************************************************
-     * 具体子类实现  被 AbstractUnsafe 调用
+     * 具体子类实现 NioServerSocketChannel  NioSocketChannel
+     *
+     * 被 AbstractUnsafe 调用
      * ************************************************
      *
      * Bind the {@link Channel} to the {@link SocketAddress}

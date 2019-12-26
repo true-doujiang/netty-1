@@ -520,6 +520,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         // 从后往前找 应该找到HeadContext
         final AbstractChannelHandlerContext next = findContextOutbound();
         EventExecutor executor = next.executor();
+
+        System.out.println(Thread.currentThread().getName() + " AbstractChannelHandlerContext.bind() thread: " + executor.inEventLoop());
+
         if (executor.inEventLoop()) {
             next.invokeBind(localAddress, promise);
         } else {
