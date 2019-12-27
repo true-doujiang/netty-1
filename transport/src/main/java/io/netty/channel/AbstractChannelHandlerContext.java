@@ -138,16 +138,20 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     /**
      * ChannelInboundInvoker
-     * fire Registered  三个方法一条线
+     * fire Registered  三个方法一条线     调用这个方法就是为了找下一个节点
      */
     @Override
     public ChannelHandlerContext fireChannelRegistered() {
         // 从前往后找
-        AbstractChannelHandlerContext inbound = findContextInbound();
-        invokeChannelRegistered(inbound);
+        AbstractChannelHandlerContext nextInbound = findContextInbound();
+        invokeChannelRegistered(nextInbound);
         return this;
     }
 
+    /**
+     * 静态方法先调用的
+     * @param next header or tail
+     */
     static void invokeChannelRegistered(final AbstractChannelHandlerContext next) {
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {
@@ -178,11 +182,12 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     /**
      * ChannelInboundInvoker
-     * fire  Unregistered   三个方法一条线
+     * fire  Unregistered   三个方法一条线            调用这个方法就是为了找下一个节点
      */
     @Override
     public ChannelHandlerContext fireChannelUnregistered() {
-        invokeChannelUnregistered(findContextInbound());
+        AbstractChannelHandlerContext nextInbound = findContextInbound();
+        invokeChannelUnregistered(nextInbound);
         return this;
     }
 
@@ -214,12 +219,12 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     /**
      * ChannelInboundInvoker
-     *  fire  Active  三个方法一条线
+     *  fire  Active  三个方法一条线            调用这个方法就是为了找下一个节点
      */
     @Override
     public ChannelHandlerContext fireChannelActive() {
-        AbstractChannelHandlerContext inbound = findContextInbound();
-        invokeChannelActive(inbound);
+        AbstractChannelHandlerContext nextInbound = findContextInbound();
+        invokeChannelActive(nextInbound);
         return this;
     }
 
@@ -257,7 +262,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     /**
      * ChannelInboundInvoker
-     *  fire  InActive  三个方法一条线
+     *  fire  InActive  三个方法一条线              调用这个方法就是为了找下一个节点
      */
     @Override
     public ChannelHandlerContext fireChannelInactive() {
@@ -293,7 +298,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     /**
      * ChannelInboundInvoker
-     *  fire   ExceptionCaught  三个方法一条线
+     *  fire   ExceptionCaught  三个方法一条线              调用这个方法就是为了找下一个节点
      */
     @Override
     public ChannelHandlerContext fireExceptionCaught(final Throwable cause) {
@@ -348,7 +353,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     /**
      * ChannelInboundInvoker
-     * fire  UserEventTriggered  三个方法一条线
+     * fire  UserEventTriggered  三个方法一条线             调用这个方法就是为了找下一个节点
      */
     @Override
     public ChannelHandlerContext fireUserEventTriggered(final Object event) {
@@ -385,16 +390,22 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     /**
      * ChannelInboundInvoker
-     * fire Read  三个方法一条线
+     * fire Read  三个方法一条线            调用这个方法就是为了找下一个节点
      * @param msg：Object 对于服务端 msg是 NioSocketChannel     对于客户端 msg 是 数据
      * @return
      */
     @Override
     public ChannelHandlerContext fireChannelRead(final Object msg) {
-        invokeChannelRead(findContextInbound(), msg);
+        AbstractChannelHandlerContext nextInbound = findContextInbound();
+        invokeChannelRead(nextInbound, msg);
         return this;
     }
 
+    /**
+     * 静态方法先调用的
+     * @param next header or tail
+     * @param msg
+     */
     static void invokeChannelRead(final AbstractChannelHandlerContext next, Object msg) {
         final Object m = next.pipeline.touch(ObjectUtil.checkNotNull(msg, "msg"), next);
         EventExecutor executor = next.executor();
@@ -435,6 +446,10 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return this;
     }
 
+    /**
+     * 静态方法先调用的
+     * @param next header or tail
+     */
     static void invokeChannelReadComplete(final AbstractChannelHandlerContext next) {
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {
@@ -462,7 +477,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     /**
      * ChannelInboundInvoker
-     * fire  ChannelWritabilityChanged  三个方法一条线
+     * fire  ChannelWritabilityChanged  三个方法一条线   调用这个方法就是为了找下一个节点
      */
     @Override
     public ChannelHandlerContext fireChannelWritabilityChanged() {

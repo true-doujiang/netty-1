@@ -57,7 +57,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     private static final NotYetConnectedException FLUSH0_NOT_YET_CONNECTED_EXCEPTION = ThrowableUtil.unknownStackTrace(
             new NotYetConnectedException(), AbstractUnsafe.class, "flush0()");
 
-    // TODO
+    /**
+     * this：NioServerSocketChannel 则 parent = null
+     * this：NioSocketChannel       则 parent = NioServerSocketChannel
+     */
     private final Channel parent;
 
     /**
