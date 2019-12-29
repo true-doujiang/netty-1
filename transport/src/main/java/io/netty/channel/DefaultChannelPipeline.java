@@ -1299,11 +1299,18 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             return this;
         }
 
+        // 个方法都留空
         @Override
         public void channelRegistered(ChannelHandlerContext ctx) { }
 
         @Override
         public void channelUnregistered(ChannelHandlerContext ctx) { }
+
+        @Override
+        public void handlerAdded(ChannelHandlerContext ctx) { }
+
+        @Override
+        public void handlerRemoved(ChannelHandlerContext ctx) { }
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
@@ -1322,11 +1329,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             onUnhandledChannelWritabilityChanged();
         }
 
-        @Override
-        public void handlerAdded(ChannelHandlerContext ctx) { }
 
-        @Override
-        public void handlerRemoved(ChannelHandlerContext ctx) { }
 
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {

@@ -80,6 +80,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      * 注册 selector 的时候 初始化了
      * 每个channel上都会有个NioEventLoop 只有这样 channel才能有生命力啊，引擎
      * 要把观念转过来 不是 channel 依赖于NioEventLoop 而是 NioEventLoop依赖于channel
+     *
+     * 可以通过 eventLoop 的 selector属性找到 他注册的channel
      */
     private volatile EventLoop eventLoop;
 
