@@ -52,7 +52,7 @@ public final class Server {
                     .attr(AttributeKey.newInstance("myServerAttr"), "myServervalue")
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     .childAttr(AttributeKey.newInstance("childAttr"), "childAttrValue")
-                    .handler(serverHandler)
+                    //.handler(serverHandler)
                     .childHandler(childInitialHandler);
 
             ChannelFuture bindCF = b.bind(8080);

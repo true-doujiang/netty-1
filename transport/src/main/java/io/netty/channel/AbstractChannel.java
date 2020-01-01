@@ -596,8 +596,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 pipeline.invokeHandlerAddedIfNeeded();
 
                 safeSetSuccess(promise);
-                //
-                pipeline.fireChannelRegistered();   //channelRegistered()被执行
+
+                // 一直传到 Tail 而 Tail.channelRegistered 是空实现
+                pipeline.fireChannelRegistered();
 
                 // Only fire a channelActive if the channel has never been registered. This prevents firing
                 // multiple channel actives if the channel is deregistered and re-registered.

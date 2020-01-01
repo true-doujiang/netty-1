@@ -1305,16 +1305,24 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         // 个方法都留空
         @Override
-        public void channelRegistered(ChannelHandlerContext ctx) { }
+        public void channelRegistered(ChannelHandlerContext ctx) {
+            System.out.println(Thread.currentThread().getName() + " TailContext = " + this + " channelRegistered(ctx) 执行");
+        }
 
         @Override
-        public void channelUnregistered(ChannelHandlerContext ctx) { }
+        public void channelUnregistered(ChannelHandlerContext ctx) {
+            System.out.println(Thread.currentThread().getName() + " TailContext = " + this + " channelUnregistered(ctx) 执行");
+        }
 
         @Override
-        public void handlerAdded(ChannelHandlerContext ctx) { }
+        public void handlerAdded(ChannelHandlerContext ctx) {
+            System.out.println(Thread.currentThread().getName() + " TailContext = " + this + " handlerAdded(ctx) 执行");
+        }
 
         @Override
-        public void handlerRemoved(ChannelHandlerContext ctx) { }
+        public void handlerRemoved(ChannelHandlerContext ctx) {
+            System.out.println(Thread.currentThread().getName() + " TailContext = " + this + " handlerRemoved(ctx) 执行");
+        }
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
@@ -1380,11 +1388,13 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         @Override
         public void handlerAdded(ChannelHandlerContext ctx) {
             // NOOP
+            System.out.println(Thread.currentThread().getName() + " HeadContext = " + this + " handlerAdded(ctx) 执行");
         }
 
         @Override
         public void handlerRemoved(ChannelHandlerContext ctx) {
             // NOOP
+            System.out.println(Thread.currentThread().getName() + " HeadContext = " + this + " handlerRemoved(ctx) 执行");
         }
 
         /******************************
@@ -1452,6 +1462,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelRegistered(ChannelHandlerContext ctx) {
+            System.out.println(Thread.currentThread().getName() + " HeadContext = " + this + " channelRegistered(ctx) 执行");
+
             invokeHandlerAddedIfNeeded();
             ctx.fireChannelRegistered();
         }

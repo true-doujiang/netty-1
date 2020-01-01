@@ -184,6 +184,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             // ChannelInitializer 父类中有 handlerAdded(ctx) 它调用了initChannel(ch)
             @Override
             public void initChannel(final Channel ch) throws Exception {
+
+                System.out.println(Thread.currentThread().getName() + " ServerBootstrap initializerHandler initChannel() ch  = " + ch);
+
                 final ChannelPipeline pipeline = ch.pipeline();
                 ChannelHandler handler = config.handler();
 
@@ -206,6 +209,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
                 System.out.println(Thread.currentThread().getName() + " 执行ChannelPipeline开始添加的initializerHandler.initChannel() ====添加==== init-pipeline-task  r = " + r);
 
+                // r 会被添加到taskQueue中
                 ch.eventLoop().execute(r);
             }
         };
