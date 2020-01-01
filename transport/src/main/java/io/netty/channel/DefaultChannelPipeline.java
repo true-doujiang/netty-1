@@ -1493,6 +1493,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            System.out.println(Thread.currentThread().getName() + " HeadContext = " + this + " channelRead(ctx, msg) 执行");
             ctx.fireChannelRead(msg);
         }
 
