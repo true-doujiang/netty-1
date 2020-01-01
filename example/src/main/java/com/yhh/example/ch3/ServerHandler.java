@@ -15,29 +15,25 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
-        System.out.println(Thread.currentThread().getName() + " ===== ServerHandler handlerAdded");
-
         Channel channel = ctx.pipeline().channel();
-        System.out.println(Thread.currentThread().getName() + " ===== ServerHandler handlerAdded() channel = " + channel);
+        System.out.println(Thread.currentThread().getName() + " =====用户自定义 ServerHandler handlerAdded()  ctx = " + ctx + " channel = " + channel);
     }
 
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) {
-        System.out.println(Thread.currentThread().getName() + " ===== ServerHandler channelRegistered");
-
         Channel channel = ctx.pipeline().channel();
-        System.out.println(Thread.currentThread().getName() + " ===== ServerHandler channelRegistered() channel = " + channel);
+        System.out.println(Thread.currentThread().getName() + " =====用户自定义 ServerHandler channelRegistered() ctx = " + ctx + " channel = " + channel);
     }
 
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        System.out.println(Thread.currentThread().getName() + "  ===== ServerHandler channelActive");
+        System.out.println(Thread.currentThread().getName() + "  =====用户自定义 ServerHandler channelActive ctx = " + ctx);
         ctx.fireChannelActive();
 
         Channel channel = ctx.pipeline().channel();
-        System.out.println(Thread.currentThread().getName() + " ===== ServerHandler channelActive() channel = " + channel);
+        System.out.println(Thread.currentThread().getName() + " =====用户自定义 ServerHandler channelActive() ctx = " + ctx + " channel = " + channel);
     }
 
 
@@ -47,13 +43,15 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
+        System.out.println(Thread.currentThread().getName() + " =====用户自定义 ServerHandler channelRead() ctx = " + ctx);
+
         // 一定要调用父类的方法  否则pipeline就到此结束 下个节点就不会执行了 ServerBootstrapAcceptor
         super.channelRead(ctx, msg);
-        System.out.println(Thread.currentThread().getName() + " ===== ServerHandler channelRead msg=" + msg);
+        System.out.println(Thread.currentThread().getName() + " =====用户自定义 ServerHandler channelRead msg=" + msg);
 
 
         Channel channel = ctx.pipeline().channel();
-        System.out.println(Thread.currentThread().getName() + " ===== ServerHandler channelRead() channel = " + channel);
+        System.out.println(Thread.currentThread().getName() + " =====用户自定义 ServerHandler channelRead() ctx = " + ctx  +" channel = " + channel);
 
 //
 //        new Thread(new Runnable() {

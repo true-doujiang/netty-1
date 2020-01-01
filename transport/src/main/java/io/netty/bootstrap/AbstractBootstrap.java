@@ -345,6 +345,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         try {
             // 1. 反射创建 NioServerSocketChannel 或者  NioSocketChannel
             channel = channelFactory.newChannel();
+            System.out.println(Thread.currentThread().getName() + " initAndRegister() 反射工厂创建了Channel channel = " + channel);
             // 2. 抽象方法  在 ServerBootstrap 或者 Bootstrap 中初始化
             init(channel);
         } catch (Throwable t) {

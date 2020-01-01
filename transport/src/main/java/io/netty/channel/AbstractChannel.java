@@ -587,18 +587,25 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 // registered 置为true , 但是 没有 注册关注的事件
                 registered = true;
 
+
                 /**
                  *  这个就是执行 ServerBootstrap 中 init(Channel) 添加的 initializerHandler
                  *  handlerAdded()被执行
                  */
                 // Ensure we call handlerAdded(...) before we actually notify the promise. This is needed as the
                 // user may already fire events through the pipeline in the ChannelFutureListener.
+                System.out.println(Thread.currentThread().getName() + " pipeline.invokeHandlerAddedIfNeeded() start");
                 pipeline.invokeHandlerAddedIfNeeded();
+                System.out.println(Thread.currentThread().getName() + " pipeline.invokeHandlerAddedIfNeeded() end");
 
+                System.out.println(Thread.currentThread().getName() + " safeSetSuccess(promise) start");
                 safeSetSuccess(promise);
+                System.out.println(Thread.currentThread().getName() + " safeSetSuccess(promise) end");
 
+                System.out.println(Thread.currentThread().getName() + " pipeline.fireChannelRegistered() start");
                 // 一直传到 Tail 而 Tail.channelRegistered 是空实现
                 pipeline.fireChannelRegistered();
+                System.out.println(Thread.currentThread().getName() + " pipeline.fireChannelRegistered() end");
 
                 // Only fire a channelActive if the channel has never been registered. This prevents firing
                 // multiple channel actives if the channel is deregistered and re-registered.
