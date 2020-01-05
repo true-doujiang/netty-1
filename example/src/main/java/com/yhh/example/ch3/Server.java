@@ -41,6 +41,8 @@ public final class Server {
                     AuthHandler authHandler = new AuthHandler();
                     System.out.println(Thread.currentThread().getName() + " new childHandler AuthHandler: " + authHandler);
                     ch.pipeline().addLast(authHandler);
+                    // 想重复添加的话 要加 @ChannelHandler.Sharable
+                    ch.pipeline().addLast(authHandler);
                     //..
                 }
             };
