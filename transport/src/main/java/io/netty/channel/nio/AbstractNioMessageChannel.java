@@ -156,6 +156,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                         // 每次最多读取16个链接
                         allocHandle.incMessagesRead(localRead);
 
+                        // DefaultMaxMessagesRecvByteBufAllocator
                     } while (allocHandle.continueReading());
 
                 } catch (Throwable t) {

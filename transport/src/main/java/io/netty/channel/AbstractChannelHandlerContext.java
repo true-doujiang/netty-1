@@ -763,8 +763,11 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
      */
     @Override
     public ChannelHandlerContext read() {
+
         final AbstractChannelHandlerContext next = findContextOutbound();
+
         EventExecutor executor = next.executor();
+
         if (executor.inEventLoop()) {
             next.invokeRead();
         } else {

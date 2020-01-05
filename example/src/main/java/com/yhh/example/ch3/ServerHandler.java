@@ -24,6 +24,8 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     public void channelRegistered(ChannelHandlerContext ctx) {
         Channel channel = ctx.pipeline().channel();
         System.out.println(Thread.currentThread().getName() + " =====用户自定义 ServerHandler channelRegistered() ctx = " + ctx + " channel = " + channel);
+        // 我加上的  不然链条就断了 就不会到tail
+        ctx.fireChannelRegistered();
     }
 
 

@@ -300,6 +300,12 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         @Override
         @SuppressWarnings("unchecked")
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
+
+            System.out.println(Thread.currentThread().getName() + " ServerBootstrapAcceptor = " + this + " channelRead(ctx, msg) 执行");
+            // 我自己加点
+            ctx.fireChannelRead(msg);
+
+
             final Channel childChannel = (Channel) msg;
 
             //childChannel.pipeline().addLast(childHandler);
