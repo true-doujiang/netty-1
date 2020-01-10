@@ -39,10 +39,12 @@ public class LineBasedFrameDecoder extends ByteToMessageDecoder {
     private final int maxLength;
     /** Whether or not to throw an exception as soon as we exceed maxLength. */
     private final boolean failFast;
+    /** true：不带换行符  false：带 */
     private final boolean stripDelimiter;
 
     /** True if we're discarding input because we're already over maxLength.  */
     private boolean discarding;
+    /** 解码到现在丢弃的字节数 */
     private int discardedBytes;
 
     /** Last scan position. */
@@ -97,8 +99,10 @@ public class LineBasedFrameDecoder extends ByteToMessageDecoder {
      */
     protected Object decode(ChannelHandlerContext ctx, ByteBuf buffer) throws Exception {
         final int eol = findEndOfLine(buffer);
+        // 第一次解析 discarding 可定=false
         if (!discarding) {
             if (eol >= 0) {
+                // 找到换行符
                 final ByteBuf frame;
                 final int length = eol - buffer.readerIndex();
                 final int delimLength = buffer.getByte(eol) == '\r'? 2 : 1;
@@ -111,6 +115,7 @@ public class LineBasedFrameDecoder extends ByteToMessageDecoder {
 
                 if (stripDelimiter) {
                     frame = buffer.readRetainedSlice(length);
+                    // 跳过换行符
                     buffer.skipBytes(delimLength);
                 } else {
                     frame = buffer.readRetainedSlice(length + delimLength);
@@ -118,6 +123,7 @@ public class LineBasedFrameDecoder extends ByteToMessageDecoder {
 
                 return frame;
             } else {
+                // 没有找到换行符
                 final int length = buffer.readableBytes();
                 if (length > maxLength) {
                     discardedBytes = length;
@@ -131,11 +137,15 @@ public class LineBasedFrameDecoder extends ByteToMessageDecoder {
                 return null;
             }
         } else {
+            // 丢弃模式
             if (eol >= 0) {
+                // 找到换行符则把换行符之前的丢弃了，因为在这之前已经丢弃一部分了
+                // 已经丢弃的字节 + 本次要丢弃的字节
                 final int length = discardedBytes + eol - buffer.readerIndex();
                 final int delimLength = buffer.getByte(eol) == '\r'? 2 : 1;
                 buffer.readerIndex(eol + delimLength);
                 discardedBytes = 0;
+                // 进入非丢弃模式
                 discarding = false;
                 if (!failFast) {
                     fail(ctx, length);
@@ -146,6 +156,8 @@ public class LineBasedFrameDecoder extends ByteToMessageDecoder {
                 // We skip everything in the buffer, we need to set the offset to 0 again.
                 offset = 0;
             }
+
+            // 只要是丢弃模式 就没有解析出一个完整的数据包 所以返回null
             return null;
         }
     }

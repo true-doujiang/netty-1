@@ -82,6 +82,7 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
         public ByteBuf cumulate(ByteBufAllocator alloc, ByteBuf cumulation, ByteBuf in) {
             try {
                 final ByteBuf buffer;
+                // 判断剩余空间是否还够存储本次读取到的数据
                 if (cumulation.writerIndex() > cumulation.maxCapacity() - in.readableBytes()
                     || cumulation.refCnt() > 1 || cumulation.isReadOnly()) {
                     // Expand cumulation (by replace it) when either there is not more room in the buffer
@@ -327,7 +328,8 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
      */
     static void fireChannelRead(ChannelHandlerContext ctx, CodecOutputList msgs, int numElements) {
         for (int i = 0; i < numElements; i ++) {
-            ctx.fireChannelRead(msgs.getUnsafe(i));
+            Object msgsUnsafe = msgs.getUnsafe(i);
+            ctx.fireChannelRead(msgsUnsafe);
         }
     }
 
@@ -445,6 +447,7 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
                     outSize = 0;
                 }
 
+                // 可读字节长度
                 int oldInputLength = in.readableBytes();
                 //
                 decodeRemovalReentryProtection(ctx, in, out);
@@ -457,21 +460,20 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
                     break;
                 }
 
-                /**
-                 *
-                 */
+                // 相等说明本次循环什么也没读到
                 if (outSize == out.size()) {
-                    //
+                    // 说明本次数据不足以分装成一个数据包，所以就没有从in中读出来
                     if (oldInputLength == in.readableBytes()) {
                         break;
                     } else {
+                        // 已经读了一点数据出来了，可能还没有封装成一个数据包放到out中
                         continue;
                     }
                 }
 
                 if (oldInputLength == in.readableBytes()) {
-                    throw new DecoderException(StringUtil.simpleClassName(getClass()) +
-                                    ".decode() did not read anything but decoded a message.");
+                    throw new DecoderException(StringUtil.simpleClassName(getClass())
+                            + ".decode() did not read anything but decoded a message.");
                 }
 
                 if (isSingleDecode()) {
