@@ -156,6 +156,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                         // 每次最多读取16个链接
                         allocHandle.incMessagesRead(localRead);
 
+                        // DefaultMaxMessagesRecvByteBufAllocator
                     } while (allocHandle.continueReading());
 
                 } catch (Throwable t) {
@@ -167,7 +168,9 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                 for (int i = 0; i < size; i ++) {
                     readPending = false;
                     // 传播事件
+                    System.out.println(Thread.currentThread().getName() + " NioMessageUnsafe read() pipeline.fireChannelRead(msg) start");
                     pipeline.fireChannelRead(readBuf.get(i));
+                    System.out.println(Thread.currentThread().getName() + " NioMessageUnsafe read() pipeline.fireChannelRead(msg) end");
                 }
 
                 readBuf.clear();

@@ -763,8 +763,11 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
      */
     @Override
     public ChannelHandlerContext read() {
+
         final AbstractChannelHandlerContext next = findContextOutbound();
+
         EventExecutor executor = next.executor();
+
         if (executor.inEventLoop()) {
             next.invokeRead();
         } else {
@@ -1072,6 +1075,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     final void setAddPending() {
         boolean updated = HANDLER_STATE_UPDATER.compareAndSet(this, INIT, ADD_PENDING);
+        // handlerState = 1
         assert updated; // This should always be true as it MUST be called before setAddComplete() or setRemoved().
     }
 

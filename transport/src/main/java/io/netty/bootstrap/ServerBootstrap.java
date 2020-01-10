@@ -184,6 +184,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             // ChannelInitializer 父类中有 handlerAdded(ctx) 它调用了initChannel(ch)
             @Override
             public void initChannel(final Channel ch) throws Exception {
+
+                System.out.println(Thread.currentThread().getName() + " ServerBootstrap initializerHandler initChannel() ch  = " + ch);
+
                 final ChannelPipeline pipeline = ch.pipeline();
                 ChannelHandler handler = config.handler();
 
@@ -206,6 +209,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
                 System.out.println(Thread.currentThread().getName() + " 执行ChannelPipeline开始添加的initializerHandler.initChannel() ====添加==== init-pipeline-task  r = " + r);
 
+                // r 会被添加到taskQueue中
                 ch.eventLoop().execute(r);
             }
         };
@@ -296,13 +300,18 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         @Override
         @SuppressWarnings("unchecked")
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
+
+            System.out.println(Thread.currentThread().getName() + " ServerBootstrapAcceptor = " + this + " channelRead(ctx, msg) 执行");
+            // 我自己加点
+            ctx.fireChannelRead(msg);
+
+
             final Channel childChannel = (Channel) msg;
 
             //childChannel.pipeline().addLast(childHandler);
             childChannel.pipeline().addLast(null, "childHandler", childHandler);
 
-            System.out.println(Thread.currentThread().getName() + " 给客户端channel= " + childChannel + " add 用户代码中的 " +
-                    "childHandler= " + childHandler);
+            System.out.println(Thread.currentThread().getName() + " 给客户端channel= " + childChannel + " add 用户代码中的 childHandler= " + childHandler);
 
             setChannelOptions(childChannel, childOptions, logger);
 
@@ -311,8 +320,10 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             }
 
             try {
+
                 // 对客户单channel 做类似服务端channel同样操作流程
                 ChannelFuture register = childGroup.register(childChannel);
+
                 ChannelFutureListener listener = new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture future) throws Exception {
@@ -321,10 +332,14 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                         }
                     }
                 };
+
                 register.addListener(listener);
             } catch (Throwable t) {
                 forceClose(childChannel, t);
             }
+
+            // 源码中没有  说执行到这个hander就不会执行后面hander的channelRead()
+            //ctx.fireChannelRead(msg);
         }
 
         private static void forceClose(Channel child, Throwable t) {

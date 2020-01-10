@@ -345,6 +345,8 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         try {
             // 1. 反射创建 NioServerSocketChannel 或者  NioSocketChannel
             channel = channelFactory.newChannel();
+            System.out.println(Thread.currentThread().getName() + " initAndRegister() 反射工厂创建了Channel channel = " + channel);
+
             // 2. 抽象方法  在 ServerBootstrap 或者 Bootstrap 中初始化
             init(channel);
         } catch (Throwable t) {
@@ -362,6 +364,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         AbstractBootstrapConfig bootstrapConfig = config();
         // MultithreadEventLoopGroup
         EventLoopGroup eventLoopGroup = bootstrapConfig.group();
+
         // eventLoopGroup 用户代码中的boss 或者 worker
         // 它会选择一个NioEventLoop 把这个channel 注册到NioEventLoop上的selector上
         ChannelFuture regFuture = eventLoopGroup.register(channel);
@@ -394,15 +397,19 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             final ChannelFuture regFuture, final Channel channel,
             final SocketAddress localAddress, final ChannelPromise promise) {
 
+        //不断点：true   断点：false
         // This method is invoked before channelRegistered() is triggered.  Give user handlers a chance to set up
         // the pipeline in its channelRegistered() implementation.
-        System.out.println(Thread.currentThread().getName() + " 2 doBind0()  isDone= " + channel.eventLoop().inEventLoop()); //不断点：true   断点：false
+        System.out.println(Thread.currentThread().getName() + " 2 doBind0()  isDone= " + channel.eventLoop().inEventLoop());
 
         Runnable r = new Thread("bind-port-task") {
             @Override
             public void run() {
+
                 System.out.println(Thread.currentThread().getName() + " bind-port-task 被执行了");
+
                 if (regFuture.isSuccess()) {
+                    // channel.bind(...) 是通过pipeline的bind() 从tail开始传播 一直到head的bind()
                     ChannelFuture bind = channel.bind(localAddress, promise);
                     bind.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
                 } else {

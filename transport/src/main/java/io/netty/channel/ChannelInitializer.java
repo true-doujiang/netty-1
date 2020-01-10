@@ -134,12 +134,14 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
         if (initMap.add(ctx)) {
             try {
                 Channel channel = ctx.channel();
+                // 抽象方法 由实现类实现
                 initChannel((C) channel);
             } catch (Throwable cause) {
                 // Explicitly call exceptionCaught(...) as we removed the handler before calling initChannel(...).
                 // We do so to prevent multiple calls to initChannel(...).
                 exceptionCaught(ctx, cause);
             } finally {
+                // 执行到这里 一定要把当前节点删掉
                 ChannelPipeline pipeline = ctx.pipeline();
                 if (pipeline.context(this) != null) {
                     // 删除 new ChannelInitializer<Channel>() { ......}

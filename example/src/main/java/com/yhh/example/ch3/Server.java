@@ -34,17 +34,19 @@ public final class Server {
              * 每次有新连接接入时，NioServerSocketChannel会把它放到NioSocketChannel的pipeline中，并执行initChannel()
              * 通S过initChannel() 给NioSocketChannel的pipeline添加Handler
              */
-            ChannelInitializer<SocketChannel> childInitialHandler = new ChannelInitializer<SocketChannel>() {
+            ChannelInitializer<SocketChannel> currentChildHandler = new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel ch) {
                     // 给每个新链接进来的SocketChannel 绑定一个Handler
                     AuthHandler authHandler = new AuthHandler();
                     System.out.println(Thread.currentThread().getName() + " new childHandler AuthHandler: " + authHandler);
                     ch.pipeline().addLast(authHandler);
+                    // 想重复添加的话 要加 @ChannelHandler.Sharable
+                    ch.pipeline().addLast(authHandler);
                     //..
                 }
             };
-            System.out.println(Thread.currentThread().getName() + " childInitialHandler = " + childInitialHandler);
+            System.out.println(Thread.currentThread().getName() + " currentChildHandler = " + currentChildHandler);
 
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
@@ -53,7 +55,7 @@ public final class Server {
                     .childOption(ChannelOption.TCP_NODELAY, true)
                     .childAttr(AttributeKey.newInstance("childAttr"), "childAttrValue")
                     .handler(serverHandler)
-                    .childHandler(childInitialHandler);
+                    .childHandler(currentChildHandler);
 
             ChannelFuture bindCF = b.bind(8080);
 

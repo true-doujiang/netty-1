@@ -470,8 +470,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                             // fall-through to SELECT since the busy-wait is not supported with NIO
 
                         case SelectStrategy.SELECT:
-                            //nio select() 操作
+                            //nio select() 操作   wakenUp设置为false
                             select(wakenUp.getAndSet(false));
+
                             //这边一大段注释 删掉了
 
                             if (wakenUp.get()) {
@@ -708,7 +709,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             // Also check for readOps of 0 to workaround possible JDK bug which may otherwise lead
             // to a spin loop
             if ((readyOps & (SelectionKey.OP_READ | SelectionKey.OP_ACCEPT)) != 0 || readyOps == 0) {
-                //
+                // 读入 数据 | 新连接
                 unsafe.read();
             }
         } catch (CancelledKeyException ignored) {
@@ -800,7 +801,10 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             long selectDeadLineNanos = currentTimeNanos + delayNanos(currentTimeNanos);
 
             for (;;) {
+
                 long timeoutMillis = (selectDeadLineNanos - currentTimeNanos + 500000L) / 1000000L;
+
+                // 判断当前时间有没有超过截止时间
                 if (timeoutMillis <= 0) {
                     if (selectCnt == 0) {
                         selector.selectNow();
@@ -814,17 +818,19 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 // If we don't, the task might be pended until select operation was timed out.
                 // It might be pended until idle timeout if IdleStateHandler existed in pipeline.
                 if (hasTasks() && wakenUp.compareAndSet(false, true)) {
+                    // taskQueue中有任务要执行 所以立即结束select() 去执行任务
                     selector.selectNow();
                     selectCnt = 1;
                     break;
                 }
 
+                // 没有超过截止时间 也没有任务需要执行 可以进行select()
                 int selectedKeys = selector.select(timeoutMillis);
-
-                System.out.println(Thread.currentThread().getName() + " NioEventLoop.run() select() timeoutMillis=" + timeoutMillis + " selectedKeys = " + selectedKeys);
-
                 selectCnt ++;
 
+                System.out.println(Thread.currentThread().getName() + " NioEventLoop.run() select() timeoutMillis = " + timeoutMillis + " selectedKeys = " + selectedKeys + " selectCnt = " + selectCnt);
+
+                // 满足任何一个跳出循环
                 if (selectedKeys != 0 || oldWakenUp || wakenUp.get() || hasTasks() || hasScheduledTasks()) {
                     // - Selected something,
                     // - waken up by user, or
@@ -832,6 +838,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     // - a scheduled task is ready for processing
                     break;
                 }
+
                 if (Thread.interrupted()) {
                     // Thread was interrupted so reset selected keys and break so we not run into a busy loop.
                     // As this is most likely a bug in the handler of the user or it's client library we will
@@ -847,6 +854,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     break;
                 }
 
+                // 解决JDK nio 空轮训bug
                 long time = System.nanoTime();
                 if (time - TimeUnit.MILLISECONDS.toNanos(timeoutMillis) >= currentTimeNanos) {
                     // timeoutMillis elapsed without anything selected.
@@ -860,7 +868,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 }
 
                 currentTimeNanos = time;
-            }
+            } // for end
 
             if (selectCnt > MIN_PREMATURE_SELECTOR_RETURNS) {
                 if (logger.isDebugEnabled()) {

@@ -80,6 +80,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      * 注册 selector 的时候 初始化了
      * 每个channel上都会有个NioEventLoop 只有这样 channel才能有生命力啊，引擎
      * 要把观念转过来 不是 channel 依赖于NioEventLoop 而是 NioEventLoop依赖于channel
+     *
+     * 可以通过 eventLoop 的 selector属性找到 他注册的channel
      */
     private volatile EventLoop eventLoop;
 
@@ -247,7 +249,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
 
 
-    // --------- ChannelOutboundInvoker
+    // --------- ChannelOutboundInvoker ---------
 
     @Override
     public ChannelFuture bind(SocketAddress localAddress) {
@@ -312,6 +314,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         return pipeline.deregister(promise);
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public Channel read() {
         pipeline.read();
@@ -504,6 +510,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         }
 
         /**
+         * AbstractUnsafe
+         *
          * 把JDK 的ServerSocketChannel 或者 SocketChannel 注册到 Selector上
          * 实际上这里只是向taskQueue中添加一个要注册的任务，真正注册早着呢
          * AbstractBootstrap.initAndRegister() 一路跳过来的
@@ -585,18 +593,28 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 // registered 置为true , 但是 没有 注册关注的事件
                 registered = true;
 
+
                 /**
                  *  这个就是执行 ServerBootstrap 中 init(Channel) 添加的 initializerHandler
                  *  handlerAdded()被执行
                  */
                 // Ensure we call handlerAdded(...) before we actually notify the promise. This is needed as the
                 // user may already fire events through the pipeline in the ChannelFutureListener.
+                System.out.println(Thread.currentThread().getName() + " pipeline.invokeHandlerAddedIfNeeded() start");
+                // 调用用户代码
                 pipeline.invokeHandlerAddedIfNeeded();
+                System.out.println(Thread.currentThread().getName() + " pipeline.invokeHandlerAddedIfNeeded() end");
 
+                System.out.println(Thread.currentThread().getName() + " safeSetSuccess(promise) start");
                 safeSetSuccess(promise);
-                //
-                pipeline.fireChannelRegistered();   //channelRegistered()被执行
+                System.out.println(Thread.currentThread().getName() + " safeSetSuccess(promise) end");
 
+                System.out.println(Thread.currentThread().getName() + " pipeline.fireChannelRegistered() start");
+                // 一直传到 Tail 而 Tail.channelRegistered 是空实现
+                pipeline.fireChannelRegistered();
+                System.out.println(Thread.currentThread().getName() + " pipeline.fireChannelRegistered() end");
+
+                // isActive() 对于 NioServerSocketChannel 是绑定端口  对于 NioSocketChannel 是客户端的channel注册到select上
                 // Only fire a channelActive if the channel has never been registered. This prevents firing
                 // multiple channel actives if the channel is deregistered and re-registered.
                 if (isActive()) {
@@ -619,7 +637,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         }
 
         /**
-         * 绑定端口号
+         * AbstractUnsafe
+         *
+         * 绑定端口号 上面是注册
          */
         @Override
         public final void bind(final SocketAddress localAddress, final ChannelPromise promise) {
@@ -654,6 +674,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             // 传播ChannelActive事件
             if (!wasActive && isActive()) {
+
                 Runnable r = new Thread("bind-port-success-task") {
                     @Override
                     public void run() {
@@ -661,11 +682,35 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                         pipeline.fireChannelActive();
                     }
                 };
+
                 System.out.println(Thread.currentThread().getName() + " 端口真正绑定完成了 ====添加==== bind-port-success-task  r = " + r);
                 invokeLater(r);
             }
 
             safeSetSuccess(promise);
+        }
+
+        /**
+         *
+         * @param task
+         */
+        private void invokeLater(Runnable task) {
+            try {
+                // This method is used by outbound operation implementations to trigger an inbound event later.
+                // They do not trigger an inbound event immediately because an outbound operation might have been
+                // triggered by another inbound event handler method.  If fired immediately, the call stack
+                // will look like this for example:
+                //
+                //   handlerA.inboundBufferUpdated() - (1) an inbound handler method closes a connection.
+                //   -> handlerA.ctx.close()
+                //      -> channel.unsafe.close()
+                //         -> handlerA.channelInactive() - (2) another inbound handler method called while in (1) yet
+                //
+                // which means the execution of two inbound handler methods of the same handler overlap undesirably.
+                eventLoop().execute(task);
+            } catch (RejectedExecutionException e) {
+                logger.warn("Can't invoke task later as EventLoop rejected it", e);
+            }
         }
 
         @Override
@@ -943,7 +988,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             }
 
             try {
-                //
+                // AbstractNioChannel 实现了 注册channel真正感兴趣的事件
                 doBeginRead();
             } catch (final Exception e) {
                 invokeLater(new Runnable() {
@@ -1122,28 +1167,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             close(voidPromise());
         }
 
-        /**
-         *
-         * @param task
-         */
-        private void invokeLater(Runnable task) {
-            try {
-                // This method is used by outbound operation implementations to trigger an inbound event later.
-                // They do not trigger an inbound event immediately because an outbound operation might have been
-                // triggered by another inbound event handler method.  If fired immediately, the call stack
-                // will look like this for example:
-                //
-                //   handlerA.inboundBufferUpdated() - (1) an inbound handler method closes a connection.
-                //   -> handlerA.ctx.close()
-                //      -> channel.unsafe.close()
-                //         -> handlerA.channelInactive() - (2) another inbound handler method called while in (1) yet
-                //
-                // which means the execution of two inbound handler methods of the same handler overlap undesirably.
-                eventLoop().execute(task);
-            } catch (RejectedExecutionException e) {
-                logger.warn("Can't invoke task later as EventLoop rejected it", e);
-            }
-        }
+
 
         /**
          * Appends the remote address to the message of the exceptions caused by connection attempt failure.
@@ -1193,6 +1217,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      */
     protected abstract SocketAddress remoteAddress0();
 
+
+
+    // -------------------1----------------------
+
     /********************************************************
      * 具体子类实现 被 AbstractUnsafe 调用
      * *******************************************************
@@ -1214,6 +1242,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      * Bind the {@link Channel} to the {@link SocketAddress}
      */
     protected abstract void doBind(SocketAddress localAddress) throws Exception;
+
+    // ----------------2-------------------------
 
     /**
      * Disconnect this {@link Channel} from its remote peer

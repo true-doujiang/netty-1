@@ -664,6 +664,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
+    /**
+     * AbstractChannel register0(Channel promise)
+     */
     final void invokeHandlerAddedIfNeeded() {
         assert channel.eventLoop().inEventLoop();
         if (firstRegistration) {
@@ -907,7 +910,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
 
     // ----------------------ChannelOutboundInvoker-------start-
-
+    // 出站是从尾节点往前执行
     @Override
     public final ChannelFuture bind(SocketAddress localAddress) {
         return tail.bind(localAddress);
@@ -1176,6 +1179,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         PendingHandlerCallback task = added ? new PendingHandlerAddedTask(ctx) : new PendingHandlerRemovedTask(ctx);
         PendingHandlerCallback pending = pendingHandlerCallbackHead;
         if (pending == null) {
+            //
             pendingHandlerCallbackHead = task;
         } else {
             // Find the tail of the linked-list.
@@ -1299,16 +1303,30 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             return this;
         }
 
+        // 个方法都留空
         @Override
-        public void channelRegistered(ChannelHandlerContext ctx) { }
+        public void channelRegistered(ChannelHandlerContext ctx) {
+            System.out.println(Thread.currentThread().getName() + " TailContext = " + this + " channelRegistered(ctx) 执行");
+        }
 
         @Override
-        public void channelUnregistered(ChannelHandlerContext ctx) { }
+        public void channelUnregistered(ChannelHandlerContext ctx) {
+            System.out.println(Thread.currentThread().getName() + " TailContext = " + this + " channelUnregistered(ctx) 执行");
+        }
+
+        @Override
+        public void handlerAdded(ChannelHandlerContext ctx) {
+            System.out.println(Thread.currentThread().getName() + " TailContext = " + this + " handlerAdded(ctx) 执行");
+        }
+
+        @Override
+        public void handlerRemoved(ChannelHandlerContext ctx) {
+            System.out.println(Thread.currentThread().getName() + " TailContext = " + this + " handlerRemoved(ctx) 执行");
+        }
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
-            System.out.println(Thread.currentThread().getName() + " 我把中间的ServerHandler、ServerBootstrapAcceptor" +
-                    " 的 channelActive(ctx) 串联起来了所以才会流转到最后一个 InBound");
+            System.out.println(Thread.currentThread().getName() + " TailContext = " + this + " channelActive(ctx) 执行");
             onUnhandledInboundChannelActive();
         }
 
@@ -1322,11 +1340,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             onUnhandledChannelWritabilityChanged();
         }
 
-        @Override
-        public void handlerAdded(ChannelHandlerContext ctx) { }
 
-        @Override
-        public void handlerRemoved(ChannelHandlerContext ctx) { }
 
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
@@ -1343,7 +1357,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
          */
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
-            System.out.println(Thread.currentThread().getName() + " 作为 InBound的最后一个 打个警告日志");
+            System.out.println(Thread.currentThread().getName() + " 作为 InBound的最后一个 打个警告日志 TailContext = " + this + "  channelRead(ctx, msg) 执行");
+            // 都到最后一个read()还没处理 所以打印一个警告日志，或者释放内存
             onUnhandledInboundMessage(msg);
         }
 
@@ -1373,11 +1388,13 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         @Override
         public void handlerAdded(ChannelHandlerContext ctx) {
             // NOOP
+            System.out.println(Thread.currentThread().getName() + " HeadContext = " + this + " handlerAdded(ctx) 执行");
         }
 
         @Override
         public void handlerRemoved(ChannelHandlerContext ctx) {
             // NOOP
+            System.out.println(Thread.currentThread().getName() + " HeadContext = " + this + " handlerRemoved(ctx) 执行");
         }
 
         /******************************
@@ -1419,6 +1436,11 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             unsafe.deregister(promise);
         }
 
+        /**
+         * 本 HeadContext.channelActive(ctx) 里的 readIfIsAutoRead(); 从tail一路传到head
+         * 注册channel真正感兴趣的事件
+         * @param ctx
+         */
         @Override
         public void read(ChannelHandlerContext ctx) {
             unsafe.beginRead();
@@ -1445,7 +1467,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelRegistered(ChannelHandlerContext ctx) {
+            System.out.println(Thread.currentThread().getName() + " HeadContext = " + this + " channelRegistered(ctx) 执行");
+
             invokeHandlerAddedIfNeeded();
+
             ctx.fireChannelRegistered();
         }
 
@@ -1461,9 +1486,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
-            System.out.println(Thread.currentThread().getName() + " HeadContext.channelActive(ctx)");
+            System.out.println(Thread.currentThread().getName() + " HeadContext = " + this + " channelActive(ctx)");
+            // 这个一直传到tail的channelActive()
             ctx.fireChannelActive();
-
+            //
             readIfIsAutoRead();
         }
 
@@ -1474,6 +1500,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            System.out.println(Thread.currentThread().getName() + " HeadContext = " + this + " channelRead(ctx, msg) 执行");
             ctx.fireChannelRead(msg);
         }
 
