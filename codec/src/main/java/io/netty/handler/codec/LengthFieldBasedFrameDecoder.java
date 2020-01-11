@@ -186,6 +186,7 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
  */
 public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
 
+    /** */
     private final ByteOrder byteOrder;
     private final int maxFrameLength;
     private final int lengthFieldOffset;
@@ -194,8 +195,11 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
     private final int lengthAdjustment;
     private final int initialBytesToStrip;
     private final boolean failFast;
+    /** true: 丢弃模式  false: 非丢弃模式*/
     private boolean discardingTooLongFrame;
+    /** 本次要丢弃的那个数据包的长度 */
     private long tooLongFrameLength;
+    /** 标记本次还需要丢弃的字节数 */
     private long bytesToDiscard;
 
     /**
@@ -337,15 +341,7 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
         }
     }
 
-    private void discardingTooLongFrame(ByteBuf in) {
-        long bytesToDiscard = this.bytesToDiscard;
-        int localBytesToDiscard = (int) Math.min(bytesToDiscard, in.readableBytes());
-        in.skipBytes(localBytesToDiscard);
-        bytesToDiscard -= localBytesToDiscard;
-        this.bytesToDiscard = bytesToDiscard;
 
-        failIfNecessary(false);
-    }
 
     private static void failOnNegativeLengthField(ByteBuf in, long frameLength, int lengthFieldEndOffset) {
         in.skipBytes(lengthFieldEndOffset);
@@ -362,7 +358,22 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
               "than lengthFieldEndOffset: " + lengthFieldEndOffset);
     }
 
+    /**
+     *
+     * @param in
+     */
+    private void discardingTooLongFrame(ByteBuf in) {
+        long bytesToDiscard = this.bytesToDiscard;
+        int localBytesToDiscard = (int) Math.min(bytesToDiscard, in.readableBytes());
+        in.skipBytes(localBytesToDiscard);
+        bytesToDiscard -= localBytesToDiscard;
+        this.bytesToDiscard = bytesToDiscard;
+
+        failIfNecessary(false);
+    }
+
     private void exceededFrameLength(ByteBuf in, long frameLength) {
+        //
         long discard = frameLength - in.readableBytes();
         tooLongFrameLength = frameLength;
 
@@ -372,6 +383,7 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
         } else {
             // Enter the discard mode and discard everything received so far.
             discardingTooLongFrame = true;
+            // 标记本次还需要丢弃的字节数
             bytesToDiscard = discard;
             in.skipBytes(in.readableBytes());
         }
@@ -396,27 +408,32 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
      *                          be created.
      */
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
+        // 刚开始肯定是false 不可能从这里进入丢弃模式
         if (discardingTooLongFrame) {
             discardingTooLongFrame(in);
         }
 
+        // lengthFieldEndOffset = lengthFieldOffset + lengthFieldLength
         if (in.readableBytes() < lengthFieldEndOffset) {
             return null;
         }
 
         int actualLengthFieldOffset = in.readerIndex() + lengthFieldOffset;
+        // 本次数据包的长度
         long frameLength = getUnadjustedFrameLength(in, actualLengthFieldOffset, lengthFieldLength, byteOrder);
 
         if (frameLength < 0) {
             failOnNegativeLengthField(in, frameLength, lengthFieldEndOffset);
         }
 
+        // 用户想要定义的数据包长度
         frameLength += lengthAdjustment + lengthFieldEndOffset;
 
         if (frameLength < lengthFieldEndOffset) {
             failOnFrameLengthLessThanLengthFieldEndOffset(in, frameLength, lengthFieldEndOffset);
         }
 
+        // 数据包长度最大的长度  只有从这里进入丢弃模式
         if (frameLength > maxFrameLength) {
             exceededFrameLength(in, frameLength);
             return null;
@@ -475,12 +492,18 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
         return frameLength;
     }
 
+    /**
+     *
+     * @param firstDetectionOfTooLongFrame true：本次数据包的第一次进入这个方法
+     */
     private void failIfNecessary(boolean firstDetectionOfTooLongFrame) {
         if (bytesToDiscard == 0) {
             // Reset to the initial state and tell the handlers that
             // the frame was too large.
             long tooLongFrameLength = this.tooLongFrameLength;
+            // 本次要丢弃的数据包的长度 已经丢弃完了所以置为0
             this.tooLongFrameLength = 0;
+            // 进入非丢弃模式
             discardingTooLongFrame = false;
             if (!failFast || firstDetectionOfTooLongFrame) {
                 fail(tooLongFrameLength);
