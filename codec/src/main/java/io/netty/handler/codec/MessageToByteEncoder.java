@@ -97,31 +97,44 @@ public abstract class MessageToByteEncoder<I> extends ChannelOutboundHandlerAdap
         return matcher.match(msg);
     }
 
+    /**
+     *
+     * @param ctx
+     * @param msg
+     * @param promise
+     * @throws Exception
+     */
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         ByteBuf buf = null;
         try {
+            // 判断能否处理该msg 不能处理直接传播到上一个hander
             if (acceptOutboundMessage(msg)) {
+
                 @SuppressWarnings("unchecked")
                 I cast = (I) msg;
+
                 buf = allocateBuffer(ctx, cast, preferDirect);
+
                 try {
-                    /**
-                     *
-                     */
+                    // 抽象方法
                     encode(ctx, cast, buf);
                 } finally {
+                    // msg 可以释放就释放
                     ReferenceCountUtil.release(cast);
                 }
 
+                // 可读 说明写入数据了
                 if (buf.isReadable()) {
                     ctx.write(buf, promise);
                 } else {
                     buf.release();
                     ctx.write(Unpooled.EMPTY_BUFFER, promise);
                 }
+
                 buf = null;
             } else {
+                // 本hander不能处理msg 则往上一个hander传播
                 ctx.write(msg, promise);
             }
         } catch (EncoderException e) {
@@ -129,6 +142,7 @@ public abstract class MessageToByteEncoder<I> extends ChannelOutboundHandlerAdap
         } catch (Throwable e) {
             throw new EncoderException(e);
         } finally {
+            //
             if (buf != null) {
                 buf.release();
             }

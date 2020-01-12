@@ -234,8 +234,17 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         return doWriteInternal(in, in.current());
     }
 
+    /**
+     *
+     * @param in
+     * @param msg
+     * @return
+     * @throws Exception
+     */
     private int doWriteInternal(ChannelOutboundBuffer in, Object msg) throws Exception {
+
         if (msg instanceof ByteBuf) {
+
             ByteBuf buf = (ByteBuf) msg;
             if (!buf.isReadable()) {
                 in.remove();
@@ -269,6 +278,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             // Should not reach here.
             throw new Error();
         }
+
         return WRITE_STATUS_SNDBUF_FULL;
     }
 
@@ -294,6 +304,11 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         incompleteWrite(writeSpinCount < 0);
     }
 
+    /**
+     * HeapBuf 转换为 DirectBuf
+     * @param msg
+     * @return
+     */
     @Override
     protected final Object filterOutboundMessage(Object msg) {
         if (msg instanceof ByteBuf) {

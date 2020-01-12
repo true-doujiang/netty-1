@@ -818,6 +818,11 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     *
+     * @param msg
+     * @param promise
+     */
     private void invokeWrite0(Object msg, ChannelPromise promise) {
         try {
             ChannelOutboundHandler outboundHandler = (ChannelOutboundHandler) handler();
@@ -853,6 +858,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     *
+     */
     private void invokeFlush0() {
         try {
             ChannelOutboundHandler outboundHandler = (ChannelOutboundHandler) handler();
@@ -869,6 +877,11 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         return promise;
     }
 
+    /**
+     *
+     * @param msg
+     * @param promise
+     */
     private void invokeWriteAndFlush(Object msg, ChannelPromise promise) {
         if (invokeHandler()) {
             invokeWrite0(msg, promise);
@@ -891,7 +904,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
             throw e;
         }
 
+        // 查找上一个节点
         AbstractChannelHandlerContext next = findContextOutbound();
+
         final Object m = pipeline.touch(msg, next);
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {
@@ -917,6 +932,11 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     *
+     * @param msg
+     * @return
+     */
     @Override
     public ChannelFuture writeAndFlush(Object msg) {
         return writeAndFlush(msg, newPromise());

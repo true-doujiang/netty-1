@@ -71,6 +71,7 @@ public final class ChannelOutboundBuffer {
 
     private final Channel channel;
 
+    //          这一段已经flush了可以写入socket了     这一段没有flush不用写入socket
     // Entry(flushedEntry) --> ... Entry(unflushedEntry) --> ... Entry(tailEntry)
     //
     // The Entry that is the first in the linked-list structure that was flushed
@@ -79,6 +80,7 @@ public final class ChannelOutboundBuffer {
     private Entry unflushedEntry;
     // The Entry which represents the tail of the buffer
     private Entry tailEntry;
+
     // The number of flushed entries that are not written yet
     private int flushed;
 
@@ -108,6 +110,7 @@ public final class ChannelOutboundBuffer {
     /**
      * Add given message to this {@link ChannelOutboundBuffer}. The given {@link ChannelPromise} will be notified once
      * the message was written.
+     *
      */
     public void addMessage(Object msg, int size, ChannelPromise promise) {
         Entry entry = Entry.newInstance(msg, size, total(msg), promise);
@@ -130,6 +133,8 @@ public final class ChannelOutboundBuffer {
     /**
      * Add a flush to this {@link ChannelOutboundBuffer}. This means all previous added messages are marked as flushed
      * and so you will be able to handle them.
+     *
+     *
      */
     public void addFlush() {
         // There is no need to process all entries if there was already a flush before and no new messages
@@ -138,10 +143,12 @@ public final class ChannelOutboundBuffer {
         // See https://github.com/netty/netty/issues/2577
         Entry entry = unflushedEntry;
         if (entry != null) {
+
             if (flushedEntry == null) {
                 // there is no flushedEntry yet, so start with the entry
                 flushedEntry = entry;
             }
+
             do {
                 flushed ++;
                 if (!entry.promise.setUncancellable()) {
@@ -184,6 +191,12 @@ public final class ChannelOutboundBuffer {
         decrementPendingOutboundBytes(size, true, true);
     }
 
+    /**
+     *
+     * @param size
+     * @param invokeLater
+     * @param notifyWritability
+     */
     private void decrementPendingOutboundBytes(long size, boolean invokeLater, boolean notifyWritability) {
         if (size == 0) {
             return;
@@ -786,6 +799,7 @@ public final class ChannelOutboundBuffer {
     }
 
     static final class Entry {
+
         private static final Recycler<Entry> RECYCLER = new Recycler<Entry>() {
             @Override
             protected Entry newObject(Handle<Entry> handle) {
