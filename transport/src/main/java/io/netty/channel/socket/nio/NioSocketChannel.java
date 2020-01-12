@@ -368,6 +368,7 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
      * @param buf           the {@link ByteBuf} from which the bytes should be written
      * @return
      * @throws Exception
+     *
      */
     @Override
     protected int doWriteBytes(ByteBuf buf) throws Exception {
