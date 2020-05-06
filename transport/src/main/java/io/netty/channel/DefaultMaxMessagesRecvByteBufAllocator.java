@@ -26,8 +26,11 @@ import io.netty.util.UncheckedBooleanSupplier;
  * and also prevents overflow.
  */
 public abstract class DefaultMaxMessagesRecvByteBufAllocator implements MaxMessagesRecvByteBufAllocator {
+
+
     private volatile int maxMessagesPerRead;
     private volatile boolean respectMaybeMoreData = true;
+
 
     public DefaultMaxMessagesRecvByteBufAllocator() {
         this(1);

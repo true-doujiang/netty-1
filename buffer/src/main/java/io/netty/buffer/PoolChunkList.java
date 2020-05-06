@@ -27,9 +27,21 @@ import static java.lang.Math.*;
 
 import java.nio.ByteBuffer;
 
+/**
+ *
+ * @param <T>
+ */
 final class PoolChunkList<T> implements PoolChunkListMetric {
     private static final Iterator<PoolChunkMetric> EMPTY_METRICS = Collections.<PoolChunkMetric>emptyList().iterator();
+
+    /**
+     *
+     */
     private final PoolArena<T> arena;
+
+    /**
+     *
+     */
     private final PoolChunkList<T> nextList;
     private final int minUsage;
     private final int maxUsage;

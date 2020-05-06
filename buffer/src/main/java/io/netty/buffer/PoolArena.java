@@ -29,15 +29,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 import static java.lang.Math.max;
 
+/**
+ *
+ * @param <T>
+ */
 abstract class PoolArena<T> implements PoolArenaMetric {
+
     static final boolean HAS_UNSAFE = PlatformDependent.hasUnsafe();
 
+    /**
+     *
+     */
     enum SizeClass {
         Tiny,
         Small,
         Normal
     }
 
+    /**
+     * 512/16=16
+     */
     static final int numTinySubpagePools = 512 >>> 4;
 
     final PooledByteBufAllocator parent;
@@ -45,7 +56,9 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     private final int maxOrder;
     final int pageSize;
     final int pageShifts;
+    //
     final int chunkSize;
+    //
     final int subpageOverflowMask;
     final int numSmallSubpagePools;
     final int directMemoryCacheAlignment;
@@ -82,7 +95,15 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
     // TODO: Test if adding padding helps under contention
     //private long pad0, pad1, pad2, pad3, pad4, pad5, pad6, pad7;
-
+    /**
+     *
+     * @param parent
+     * @param pageSize
+     * @param maxOrder
+     * @param pageShifts
+     * @param chunkSize
+     * @param cacheAlignment
+     */
     protected PoolArena(PooledByteBufAllocator parent, int pageSize,
           int maxOrder, int pageShifts, int chunkSize, int cacheAlignment) {
         this.parent = parent;
@@ -104,6 +125,9 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             smallSubpagePools[i] = newSubpagePoolHead(pageSize);
         }
 
+        /**
+         *
+         */
         q100 = new PoolChunkList<T>(this, null, 100, Integer.MAX_VALUE, chunkSize);
         q075 = new PoolChunkList<T>(this, q100, 75, 100, chunkSize);
         q050 = new PoolChunkList<T>(this, q075, 50, 100, chunkSize);
@@ -140,7 +164,13 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         return new PoolSubpage[size];
     }
 
+    /**
+     * 2 个内部类 实现了
+     * @return
+     */
     abstract boolean isDirect();
+
+
 
     PooledByteBuf<T> allocate(PoolThreadCache cache, int reqCapacity, int maxCapacity) {
         PooledByteBuf<T> buf = newByteBuf(maxCapacity);
@@ -172,12 +202,21 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         return (normCapacity & 0xFFFFFE00) == 0;
     }
 
+    /**
+     *
+     * @param cache
+     * @param buf
+     * @param reqCapacity
+     */
     private void allocate(PoolThreadCache cache, PooledByteBuf<T> buf, final int reqCapacity) {
+        // 规格化
         final int normCapacity = normalizeCapacity(reqCapacity);
+
         if (isTinyOrSmall(normCapacity)) { // capacity < pageSize
             int tableIdx;
             PoolSubpage<T>[] table;
             boolean tiny = isTiny(normCapacity);
+
             if (tiny) { // < 512
                 if (cache.allocateTiny(this, buf, reqCapacity, normCapacity)) {
                     // was able to allocate out of the cache so move on
@@ -218,6 +257,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             incTinySmallAllocation(tiny);
             return;
         }
+
         if (normCapacity <= chunkSize) {
             if (cache.allocateNormal(this, buf, reqCapacity, normCapacity)) {
                 // was able to allocate out of the cache so move on
@@ -330,15 +370,22 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         return table[tableIdx];
     }
 
+    /**
+     *
+     * @param reqCapacity
+     * @return
+     */
     int normalizeCapacity(int reqCapacity) {
+
         checkPositiveOrZero(reqCapacity, "reqCapacity");
 
+        // 大于 16M 直接返回
         if (reqCapacity >= chunkSize) {
             return directMemoryCacheAlignment == 0 ? reqCapacity : alignCapacity(reqCapacity);
         }
 
         if (!isTiny(reqCapacity)) { // >= 512
-            // Doubled
+            // Doubled  找个2的幂次方数 大于等于 reqCapacity
 
             int normalizedCapacity = reqCapacity;
             normalizedCapacity --;
@@ -663,6 +710,9 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         }
     }
 
+    /**
+     *
+     */
     static final class HeapArena extends PoolArena<byte[]> {
 
         HeapArena(PooledByteBufAllocator parent, int pageSize, int maxOrder,
@@ -711,6 +761,9 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         }
     }
 
+    /**
+     *
+     */
     static final class DirectArena extends PoolArena<ByteBuffer> {
 
         DirectArena(PooledByteBufAllocator parent, int pageSize, int maxOrder,

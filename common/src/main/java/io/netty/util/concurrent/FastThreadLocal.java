@@ -130,6 +130,7 @@ public class FastThreadLocal<V> {
 
     /**
      * Returns the current value for the current thread
+     *
      */
     @SuppressWarnings("unchecked")
     public final V get() {

@@ -48,9 +48,10 @@ final class PoolThreadCache {
     // Hold the caches for the different size classes, which are tiny, small and normal.
     private final MemoryRegionCache<byte[]>[] tinySubPageHeapCaches;
     private final MemoryRegionCache<byte[]>[] smallSubPageHeapCaches;
+    private final MemoryRegionCache<byte[]>[] normalHeapCaches;
+
     private final MemoryRegionCache<ByteBuffer>[] tinySubPageDirectCaches;
     private final MemoryRegionCache<ByteBuffer>[] smallSubPageDirectCaches;
-    private final MemoryRegionCache<byte[]>[] normalHeapCaches;
     private final MemoryRegionCache<ByteBuffer>[] normalDirectCaches;
 
     // Used for bitshifting when calculate the index of normal caches later
@@ -67,17 +68,23 @@ final class PoolThreadCache {
     PoolThreadCache(PoolArena<byte[]> heapArena, PoolArena<ByteBuffer> directArena,
                     int tinyCacheSize, int smallCacheSize, int normalCacheSize,
                     int maxCachedBufferCapacity, int freeSweepAllocationThreshold) {
+
         checkPositiveOrZero(maxCachedBufferCapacity, "maxCachedBufferCapacity");
+
         this.freeSweepAllocationThreshold = freeSweepAllocationThreshold;
         this.heapArena = heapArena;
         this.directArena = directArena;
+
         if (directArena != null) {
+            // len = 32
             tinySubPageDirectCaches = createSubPageCaches(
                     tinyCacheSize, PoolArena.numTinySubpagePools, SizeClass.Tiny);
+            // len = 4
             smallSubPageDirectCaches = createSubPageCaches(
                     smallCacheSize, directArena.numSmallSubpagePools, SizeClass.Small);
 
             numShiftsNormalDirect = log2(directArena.pageSize);
+            // len = 3
             normalDirectCaches = createNormalCaches(
                     normalCacheSize, maxCachedBufferCapacity, directArena);
 
@@ -89,14 +96,18 @@ final class PoolThreadCache {
             normalDirectCaches = null;
             numShiftsNormalDirect = -1;
         }
+
         if (heapArena != null) {
-            // Create the caches for the heap allocations
+
+            // Create the caches for the heap allocations    len = 32
             tinySubPageHeapCaches = createSubPageCaches(
                     tinyCacheSize, PoolArena.numTinySubpagePools, SizeClass.Tiny);
+            // len = 4
             smallSubPageHeapCaches = createSubPageCaches(
                     smallCacheSize, heapArena.numSmallSubpagePools, SizeClass.Small);
 
             numShiftsNormalHeap = log2(heapArena.pageSize);
+            // len = 3
             normalHeapCaches = createNormalCaches(
                     normalCacheSize, maxCachedBufferCapacity, heapArena);
 
@@ -113,13 +124,24 @@ final class PoolThreadCache {
         if ((tinySubPageDirectCaches != null || smallSubPageDirectCaches != null || normalDirectCaches != null
                 || tinySubPageHeapCaches != null || smallSubPageHeapCaches != null || normalHeapCaches != null)
                 && freeSweepAllocationThreshold < 1) {
+
             throw new IllegalArgumentException("freeSweepAllocationThreshold: "
                     + freeSweepAllocationThreshold + " (expected: > 0)");
         }
+
     }
 
+    /**
+     *
+     * @param cacheSize
+     * @param numCaches
+     * @param sizeClass
+     * @param <T>
+     * @return
+     */
     private static <T> MemoryRegionCache<T>[] createSubPageCaches(
             int cacheSize, int numCaches, SizeClass sizeClass) {
+
         if (cacheSize > 0 && numCaches > 0) {
             @SuppressWarnings("unchecked")
             MemoryRegionCache<T>[] cache = new MemoryRegionCache[numCaches];
@@ -133,8 +155,17 @@ final class PoolThreadCache {
         }
     }
 
+    /**
+     *
+     * @param cacheSize
+     * @param maxCachedBufferCapacity
+     * @param area
+     * @param <T>
+     * @return
+     */
     private static <T> MemoryRegionCache<T>[] createNormalCaches(
             int cacheSize, int maxCachedBufferCapacity, PoolArena<T> area) {
+
         if (cacheSize > 0 && maxCachedBufferCapacity > 0) {
             int max = Math.min(area.chunkSize, maxCachedBufferCapacity);
             int arraySize = Math.max(1, log2(max / area.pageSize) + 1);
@@ -366,10 +397,26 @@ final class PoolThreadCache {
         }
     }
 
+    /**
+     * 上面 2 个实现类：
+     *                @link {io.netty.buffer.PoolThreadCache.SubPageMemoryRegionCache}
+     *                @link {io.netty.buffer.PoolThreadCache.NormalMemoryRegionCache}
+     * @param <T>
+     */
     private abstract static class MemoryRegionCache<T> {
+
         private final int size;
+        /**
+         * 下面一点 Entry内部类， 包含 一个Handle  一个PoolChunk
+         */
         private final Queue<Entry<T>> queue;
+
+        /**
+         * SizeClass  enum : Tiny,      Small,               Normal
+         *               0 - 512B    ,    512B - 8K    ,    8K - 16M
+         */
         private final SizeClass sizeClass;
+
         private int allocations;
 
         MemoryRegionCache(int size, SizeClass sizeClass) {
@@ -461,23 +508,6 @@ final class PoolThreadCache {
             chunk.arena.freeChunk(chunk, handle, sizeClass, nioBuffer);
         }
 
-        static final class Entry<T> {
-            final Handle<Entry<?>> recyclerHandle;
-            PoolChunk<T> chunk;
-            ByteBuffer nioBuffer;
-            long handle = -1;
-
-            Entry(Handle<Entry<?>> recyclerHandle) {
-                this.recyclerHandle = recyclerHandle;
-            }
-
-            void recycle() {
-                chunk = null;
-                nioBuffer = null;
-                handle = -1;
-                recyclerHandle.recycle(this);
-            }
-        }
 
         @SuppressWarnings("rawtypes")
         private static Entry newEntry(PoolChunk<?> chunk, ByteBuffer nioBuffer, long handle) {
@@ -497,4 +527,48 @@ final class PoolThreadCache {
             }
         };
     }
+
+
+    /**
+         *
+         * @param <T>
+         */
+        static final class Entry<T> {
+
+            /**
+             * 指向一段唯一的连续内存
+             */
+            final Handle<Entry<?>> recyclerHandle;
+
+            PoolChunk<T> chunk;
+
+            /**
+             *
+             */
+            ByteBuffer nioBuffer;
+
+            long handle = -1;
+
+
+
+            Entry(Handle<Entry<?>> recyclerHandle) {
+                this.recyclerHandle = recyclerHandle;
+            }
+
+
+            void recycle() {
+                chunk = null;
+                nioBuffer = null;
+                handle = -1;
+                recyclerHandle.recycle(this);
+            }
+
+        } // Entry end
+
+
+
+
+
+
+
 }

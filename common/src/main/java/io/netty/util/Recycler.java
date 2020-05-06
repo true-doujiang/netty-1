@@ -24,6 +24,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Stack;
 import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -194,10 +195,18 @@ public abstract class Recycler<T> {
 
     protected abstract T newObject(Handle<T> handle);
 
+    /**
+     *
+     * @param <T>
+     */
     public interface Handle<T> {
         void recycle(T object);
     }
 
+    /**
+     *
+     * @param <T>
+     */
     static final class DefaultHandle<T> implements Handle<T> {
         private int lastRecycledId;
         private int recycleId;
@@ -226,6 +235,9 @@ public abstract class Recycler<T> {
         }
     }
 
+    /**
+     *
+     */
     private static final FastThreadLocal<Map<Stack<?>, WeakOrderQueue>> DELAYED_RECYCLED =
             new FastThreadLocal<Map<Stack<?>, WeakOrderQueue>>() {
         @Override
@@ -444,6 +456,10 @@ public abstract class Recycler<T> {
         }
     }
 
+    /**
+     *
+     * @param <T>
+     */
     static final class Stack<T> {
 
         // we keep a queue of per-thread queues, which is appended to once only, each time a new thread other

@@ -27,14 +27,19 @@ import io.netty.util.internal.StringUtil;
  * Skeletal {@link ByteBufAllocator} implementation to extend.
  */
 public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
+
+
     static final int DEFAULT_INITIAL_CAPACITY = 256;
     static final int DEFAULT_MAX_CAPACITY = Integer.MAX_VALUE;
     static final int DEFAULT_MAX_COMPONENTS = 16;
     static final int CALCULATE_THRESHOLD = 1048576 * 4; // 4 MiB page
 
+
     static {
         ResourceLeakDetector.addExclusions(AbstractByteBufAllocator.class, "toLeakAwareBuffer");
     }
+
+
 
     protected static ByteBuf toLeakAwareBuffer(ByteBuf buf) {
         ResourceLeakTracker<ByteBuf> leak;
