@@ -162,7 +162,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             boolean close = false;
             try {
                 do {
-                    // PooledUnsafeDirectByteBuf   这里 进去 分配内存的逻辑
+                    // byteBuf: PooledUnsafeDirectByteBuf   这里 进去 分配内存的逻辑   allocator: PooledByteBufAllocator(directByDefault: true)  allocHandle: DefaultMaxMessagesRecvByteBufAllocator
                     byteBuf = allocHandle.allocate(allocator);
                     //
                     int i = doReadBytes(byteBuf);

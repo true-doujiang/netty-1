@@ -42,8 +42,17 @@ final class PoolThreadCache {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PoolThreadCache.class);
 
+    /**
+     *
+     */
     final PoolArena<byte[]> heapArena;
+
+    /**
+     *
+     */
     final PoolArena<ByteBuffer> directArena;
+
+
 
     // Hold the caches for the different size classes, which are tiny, small and normal.
     private final MemoryRegionCache<byte[]>[] tinySubPageHeapCaches;
@@ -369,6 +378,8 @@ final class PoolThreadCache {
 
     /**
      * Cache used for buffers which are backed by TINY or SMALL size.
+     *
+     *
      */
     private static final class SubPageMemoryRegionCache<T> extends MemoryRegionCache<T> {
         SubPageMemoryRegionCache(int size, SizeClass sizeClass) {
@@ -384,6 +395,9 @@ final class PoolThreadCache {
 
     /**
      * Cache used for buffers which are backed by NORMAL size.
+     *
+     *
+     *
      */
     private static final class NormalMemoryRegionCache<T> extends MemoryRegionCache<T> {
         NormalMemoryRegionCache(int size) {
@@ -530,40 +544,38 @@ final class PoolThreadCache {
 
 
     /**
-         *
-         * @param <T>
+     * @param <T>
+     */
+    static final class Entry<T> {
+
+        /**
+         * 指向一段唯一的连续内存
          */
-        static final class Entry<T> {
+        final Handle<Entry<?>> recyclerHandle;
 
-            /**
-             * 指向一段唯一的连续内存
-             */
-            final Handle<Entry<?>> recyclerHandle;
+        PoolChunk<T> chunk;
 
-            PoolChunk<T> chunk;
+        /**
+         *
+         */
+        ByteBuffer nioBuffer;
 
-            /**
-             *
-             */
-            ByteBuffer nioBuffer;
-
-            long handle = -1;
+        long handle = -1;
 
 
+        Entry(Handle<Entry<?>> recyclerHandle) {
+            this.recyclerHandle = recyclerHandle;
+        }
 
-            Entry(Handle<Entry<?>> recyclerHandle) {
-                this.recyclerHandle = recyclerHandle;
-            }
 
+        void recycle() {
+            chunk = null;
+            nioBuffer = null;
+            handle = -1;
+            recyclerHandle.recycle(this);
+        }
 
-            void recycle() {
-                chunk = null;
-                nioBuffer = null;
-                handle = -1;
-                recyclerHandle.recycle(this);
-            }
-
-        } // Entry end
+    } // Entry end
 
 
 
