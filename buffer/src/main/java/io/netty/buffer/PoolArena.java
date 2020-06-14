@@ -53,7 +53,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     static final int numTinySubpagePools = 512 >>> 4;
 
     /**
-     *
+     * 内存分配器
      */
     final PooledByteBufAllocator parent;
 
@@ -129,7 +129,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         }
 
         numSmallSubpagePools = pageShifts - 9;
-        // len=
+        // len=4
         smallSubpagePools = newSubpagePoolArray(numSmallSubpagePools);
         for (int i = 0; i < smallSubpagePools.length; i ++) {
             smallSubpagePools[i] = newSubpagePoolHead(pageSize);
@@ -721,7 +721,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     }
 
     /**
-     *
+     * T: byte[]
      */
     static final class HeapArena extends PoolArena<byte[]> {
 
@@ -772,7 +772,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     } // HeapArena end
 
     /**
-     *
+     * T: ByteBuffer
      */
     static final class DirectArena extends PoolArena<ByteBuffer> {
 

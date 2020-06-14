@@ -43,22 +43,27 @@ final class PoolThreadCache {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PoolThreadCache.class);
 
     /**
-     *
+     * 这是内存区域，所有数据都缓存在我这里
      */
     final PoolArena<byte[]> heapArena;
 
     /**
-     *
+     * 这是内存区域，所有数据都缓存在我这里
      */
     final PoolArena<ByteBuffer> directArena;
 
 
-
+    /**
+     * 堆内存
+     */
     // Hold the caches for the different size classes, which are tiny, small and normal.
     private final MemoryRegionCache<byte[]>[] tinySubPageHeapCaches;
     private final MemoryRegionCache<byte[]>[] smallSubPageHeapCaches;
     private final MemoryRegionCache<byte[]>[] normalHeapCaches;
 
+    /**
+     * 直接内存
+     */
     private final MemoryRegionCache<ByteBuffer>[] tinySubPageDirectCaches;
     private final MemoryRegionCache<ByteBuffer>[] smallSubPageDirectCaches;
     private final MemoryRegionCache<ByteBuffer>[] normalDirectCaches;

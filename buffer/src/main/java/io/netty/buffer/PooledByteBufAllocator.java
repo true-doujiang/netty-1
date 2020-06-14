@@ -38,19 +38,40 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
     /**
      * 这些静态熟悉 都是在static{} 代码块中初始化的
+     * 8
      */
     private static final int DEFAULT_NUM_HEAP_ARENA;
+    // 8
     private static final int DEFAULT_NUM_DIRECT_ARENA;
 
+    // 8192
     private static final int DEFAULT_PAGE_SIZE;
+
+    // 11
     private static final int DEFAULT_MAX_ORDER; // 8192 << 11 = 16 MiB per chunk
+
+    // 512
     private static final int DEFAULT_TINY_CACHE_SIZE;
+
+    // 256
     private static final int DEFAULT_SMALL_CACHE_SIZE;
+
+    // 64
     private static final int DEFAULT_NORMAL_CACHE_SIZE;
+
+    // 32768
     private static final int DEFAULT_MAX_CACHED_BUFFER_CAPACITY;
+
+    // 8192
     private static final int DEFAULT_CACHE_TRIM_INTERVAL;
+
+    // true
     private static final boolean DEFAULT_USE_CACHE_FOR_ALL_THREADS;
+
+    // 0
     private static final int DEFAULT_DIRECT_MEMORY_CACHE_ALIGNMENT;
+
+    // 1023
     static final int DEFAULT_MAX_CACHED_BYTEBUFFERS_PER_CHUNK;
 
     private static final int MIN_PAGE_SIZE = 4096;
@@ -159,6 +180,9 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     public static final PooledByteBufAllocator DEFAULT =
             new PooledByteBufAllocator(PlatformDependent.directBufferPreferred());
 
+    /**
+     * 和下面2个list 装的东西一样
+     */
     private final PoolArena<byte[]>[] heapArenas;
     private final PoolArena<ByteBuffer>[] directArenas;
 
@@ -167,7 +191,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     private final int normalCacheSize;
 
     /**
-     * metric [ˈmetrɪk]   度量标准; [数学] 度量
+     * metric [ˈmetrɪk]   度量标准; [数学] 度量  len=8
      */
     private final List<PoolArenaMetric> heapArenaMetrics;
     private final List<PoolArenaMetric> directArenaMetrics;
@@ -237,10 +261,10 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         //
         threadCache = new PoolThreadLocalCache(useCacheForAllThreads);
 
-        this.tinyCacheSize = tinyCacheSize;
-        this.smallCacheSize = smallCacheSize;
-        this.normalCacheSize = normalCacheSize;
-        chunkSize = validateAndCalculateChunkSize(pageSize, maxOrder);
+        this.tinyCacheSize = tinyCacheSize;// 512
+        this.smallCacheSize = smallCacheSize;//256
+        this.normalCacheSize = normalCacheSize;//64
+        chunkSize = validateAndCalculateChunkSize(pageSize, maxOrder);//16777214
 
         checkPositiveOrZero(nHeapArena, "nHeapArena");
         checkPositiveOrZero(nDirectArena, "nDirectArena");
@@ -288,7 +312,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             directArenas = null;
             directArenaMetrics = Collections.emptyList();
         }
-
+        // metric 只是简单的包装一层this
         metric = new PooledByteBufAllocatorMetric(this);
     }
 
@@ -460,15 +484,20 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     }
 
     /**
-     *
+     * FastThreadLocal
      */
     final class PoolThreadLocalCache extends FastThreadLocal<PoolThreadCache> {
+
         private final boolean useCacheForAllThreads;
 
         PoolThreadLocalCache(boolean useCacheForAllThreads) {
             this.useCacheForAllThreads = useCacheForAllThreads;
         }
 
+        /**
+         *
+         * @return PoolThreadCache
+         */
         @Override
         protected synchronized PoolThreadCache initialValue() {
             final PoolArena<byte[]> heapArena = leastUsedArena(heapArenas);
@@ -480,6 +509,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
                         heapArena, directArena, tinyCacheSize, smallCacheSize, normalCacheSize,
                         DEFAULT_MAX_CACHED_BUFFER_CAPACITY, DEFAULT_CACHE_TRIM_INTERVAL);
             }
+
             // No caching so just use 0 as sizes.
             return new PoolThreadCache(heapArena, directArena, 0, 0, 0, 0, 0);
         }
@@ -504,6 +534,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
             return minArena;
         }
+
     } // PoolThreadLocalCache end
 
     @Override
