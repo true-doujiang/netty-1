@@ -35,6 +35,10 @@ import java.util.List;
 public class PooledByteBufAllocator extends AbstractByteBufAllocator implements ByteBufAllocatorMetricProvider {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PooledByteBufAllocator.class);
+
+    /**
+     * 这些静态熟悉 都是在static{} 代码块中初始化的
+     */
     private static final int DEFAULT_NUM_HEAP_ARENA;
     private static final int DEFAULT_NUM_DIRECT_ARENA;
 
@@ -149,19 +153,38 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         }
     }
 
+    /**
+     *
+     */
     public static final PooledByteBufAllocator DEFAULT =
             new PooledByteBufAllocator(PlatformDependent.directBufferPreferred());
 
     private final PoolArena<byte[]>[] heapArenas;
     private final PoolArena<ByteBuffer>[] directArenas;
+
     private final int tinyCacheSize;
     private final int smallCacheSize;
     private final int normalCacheSize;
+
+    /**
+     * metric [ˈmetrɪk]   度量标准; [数学] 度量
+     */
     private final List<PoolArenaMetric> heapArenaMetrics;
     private final List<PoolArenaMetric> directArenaMetrics;
+
+    /**
+     * PoolThreadLocalCache 本类的内部类
+     */
     private final PoolThreadLocalCache threadCache;
+
     private final int chunkSize;
+
+    /**
+     *
+     */
     private final PooledByteBufAllocatorMetric metric;
+
+
 
     public PooledByteBufAllocator() {
         this(false);
@@ -213,6 +236,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         super(preferDirect);
         //
         threadCache = new PoolThreadLocalCache(useCacheForAllThreads);
+
         this.tinyCacheSize = tinyCacheSize;
         this.smallCacheSize = smallCacheSize;
         this.normalCacheSize = normalCacheSize;
@@ -237,6 +261,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             heapArenas = newArenaArray(nHeapArena);
             List<PoolArenaMetric> metrics = new ArrayList<PoolArenaMetric>(heapArenas.length);
             for (int i = 0; i < heapArenas.length; i ++) {
+
                 PoolArena.HeapArena arena = new PoolArena.HeapArena(this,
                         pageSize, maxOrder, pageShifts, chunkSize,
                         directMemoryCacheAlignment);
@@ -263,6 +288,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             directArenas = null;
             directArenaMetrics = Collections.emptyList();
         }
+
         metric = new PooledByteBufAllocatorMetric(this);
     }
 
@@ -433,6 +459,9 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         threadCache.remove();
     }
 
+    /**
+     *
+     */
     final class PoolThreadLocalCache extends FastThreadLocal<PoolThreadCache> {
         private final boolean useCacheForAllThreads;
 
@@ -475,7 +504,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
             return minArena;
         }
-    }
+    } // PoolThreadLocalCache end
 
     @Override
     public PooledByteBufAllocatorMetric metric() {

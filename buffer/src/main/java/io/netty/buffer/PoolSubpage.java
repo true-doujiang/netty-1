@@ -16,6 +16,10 @@
 
 package io.netty.buffer;
 
+/**
+ * 一个内存页，默认是8k
+ *
+ */
 final class PoolSubpage<T> implements PoolSubpageMetric {
 
     final PoolChunk<T> chunk;
@@ -24,7 +28,14 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
     private final int pageSize;
     private final long[] bitmap;
 
+    /**
+     *
+     */
     PoolSubpage<T> prev;
+
+    /**
+     *
+     */
     PoolSubpage<T> next;
 
     boolean doNotDestroy;

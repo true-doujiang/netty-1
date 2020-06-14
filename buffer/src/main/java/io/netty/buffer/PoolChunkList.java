@@ -28,7 +28,7 @@ import static java.lang.Math.*;
 import java.nio.ByteBuffer;
 
 /**
- *
+ * 也是一个链表结构
  * @param <T>
  */
 final class PoolChunkList<T> implements PoolChunkListMetric {
@@ -40,7 +40,7 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     private final PoolArena<T> arena;
 
     /**
-     *
+     * 下一个节点
      */
     private final PoolChunkList<T> nextList;
     private final int minUsage;

@@ -103,12 +103,19 @@ import java.util.Deque;
  * memoryMap[id]= depth_of_id  is defined above
  * depthMap[id]= x  indicates that the first node which is free to be allocated is at depth x (from root)
  *
- *
+ * 参考: https://www.cnblogs.com/sunshine-2015/p/9375157.html
+ * 有多个PoolSubpage组成，默认包含2048个subpage，即默认大小是16m
+ * chunk内部包含一个byte数组memoryMap，默认包含4096个元素，memoryMap实际上是一棵完全二叉树，共有12层，也就是maxOrder默认是11（从0开始），
+ * 所以这棵树总共有2048个叶子结点，每个叶子节点对应一个subpage，树中非叶子节点的内存大小由左子节点的内存大小加上右子节点的内存大小，
+ * memoryMap数组中存储的值是byte类型，其实就是该树节点在树中的深度（深度从0开始）。树的基本结构如下图：
  */
 final class PoolChunk<T> implements PoolChunkMetric {
 
     private static final int INTEGER_SIZE_MINUS_ONE = Integer.SIZE - 1;
 
+    /**
+     *
+     */
     final PoolArena<T> arena;
     final T memory;
     final boolean unpooled;

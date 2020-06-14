@@ -30,11 +30,9 @@ import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 import static java.lang.Math.max;
 
 /**
- *
- * @param <T>
- *
- *
- *
+ * 2 个实现类 内部类
+ *    DirectArena
+ *    HeapArena
  */
 abstract class PoolArena<T> implements PoolArenaMetric {
 
@@ -50,10 +48,13 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     }
 
     /**
-     * 512/16=16
+     * 512/16=32
      */
     static final int numTinySubpagePools = 512 >>> 4;
 
+    /**
+     *
+     */
     final PooledByteBufAllocator parent;
 
     private final int maxOrder;
@@ -66,6 +67,10 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     final int numSmallSubpagePools;
     final int directMemoryCacheAlignment;
     final int directMemoryCacheAlignmentMask;
+
+    /**
+     * 一个内存页，默认是8k
+     */
     private final PoolSubpage<T>[] tinySubpagePools;
     private final PoolSubpage<T>[] smallSubpagePools;
 
@@ -117,12 +122,14 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         directMemoryCacheAlignment = cacheAlignment;
         directMemoryCacheAlignmentMask = cacheAlignment - 1;
         subpageOverflowMask = ~(pageSize - 1);
+        // len=32
         tinySubpagePools = newSubpagePoolArray(numTinySubpagePools);
         for (int i = 0; i < tinySubpagePools.length; i ++) {
             tinySubpagePools[i] = newSubpagePoolHead(pageSize);
         }
 
         numSmallSubpagePools = pageShifts - 9;
+        // len=
         smallSubpagePools = newSubpagePoolArray(numSmallSubpagePools);
         for (int i = 0; i < smallSubpagePools.length; i ++) {
             smallSubpagePools[i] = newSubpagePoolHead(pageSize);
@@ -762,7 +769,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
             System.arraycopy(src, srcOffset, dst, dstOffset, length);
         }
-    }
+    } // HeapArena end
 
     /**
      *
@@ -861,5 +868,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
                 dst.put(src);
             }
         }
-    }
+    } // DirectArena end
+
+
 }
