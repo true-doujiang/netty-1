@@ -181,7 +181,13 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     abstract boolean isDirect();
 
 
-
+    /**
+     *
+     * @param cache
+     * @param reqCapacity
+     * @param maxCapacity
+     * @return
+     */
     PooledByteBuf<T> allocate(PoolThreadCache cache, int reqCapacity, int maxCapacity) {
         PooledByteBuf<T> buf = newByteBuf(maxCapacity);
         allocate(cache, buf, reqCapacity);
@@ -209,10 +215,13 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
     // normCapacity < 512
     static boolean isTiny(int normCapacity) {
+        // 小于512的是tiny
         return (normCapacity & 0xFFFFFE00) == 0;
     }
 
     /**
+     * 先看下分配内存的入口方法allocate
+     * 这个方法进行具体申请内存的操作
      *
      * @param cache
      * @param buf
@@ -222,12 +231,14 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         // 规格化
         final int normCapacity = normalizeCapacity(reqCapacity);
 
+        // 小于pageSize(默认是8K)
         if (isTinyOrSmall(normCapacity)) { // capacity < pageSize
             int tableIdx;
             PoolSubpage<T>[] table;
             boolean tiny = isTiny(normCapacity);
 
             if (tiny) { // < 512
+                // 使用缓存
                 if (cache.allocateTiny(this, buf, reqCapacity, normCapacity)) {
                     // was able to allocate out of the cache so move on
                     return;
@@ -235,6 +246,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
                 tableIdx = tinyIdx(normCapacity);
                 table = tinySubpagePools;
             } else {
+                // 512-8K
                 if (cache.allocateSmall(this, buf, reqCapacity, normCapacity)) {
                     // was able to allocate out of the cache so move on
                     return;
@@ -253,6 +265,9 @@ abstract class PoolArena<T> implements PoolArenaMetric {
                 final PoolSubpage<T> s = head.next;
                 if (s != head) {
                     assert s.doNotDestroy && s.elemSize == normCapacity;
+
+                    // 这里为什么一定可以找到可用的内存块（handle>=0）呢？
+                    // 因为在io.netty.buffer.PoolSubpage#allocate的时候，如果可用内存块为0了会将该page从链表中remove，所以保证了head.next一定有可用的内存
                     long handle = s.allocate();
                     assert handle >= 0;
                     s.chunk.initBufWithSubpage(buf, null, handle, reqCapacity);

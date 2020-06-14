@@ -178,6 +178,11 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         return directBuffer(DEFAULT_INITIAL_CAPACITY, DEFAULT_MAX_CAPACITY);
     }
 
+    /**
+     *
+     * @param initialCapacity
+     * @return
+     */
     @Override
     public ByteBuf directBuffer(int initialCapacity) {
         return directBuffer(initialCapacity, DEFAULT_MAX_CAPACITY);
@@ -244,6 +249,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
 
     /**
      * Create a direct {@link ByteBuf} with the given initialCapacity and maxCapacity.
+     *
      */
     protected abstract ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity);
 
