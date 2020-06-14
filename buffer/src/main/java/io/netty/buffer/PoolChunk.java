@@ -113,8 +113,18 @@ final class PoolChunk<T> implements PoolChunkMetric {
     final T memory;
     final boolean unpooled;
     final int offset;
+
+    /**
+     *
+     */
     private final byte[] memoryMap;
+
+    /**
+     * depthMap数组值为0表示可以分配16M空间，如果为1 表示可以分配8M，
+     * 如果为2表示嗯可以分配4M，如果为3表示可以分配2M ……………………如果为11表示可以分配8k空间
+     */
     private final byte[] depthMap;
+
     private final PoolSubpage<T>[] subpages;
     /** Used to determine if the requested capacity is equal to or greater than pageSize. */
     private final int subpageOverflowMask;
@@ -136,9 +146,13 @@ final class PoolChunk<T> implements PoolChunkMetric {
 
     private int freeBytes;
 
+    /**
+     * 双向链表
+     */
     PoolChunkList<T> parent;
     PoolChunk<T> prev;
     PoolChunk<T> next;
+
 
     // TODO: Test if adding padding helps under contention
     //private long pad0, pad1, pad2, pad3, pad4, pad5, pad6, pad7;
@@ -320,6 +334,8 @@ final class PoolChunk<T> implements PoolChunkMetric {
      *
      * @param normCapacity normalized capacity
      * @return index in memoryMap
+     *
+     * 如果为8k或者大于8k那么通过下面代码就可以定位到深度了
      */
     private long allocateRun(int normCapacity) {
         int d = maxOrder - (log2(normCapacity) - pageShifts);

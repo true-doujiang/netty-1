@@ -431,6 +431,7 @@ final class PoolThreadCache {
 
         MemoryRegionCache(int size, SizeClass sizeClass) {
             this.size = MathUtil.safeFindNextPositivePowerOfTwo(size);
+            //
             queue = PlatformDependent.newFixedMpscQueue(this.size);
             this.sizeClass = sizeClass;
         }
@@ -536,7 +537,8 @@ final class PoolThreadCache {
                 return new Entry(handle);
             }
         };
-    }
+
+    } // MemoryRegionCache end
 
 
     /**
