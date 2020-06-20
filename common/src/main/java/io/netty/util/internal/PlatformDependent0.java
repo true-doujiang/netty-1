@@ -290,6 +290,10 @@ final class PlatformDependent0 {
             ADDRESS_FIELD_OFFSET = objectFieldOffset(addressField);
             BYTE_ARRAY_BASE_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);
 
+            System.out.println(Thread.currentThread().getName() + " DIRECT_BUFFER_CONSTRUCTOR = " + DIRECT_BUFFER_CONSTRUCTOR);
+            System.out.println(Thread.currentThread().getName() + " ADDRESS_FIELD_OFFSET = " + ADDRESS_FIELD_OFFSET);
+            System.out.println(Thread.currentThread().getName() + " BYTE_ARRAY_BASE_OFFSET = " + BYTE_ARRAY_BASE_OFFSET);
+
             final boolean unaligned;
 
             Object maybeUnaligned = AccessController.doPrivileged(new PrivilegedAction<Object>() {

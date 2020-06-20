@@ -67,7 +67,8 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
         }
 
         this.alloc = alloc;
-        setArray(allocateArray(initialCapacity));
+        byte[] bytes = allocateArray(initialCapacity);
+        setArray(bytes);
         setIndex(0, 0);
     }
 

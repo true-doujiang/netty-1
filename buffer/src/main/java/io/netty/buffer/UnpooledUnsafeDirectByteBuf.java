@@ -33,15 +33,22 @@ import java.nio.channels.ScatteringByteChannel;
  * A NIO {@link ByteBuffer} based buffer. It is recommended to use
  * {@link UnpooledByteBufAllocator#directBuffer(int, int)}, {@link Unpooled#directBuffer(int)} and
  * {@link Unpooled#wrappedBuffer(ByteBuffer)} instead of calling the constructor explicitly.}
+ *
+ *
  */
 public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf {
 
+    /**
+     *
+     */
     private final ByteBufAllocator alloc;
 
     private ByteBuffer tmpNioBuf;
     private int capacity;
     private boolean doNotFree;
+    //
     ByteBuffer buffer;
+    //
     long memoryAddress;
 
     /**
@@ -63,7 +70,8 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
         }
 
         this.alloc = alloc;
-        setByteBuffer(allocateDirect(initialCapacity), false);
+        ByteBuffer byteBuffer = allocateDirect(initialCapacity);
+        setByteBuffer(byteBuffer, false);
     }
 
     /**

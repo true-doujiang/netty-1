@@ -7,13 +7,14 @@ public class TestUnPooledByteBufAllocator {
 
 
     public static void main(String[] args) {
-        f1();
-        //f2();
+        //f1();
+        f2();
     }
 
     public static void f1() {
         UnpooledByteBufAllocator alloc = UnpooledByteBufAllocator.DEFAULT;
-
+        // Unpooled-Unsafe-Heap-Byte
+        // UnpooledByteBufAllocator$InstrumentedUnpooledUnsafeHeapByteBuf(ridx: 0, widx: 1, cap: 254)
         ByteBuf byteBuf = alloc.heapBuffer(254);
         byteBuf.writeByte(100);
 
@@ -34,9 +35,9 @@ public class TestUnPooledByteBufAllocator {
          * 128  ->  -128
          * 127  ->  127
          */
-        byteBuf.writeByte(130);
+        byteBuf.writeByte(127);
 
-        System.out.println( byteBuf.readByte());
+        System.out.println(byteBuf.readByte());
 
         byteBuf.release();
     }

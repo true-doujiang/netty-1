@@ -91,9 +91,15 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
      */
     @Override
     protected ByteBuf newHeapBuffer(int initialCapacity, int maxCapacity) {
-        return PlatformDependent.hasUnsafe() ?
-                new InstrumentedUnpooledUnsafeHeapByteBuf(this, initialCapacity, maxCapacity) :
-                new InstrumentedUnpooledHeapByteBuf(this, initialCapacity, maxCapacity);
+        boolean b = PlatformDependent.hasUnsafe();
+        if (b) {
+            return new InstrumentedUnpooledUnsafeHeapByteBuf(this, initialCapacity, maxCapacity);
+        } else {
+            return new InstrumentedUnpooledHeapByteBuf(this, initialCapacity, maxCapacity);
+        }
+//        return PlatformDependent.hasUnsafe() ?
+//                new InstrumentedUnpooledUnsafeHeapByteBuf(this, initialCapacity, maxCapacity) :
+//                new InstrumentedUnpooledHeapByteBuf(this, initialCapacity, maxCapacity);
     }
 
     /**
@@ -156,6 +162,9 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
      * 以下都为内部实现类
      */
 
+    /**
+     * 1. Unsafe
+     */
     private static final class InstrumentedUnpooledUnsafeHeapByteBuf extends UnpooledUnsafeHeapByteBuf {
 
         InstrumentedUnpooledUnsafeHeapByteBuf(UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
@@ -177,6 +186,9 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
         }
     }
 
+    /**
+     * 2.
+     */
     private static final class InstrumentedUnpooledHeapByteBuf extends UnpooledHeapByteBuf {
 
         InstrumentedUnpooledHeapByteBuf(UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
@@ -198,6 +210,9 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
         }
     }
 
+    /**
+     * 3. Unsafe
+     */
     private static final class InstrumentedUnpooledUnsafeNoCleanerDirectByteBuf
             extends UnpooledUnsafeNoCleanerDirectByteBuf {
 
@@ -229,6 +244,9 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
         }
     }
 
+    /**
+     * 4. Unsafe
+     */
     private static final class InstrumentedUnpooledUnsafeDirectByteBuf extends UnpooledUnsafeDirectByteBuf {
 
         InstrumentedUnpooledUnsafeDirectByteBuf(
@@ -251,6 +269,9 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
         }
     }
 
+    /**
+     * 5.
+     */
     private static final class InstrumentedUnpooledDirectByteBuf extends UnpooledDirectByteBuf {
 
         InstrumentedUnpooledDirectByteBuf(
@@ -273,6 +294,9 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
         }
     }
 
+    /**
+     * 6.
+     */
     private static final class UnpooledByteBufAllocatorMetric implements ByteBufAllocatorMetric {
 
         final LongCounter directCounter = PlatformDependent.newLongCounter();

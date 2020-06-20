@@ -17,6 +17,9 @@ package io.netty.buffer;
 
 import io.netty.util.internal.PlatformDependent;
 
+/**
+ *
+ */
 class UnpooledUnsafeHeapByteBuf extends UnpooledHeapByteBuf {
 
     /**
