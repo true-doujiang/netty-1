@@ -41,6 +41,7 @@ final class PlatformDependent0 {
     private static final long ADDRESS_FIELD_OFFSET;
     private static final long BYTE_ARRAY_BASE_OFFSET;
     private static final Constructor<?> DIRECT_BUFFER_CONSTRUCTOR;
+    // explicitNoUnsafeCause0() 返回 null
     private static final Throwable EXPLICIT_NO_UNSAFE_CAUSE = explicitNoUnsafeCause0();
     private static final Method ALLOCATE_ARRAY_METHOD;
     //
@@ -70,6 +71,7 @@ final class PlatformDependent0 {
 
     private static final boolean UNALIGNED;
 
+    // ------------static start ----------------
     static {
         final ByteBuffer direct;
         Field addressField = null;
@@ -84,8 +86,12 @@ final class PlatformDependent0 {
             unsafe = null;
             internalUnsafe = null;
         } else {
+
             direct = ByteBuffer.allocateDirect(1);
 
+            /**
+             * 使用反射返回 UnSafe  也有可能返回Throwable
+             */
             // attempt to access field Unsafe#theUnsafe
             final Object maybeUnsafe = AccessController.doPrivileged(new PrivilegedAction<Object>() {
                 @Override
@@ -131,7 +137,10 @@ final class PlatformDependent0 {
             // https://github.com/netty/netty/issues/1061
             // http://www.mail-archive.com/jdk6-dev@openjdk.java.net/msg00698.html
             if (unsafe != null) {
+
                 final Unsafe finalUnsafe = unsafe;
+
+                // 返回null
                 final Object maybeException = AccessController.doPrivileged(new PrivilegedAction<Object>() {
                     @Override
                     public Object run() {
@@ -158,6 +167,7 @@ final class PlatformDependent0 {
             }
 
             if (unsafe != null) {
+
                 final Unsafe finalUnsafe = unsafe;
 
                 // attempt to access field Buffer#address
@@ -184,6 +194,7 @@ final class PlatformDependent0 {
                     }
                 });
 
+                // long java.nio.Buffer.address
                 if (maybeAddressField instanceof Field) {
                     addressField = (Field) maybeAddressField;
                     logger.debug("java.nio.Buffer.address: available");
@@ -208,9 +219,13 @@ final class PlatformDependent0 {
                 }
             }
         }
+        // ------------ 第一个 else end -------------
 
-        //
+
+
+        // null
         UNSAFE_UNAVAILABILITY_CAUSE = unsafeUnavailabilityCause;
+        //
         UNSAFE = unsafe;
 
         if (unsafe == null) {
@@ -220,10 +235,11 @@ final class PlatformDependent0 {
             DIRECT_BUFFER_CONSTRUCTOR = null;
             ALLOCATE_ARRAY_METHOD = null;
         } else {
+
             Constructor<?> directBufferConstructor;
             long address = -1;
             try {
-
+                // 反射 java.nio.DirectByteBuffer.DirectByteBuffer(long, int)
                 final Object maybeDirectBufferConstructor =
                         AccessController.doPrivileged(new PrivilegedAction<Object>() {
                             @Override
@@ -332,6 +348,7 @@ final class PlatformDependent0 {
                 logger.debug("java.nio.Bits.unaligned: unavailable {}", unaligned, t);
             }
 
+            // true
             UNALIGNED = unaligned;
 
             if (javaVersion() >= 9) {
@@ -393,11 +410,14 @@ final class PlatformDependent0 {
             ALLOCATE_ARRAY_METHOD = allocateArrayMethod;
         }
 
+        // null
         INTERNAL_UNSAFE = internalUnsafe;
 
         logger.debug("java.nio.DirectByteBuffer.<init>(long, int): {}",
                 DIRECT_BUFFER_CONSTRUCTOR != null ? "available" : "unavailable");
     }
+    // ------------static end ----------------
+
 
     static boolean isExplicitNoUnsafe() {
         return EXPLICIT_NO_UNSAFE_CAUSE != null;
@@ -433,6 +453,10 @@ final class PlatformDependent0 {
         return UNALIGNED;
     }
 
+    /**
+     *
+     * @return
+     */
     static boolean hasUnsafe() {
         return UNSAFE != null;
     }

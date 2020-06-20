@@ -28,9 +28,12 @@ import java.security.PrivilegedAction;
  * Provide a way to clean a ByteBuffer on Java9+.
  */
 final class CleanerJava9 implements Cleaner {
+
+
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(CleanerJava9.class);
 
     private static final Method INVOKE_CLEANER;
+
 
     static {
         final Method method;
