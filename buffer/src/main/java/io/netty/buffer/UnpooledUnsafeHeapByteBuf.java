@@ -18,9 +18,14 @@ package io.netty.buffer;
 import io.netty.util.internal.PlatformDependent;
 
 /**
- *
+ * Unsafe 在 safe的基础上 扩展
  */
 class UnpooledUnsafeHeapByteBuf extends UnpooledHeapByteBuf {
+
+    /*
+     * 内存是 byte数组   在父类里
+     */
+
 
     /**
      * Creates a new heap buffer with a newly allocated byte array.
@@ -37,12 +42,22 @@ class UnpooledUnsafeHeapByteBuf extends UnpooledHeapByteBuf {
         return PlatformDependent.allocateUninitializedArray(initialCapacity);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     @Override
     public byte getByte(int index) {
         checkIndex(index);
         return _getByte(index);
     }
 
+    /**
+     * 数组肯定是在堆上分配的  但是是用Unsafe读写
+     * @param index
+     * @return
+     */
     @Override
     protected byte _getByte(int index) {
         return UnsafeByteBufUtil.getByte(array, index);

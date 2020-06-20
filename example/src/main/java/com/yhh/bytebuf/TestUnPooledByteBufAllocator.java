@@ -13,8 +13,11 @@ public class TestUnPooledByteBufAllocator {
 
     public static void f1() {
         UnpooledByteBufAllocator alloc = UnpooledByteBufAllocator.DEFAULT;
-        // Unpooled-Unsafe-Heap-Byte
-        // UnpooledByteBufAllocator$InstrumentedUnpooledUnsafeHeapByteBuf(ridx: 0, widx: 1, cap: 254)
+        /**
+         * Unpooled-Unsafe-Heap-Byte
+         *
+         * UnpooledByteBufAllocator $ InstrumentedUnpooledUnsafeHeapByteBuf(ridx: 0, widx: 1, cap: 254)
+         */
         ByteBuf byteBuf = alloc.heapBuffer(254);
         byteBuf.writeByte(100);
 
@@ -27,6 +30,11 @@ public class TestUnPooledByteBufAllocator {
     public static void f2() {
         UnpooledByteBufAllocator alloc = UnpooledByteBufAllocator.DEFAULT;
 
+        /**
+         * Unpooled-Unsafe-Direct
+         *
+         * UnpooledByteBufAllocator $ InstrumentedUnpooledUnsafeNoCleanerDirectByteBuf(ridx: 0, widx: 0, cap: 254)
+         */
         ByteBuf byteBuf = alloc.directBuffer(254);
 
         /**byte 范围   -128  -   127

@@ -211,7 +211,8 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
     }
 
     /**
-     * 3. Unsafe
+     * 3. Unsafe-Direct
+     * NoCleaner ?? todo
      */
     private static final class InstrumentedUnpooledUnsafeNoCleanerDirectByteBuf
             extends UnpooledUnsafeNoCleanerDirectByteBuf {
@@ -245,7 +246,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
     }
 
     /**
-     * 4. Unsafe
+     * 4. Unsafe-Direct
      */
     private static final class InstrumentedUnpooledUnsafeDirectByteBuf extends UnpooledUnsafeDirectByteBuf {
 
@@ -270,7 +271,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
     }
 
     /**
-     * 5.
+     * 5. Direct
      */
     private static final class InstrumentedUnpooledDirectByteBuf extends UnpooledDirectByteBuf {
 

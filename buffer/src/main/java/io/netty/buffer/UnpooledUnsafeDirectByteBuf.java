@@ -46,7 +46,10 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
     private ByteBuffer tmpNioBuf;
     private int capacity;
     private boolean doNotFree;
-    //
+
+    /**
+     * 内存是 DirectBuffer
+     */
     ByteBuffer buffer;
     //
     long memoryAddress;
