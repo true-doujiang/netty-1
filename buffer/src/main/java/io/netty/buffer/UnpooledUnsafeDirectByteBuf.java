@@ -133,6 +133,11 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
         PlatformDependent.freeDirectBuffer(buffer);
     }
 
+    /**
+     *
+     * @param buffer
+     * @param tryFree
+     */
     final void setByteBuffer(ByteBuffer buffer, boolean tryFree) {
         if (tryFree) {
             ByteBuffer oldBuffer = this.buffer;

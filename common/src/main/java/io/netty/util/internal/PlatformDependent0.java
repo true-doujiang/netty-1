@@ -507,6 +507,12 @@ final class PlatformDependent0 {
         }
     }
 
+    /**
+     *
+     * @param address
+     * @param capacity
+     * @return
+     */
     static ByteBuffer newDirectBuffer(long address, int capacity) {
         ObjectUtil.checkPositiveOrZero(capacity, "capacity");
 
@@ -521,6 +527,11 @@ final class PlatformDependent0 {
         }
     }
 
+    /**
+     *
+     * @param buffer
+     * @return
+     */
     static long directBufferAddress(ByteBuffer buffer) {
         return getLong(buffer, ADDRESS_FIELD_OFFSET);
     }

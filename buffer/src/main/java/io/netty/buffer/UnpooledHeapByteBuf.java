@@ -45,7 +45,7 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
     private final ByteBufAllocator alloc;
 
     /**
-     *
+     * 内存是 byte数组
      */
     byte[] array;
     private ByteBuffer tmpNioBuf;
@@ -102,6 +102,10 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
         // NOOP
     }
 
+    /**
+     *
+     * @param initialArray
+     */
     private void setArray(byte[] initialArray) {
         array = initialArray;
         tmpNioBuf = null;

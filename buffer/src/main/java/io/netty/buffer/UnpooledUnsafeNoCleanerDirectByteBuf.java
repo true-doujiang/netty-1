@@ -20,7 +20,7 @@ import io.netty.util.internal.PlatformDependent;
 import java.nio.ByteBuffer;
 
 /**
- *
+ * NoCleaner
  */
 class UnpooledUnsafeNoCleanerDirectByteBuf extends UnpooledUnsafeDirectByteBuf {
 
