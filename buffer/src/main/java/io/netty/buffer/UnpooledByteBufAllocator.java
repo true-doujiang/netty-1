@@ -271,7 +271,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
     }
 
     /**
-     * 5. Direct
+     * 5. safe-Direct
      */
     private static final class InstrumentedUnpooledDirectByteBuf extends UnpooledDirectByteBuf {
 

@@ -38,8 +38,16 @@ import static io.netty.util.internal.ObjectUtil.checkNotNull;
 final class PlatformDependent0 {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PlatformDependent0.class);
+
+    /**
+     *
+     */
     private static final long ADDRESS_FIELD_OFFSET;
+    /**
+     *
+     */
     private static final long BYTE_ARRAY_BASE_OFFSET;
+
     private static final Constructor<?> DIRECT_BUFFER_CONSTRUCTOR;
     // explicitNoUnsafeCause0() 返回 null
     private static final Throwable EXPLICIT_NO_UNSAFE_CAUSE = explicitNoUnsafeCause0();
