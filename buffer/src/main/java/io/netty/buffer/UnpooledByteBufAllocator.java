@@ -23,15 +23,21 @@ import java.nio.ByteBuffer;
 
 /**
  * Simplistic {@link ByteBufAllocator} implementation that does not pool anything.
+ *
+ * UnPooled内存分配器
  */
 public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator implements ByteBufAllocatorMetricProvider {
 
+    /**
+     *
+     */
     private final UnpooledByteBufAllocatorMetric metric = new UnpooledByteBufAllocatorMetric();
     private final boolean disableLeakDetector;
     private final boolean noCleaner;
 
     /**
      * Default instance which uses leak-detection for direct buffers.
+     *
      */
     public static final UnpooledByteBufAllocator DEFAULT =
             new UnpooledByteBufAllocator(PlatformDependent.directBufferPreferred());
@@ -133,6 +139,10 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
     void decrementHeap(int amount) {
         metric.heapCounter.add(-amount);
     }
+
+    /**
+     * 以下都为内部实现类
+     */
 
     private static final class InstrumentedUnpooledUnsafeHeapByteBuf extends UnpooledUnsafeHeapByteBuf {
         InstrumentedUnpooledUnsafeHeapByteBuf(UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {

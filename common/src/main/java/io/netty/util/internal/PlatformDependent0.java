@@ -32,6 +32,8 @@ import static io.netty.util.internal.ObjectUtil.checkNotNull;
 
 /**
  * The {@link PlatformDependent} operations which requires access to {@code sun.misc.*}.
+ *
+ * java 中系统参数说明   https://blog.csdn.net/songylwq/article/details/8312832
  */
 final class PlatformDependent0 {
 
@@ -41,13 +43,18 @@ final class PlatformDependent0 {
     private static final Constructor<?> DIRECT_BUFFER_CONSTRUCTOR;
     private static final Throwable EXPLICIT_NO_UNSAFE_CAUSE = explicitNoUnsafeCause0();
     private static final Method ALLOCATE_ARRAY_METHOD;
+    //
     private static final int JAVA_VERSION = javaVersion0();
+    //
     private static final boolean IS_ANDROID = isAndroid0();
 
     private static final Throwable UNSAFE_UNAVAILABILITY_CAUSE;
     private static final Object INTERNAL_UNSAFE;
     private static final boolean IS_EXPLICIT_TRY_REFLECTION_SET_ACCESSIBLE = explicitTryReflectionSetAccessible0();
 
+    /**
+     * sun.misc.Unsafe
+     */
     static final Unsafe UNSAFE;
 
     // constants borrowed from murmur3
@@ -201,6 +208,8 @@ final class PlatformDependent0 {
                 }
             }
         }
+
+        //
         UNSAFE_UNAVAILABILITY_CAUSE = unsafeUnavailabilityCause;
         UNSAFE = unsafe;
 
@@ -214,6 +223,7 @@ final class PlatformDependent0 {
             Constructor<?> directBufferConstructor;
             long address = -1;
             try {
+
                 final Object maybeDirectBufferConstructor =
                         AccessController.doPrivileged(new PrivilegedAction<Object>() {
                             @Override
@@ -259,10 +269,13 @@ final class PlatformDependent0 {
                     UNSAFE.freeMemory(address);
                 }
             }
+
             DIRECT_BUFFER_CONSTRUCTOR = directBufferConstructor;
             ADDRESS_FIELD_OFFSET = objectFieldOffset(addressField);
             BYTE_ARRAY_BASE_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);
+
             final boolean unaligned;
+
             Object maybeUnaligned = AccessController.doPrivileged(new PrivilegedAction<Object>() {
                 @Override
                 public Object run() {
@@ -819,6 +832,8 @@ final class PlatformDependent0 {
 
         // Android sets this property to Dalvik, regardless of whether it actually is.
         String vmName = SystemPropertyUtil.get("java.vm.name");
+        System.out.println("java.vm.name = " + vmName);
+
         boolean isAndroid = "Dalvik".equals(vmName);
         if (isAndroid) {
             logger.debug("Platform: Android");
@@ -855,6 +870,7 @@ final class PlatformDependent0 {
 
     // Package-private for testing only
     static int majorVersionFromJavaSpecificationVersion() {
+        // java.specification.version  :  Java 运行时环境规范版本    :  1.8
         return majorVersion(SystemPropertyUtil.get("java.specification.version", "1.6"));
     }
 
@@ -862,6 +878,7 @@ final class PlatformDependent0 {
     static int majorVersion(final String javaSpecVersion) {
         final String[] components = javaSpecVersion.split("\\.");
         final int[] version = new int[components.length];
+
         for (int i = 0; i < components.length; i++) {
             version[i] = Integer.parseInt(components[i]);
         }

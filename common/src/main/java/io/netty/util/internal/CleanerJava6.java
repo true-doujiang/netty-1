@@ -32,6 +32,7 @@ import java.security.PrivilegedAction;
  * For more details see <a href="https://github.com/netty/netty/issues/2604">#2604</a>.
  */
 final class CleanerJava6 implements Cleaner {
+
     private static final long CLEANER_FIELD_OFFSET;
     private static final Method CLEAN_METHOD;
     private static final Field CLEANER_FIELD;
@@ -44,7 +45,9 @@ final class CleanerJava6 implements Cleaner {
         Field cleanerField;
         Throwable error = null;
         final ByteBuffer direct = ByteBuffer.allocateDirect(1);
+
         try {
+
             Object mayBeCleanerField = AccessController.doPrivileged(new PrivilegedAction<Object>() {
                 @Override
                 public Object run() {
@@ -61,6 +64,9 @@ final class CleanerJava6 implements Cleaner {
                     }
                 }
             });
+
+            System.out.println("mayBeCleanerField = " + mayBeCleanerField);
+
             if (mayBeCleanerField instanceof Throwable) {
                 throw (Throwable) mayBeCleanerField;
             }
@@ -93,6 +99,7 @@ final class CleanerJava6 implements Cleaner {
         } else {
             logger.debug("java.nio.ByteBuffer.cleaner(): unavailable", error);
         }
+
         CLEANER_FIELD = cleanerField;
         CLEANER_FIELD_OFFSET = fieldOffset;
         CLEAN_METHOD = clean;

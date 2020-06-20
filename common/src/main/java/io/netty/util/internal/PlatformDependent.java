@@ -80,6 +80,9 @@ public final class PlatformDependent {
 
     private static final boolean CAN_ENABLE_TCP_NODELAY_BY_DEFAULT = !isAndroid();
 
+    /**
+     *
+     */
     private static final Throwable UNSAFE_UNAVAILABILITY_CAUSE = unsafeUnavailabilityCause0();
     private static final boolean DIRECT_BUFFER_PREFERRED;
     private static final long MAX_DIRECT_MEMORY = maxDirectMemory0();
@@ -113,6 +116,7 @@ public final class PlatformDependent {
         }
     };
 
+    // -----------static start-----------
     static {
         if (javaVersion() >= 7) {
             RANDOM_PROVIDER = new ThreadLocalRandomProvider() {
@@ -178,12 +182,16 @@ public final class PlatformDependent {
             CLEANER = NOOP;
         }
 
+        System.out.println("CLEANER = " + CLEANER);
+
         // We should always prefer direct buffers by default if we can use a Cleaner to release direct buffers.
         DIRECT_BUFFER_PREFERRED = CLEANER != NOOP
                                   && !SystemPropertyUtil.getBoolean("io.netty.noPreferDirect", false);
         if (logger.isDebugEnabled()) {
             logger.debug("-Dio.netty.noPreferDirect: {}", !DIRECT_BUFFER_PREFERRED);
         }
+        // true
+        System.out.println("-Dio.netty.noPreferDirect = " + DIRECT_BUFFER_PREFERRED);
 
         /*
          * We do not want to log this message if unsafe is explicitly disabled. Do not remove the explicit no unsafe
@@ -196,6 +204,7 @@ public final class PlatformDependent {
                     "instability.");
         }
     }
+    // -----------static end-----------
 
     public static boolean hasDirectBufferNoCleanerConstructor() {
         return PlatformDependent0.hasDirectBufferNoCleanerConstructor();

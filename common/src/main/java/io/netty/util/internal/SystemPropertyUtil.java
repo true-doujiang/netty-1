@@ -66,6 +66,7 @@ public final class SystemPropertyUtil {
         String value = null;
         try {
             if (System.getSecurityManager() == null) {
+                // jdk API
                 value = System.getProperty(key);
             } else {
                 value = AccessController.doPrivileged(new PrivilegedAction<String>() {

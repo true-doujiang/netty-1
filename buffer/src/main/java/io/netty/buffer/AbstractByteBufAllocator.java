@@ -25,12 +25,20 @@ import io.netty.util.internal.StringUtil;
 
 /**
  * Skeletal {@link ByteBufAllocator} implementation to extend.
+ *
+ * 内存分配器 抽象类，实现了大部分功能，实现类：
+ *                           PooledByteBufAllocator
+ *                           UnpooledByteBufAllocator
+ *
  */
 public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
 
 
+    // 默认初始化容量
     static final int DEFAULT_INITIAL_CAPACITY = 256;
+    // 默认最大容量
     static final int DEFAULT_MAX_CAPACITY = Integer.MAX_VALUE;
+
     static final int DEFAULT_MAX_COMPONENTS = 16;
     static final int CALCULATE_THRESHOLD = 1048576 * 4; // 4 MiB page
 
@@ -85,6 +93,9 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         return buf;
     }
 
+    /**
+     *
+     */
     private final boolean directByDefault;
     private final ByteBuf emptyBuf;
 
@@ -100,12 +111,18 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
      *
      * @param preferDirect {@code true} if {@link #buffer(int)} should try to allocate a direct buffer rather than
      *                     a heap buffer
+     *  子类构造器调用
      */
     protected AbstractByteBufAllocator(boolean preferDirect) {
         directByDefault = preferDirect && PlatformDependent.hasUnsafe();
         emptyBuf = new EmptyByteBuf(this);
     }
 
+    /**
+     * 最终会调用到 下面的俩个抽象方法上
+     *
+     * @return
+     */
     @Override
     public ByteBuf buffer() {
         if (directByDefault) {
@@ -242,16 +259,30 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         }
     }
 
+
+
+
+
     /**
      * Create a heap {@link ByteBuf} with the given initialCapacity and maxCapacity.
+     *
+     * 有具体子类实现：
+     *          PooledByteBufAllocator
+     *          UnpooledByteBufAllocator
      */
     protected abstract ByteBuf newHeapBuffer(int initialCapacity, int maxCapacity);
 
     /**
      * Create a direct {@link ByteBuf} with the given initialCapacity and maxCapacity.
      *
+     * 有具体子类实现：
+     *          PooledByteBufAllocator
+     *          UnpooledByteBufAllocator
      */
     protected abstract ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity);
+
+
+
 
     @Override
     public String toString() {
