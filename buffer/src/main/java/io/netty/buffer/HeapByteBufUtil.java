@@ -20,6 +20,12 @@ package io.netty.buffer;
  */
 final class HeapByteBufUtil {
 
+    /**
+     *
+     * @param memory
+     * @param index
+     * @return
+     */
     static byte getByte(byte[] memory, int index) {
         return memory[index];
     }

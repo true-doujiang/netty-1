@@ -65,7 +65,7 @@ final class CleanerJava6 implements Cleaner {
                 }
             });
 
-            System.out.println("mayBeCleanerField = " + mayBeCleanerField);
+            System.out.println(Thread.currentThread().getName() + " mayBeCleanerField = " + mayBeCleanerField);
 
             if (mayBeCleanerField instanceof Throwable) {
                 throw (Throwable) mayBeCleanerField;

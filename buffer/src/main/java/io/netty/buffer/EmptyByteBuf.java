@@ -54,6 +54,7 @@ public final class EmptyByteBuf extends ByteBuf {
         EMPTY_BYTE_BUFFER_ADDRESS = emptyByteBufferAddress;
     }
 
+    //
     private final ByteBufAllocator alloc;
     private final ByteOrder order;
     private final String str;

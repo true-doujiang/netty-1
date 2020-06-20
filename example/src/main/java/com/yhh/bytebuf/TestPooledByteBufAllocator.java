@@ -4,9 +4,14 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
 
-public class TestByteBufAllocator {
+public class TestPooledByteBufAllocator {
 
     public static void main(String[] args) {
+        test1();
+        test2();
+    }
+
+    public static void test1() {
         // PooledByteBufAllocator(true)
         ByteBufAllocator alloc = PooledByteBufAllocator.DEFAULT;
 
@@ -18,6 +23,18 @@ public class TestByteBufAllocator {
         System.out.println(byteBuf.readInt());
 
         //很重要，内存释放
+        byteBuf.release();
+    }
+
+
+    public static void test2() {
+        ByteBufAllocator alloc = PooledByteBufAllocator.DEFAULT;
+
+        ByteBuf byteBuf = alloc.heapBuffer(254);
+
+        byteBuf.writeInt(126);
+        System.out.println(byteBuf.readInt());
+
         byteBuf.release();
     }
 }

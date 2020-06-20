@@ -182,7 +182,7 @@ public final class PlatformDependent {
             CLEANER = NOOP;
         }
 
-        System.out.println("CLEANER = " + CLEANER);
+        System.out.println(Thread.currentThread().getName() + " CLEANER = " + CLEANER);
 
         // We should always prefer direct buffers by default if we can use a Cleaner to release direct buffers.
         DIRECT_BUFFER_PREFERRED = CLEANER != NOOP

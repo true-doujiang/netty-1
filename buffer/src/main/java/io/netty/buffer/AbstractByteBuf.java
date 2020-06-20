@@ -42,9 +42,13 @@ import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 
 /**
  * A skeletal implementation of a buffer.
+ *
+ * netty 的 ByteBuf
  */
 public abstract class AbstractByteBuf extends ByteBuf {
+
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractByteBuf.class);
+
     private static final String LEGACY_PROP_CHECK_ACCESSIBLE = "io.netty.buffer.bytebuf.checkAccessible";
     private static final String PROP_CHECK_ACCESSIBLE = "io.netty.buffer.checkAccessible";
     static final boolean checkAccessible; // accessed from CompositeByteBuf
@@ -67,11 +71,17 @@ public abstract class AbstractByteBuf extends ByteBuf {
     static final ResourceLeakDetector<ByteBuf> leakDetector =
             ResourceLeakDetectorFactory.instance().newResourceLeakDetector(ByteBuf.class);
 
+    /**
+     * 读写指针
+     */
     int readerIndex;
     int writerIndex;
     private int markedReaderIndex;
     private int markedWriterIndex;
+
+    // 最大容量
     private int maxCapacity;
+
 
     protected AbstractByteBuf(int maxCapacity) {
         checkPositiveOrZero(maxCapacity, "maxCapacity");
@@ -347,6 +357,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return _getByte(index);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     protected abstract byte _getByte(int index);
 
     @Override
@@ -365,6 +380,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return _getShort(index);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     protected abstract short _getShort(int index);
 
     @Override
@@ -373,6 +393,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return _getShortLE(index);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     protected abstract short _getShortLE(int index);
 
     @Override
@@ -391,6 +416,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return _getUnsignedMedium(index);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     protected abstract int _getUnsignedMedium(int index);
 
     @Override
@@ -399,6 +429,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return _getUnsignedMediumLE(index);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     protected abstract int _getUnsignedMediumLE(int index);
 
     @Override
@@ -425,6 +460,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return _getInt(index);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     protected abstract int _getInt(int index);
 
     @Override
@@ -433,6 +473,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return _getIntLE(index);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     protected abstract int _getIntLE(int index);
 
     @Override
@@ -451,6 +496,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return _getLong(index);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     protected abstract long _getLong(int index);
 
     @Override
@@ -459,6 +509,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return _getLongLE(index);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     protected abstract long _getLongLE(int index);
 
     @Override
@@ -518,6 +573,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return this;
     }
 
+    /**
+     *
+     * @param index
+     * @param value
+     */
     protected abstract void _setByte(int index, int value);
 
     @Override
@@ -533,6 +593,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return this;
     }
 
+    /**
+     *
+     * @param index
+     * @param value
+     */
     protected abstract void _setShort(int index, int value);
 
     @Override
@@ -542,6 +607,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return this;
     }
 
+    /**
+     *
+     * @param index
+     * @param value
+     */
     protected abstract void _setShortLE(int index, int value);
 
     @Override
@@ -557,6 +627,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return this;
     }
 
+    /**
+     *
+     * @param index
+     * @param value
+     */
     protected abstract void _setMedium(int index, int value);
 
     @Override
@@ -566,6 +641,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return this;
     }
 
+    /**
+     *
+     * @param index
+     * @param value
+     */
     protected abstract void _setMediumLE(int index, int value);
 
     @Override
@@ -575,6 +655,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return this;
     }
 
+    /**
+     *
+     * @param index
+     * @param value
+     */
     protected abstract void _setInt(int index, int value);
 
     @Override
@@ -584,6 +669,11 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return this;
     }
 
+    /**
+     *
+     * @param index
+     * @param value
+     */
     protected abstract void _setIntLE(int index, int value);
 
     @Override

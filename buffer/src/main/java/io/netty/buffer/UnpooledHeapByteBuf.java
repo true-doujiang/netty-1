@@ -34,10 +34,19 @@ import static io.netty.util.internal.ObjectUtil.checkNotNull;
  * Big endian Java heap buffer implementation. It is recommended to use
  * {@link UnpooledByteBufAllocator#heapBuffer(int, int)}, {@link Unpooled#buffer(int)} and
  * {@link Unpooled#wrappedBuffer(byte[])} instead of calling the constructor explicitly.
+ *
+ *
  */
 public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
 
+    /**
+     *
+     */
     private final ByteBufAllocator alloc;
+
+    /**
+     *
+     */
     byte[] array;
     private ByteBuffer tmpNioBuf;
 
@@ -332,6 +341,11 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
         return _getByte(index);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     @Override
     protected byte _getByte(int index) {
         return HeapByteBufUtil.getByte(array, index);
@@ -425,6 +439,12 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
         return HeapByteBufUtil.getLongLE(array, index);
     }
 
+    /**
+     *
+     * @param index
+     * @param value
+     * @return
+     */
     @Override
     public ByteBuf setByte(int index, int value) {
         ensureAccessible();

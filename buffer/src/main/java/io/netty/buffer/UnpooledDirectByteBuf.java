@@ -33,13 +33,22 @@ import java.nio.channels.ScatteringByteChannel;
  * A NIO {@link ByteBuffer} based buffer. It is recommended to use
  * {@link UnpooledByteBufAllocator#directBuffer(int, int)}, {@link Unpooled#directBuffer(int)} and
  * {@link Unpooled#wrappedBuffer(ByteBuffer)} instead of calling the constructor explicitly.
+ *
+ *
  */
 public class UnpooledDirectByteBuf extends AbstractReferenceCountedByteBuf {
 
+    /**
+     *
+     */
     private final ByteBufAllocator alloc;
 
+    /**
+     *
+     */
     private ByteBuffer buffer;
     private ByteBuffer tmpNioBuf;
+
     private int capacity;
     private boolean doNotFree;
 
@@ -212,6 +221,11 @@ public class UnpooledDirectByteBuf extends AbstractReferenceCountedByteBuf {
         return _getByte(index);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     @Override
     protected byte _getByte(int index) {
         return buffer.get(index);
@@ -223,6 +237,11 @@ public class UnpooledDirectByteBuf extends AbstractReferenceCountedByteBuf {
         return _getShort(index);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     @Override
     protected short _getShort(int index) {
         return buffer.getShort(index);
@@ -259,6 +278,11 @@ public class UnpooledDirectByteBuf extends AbstractReferenceCountedByteBuf {
         return _getInt(index);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     @Override
     protected int _getInt(int index) {
         return buffer.getInt(index);
@@ -275,6 +299,11 @@ public class UnpooledDirectByteBuf extends AbstractReferenceCountedByteBuf {
         return _getLong(index);
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     @Override
     protected long _getLong(int index) {
         return buffer.getLong(index);
@@ -364,6 +393,11 @@ public class UnpooledDirectByteBuf extends AbstractReferenceCountedByteBuf {
         return this;
     }
 
+    /**
+     *
+     * @param index
+     * @param value
+     */
     @Override
     protected void _setByte(int index, int value) {
         buffer.put(index, (byte) value);
