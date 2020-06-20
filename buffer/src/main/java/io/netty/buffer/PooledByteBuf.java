@@ -30,14 +30,23 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
     private final Recycler.Handle<PooledByteBuf<T>> recyclerHandle;
 
+    /**
+     *
+     */
     protected PoolChunk<T> chunk;
     protected long handle;
     protected T memory;
     protected int offset;
     protected int length;
     int maxLength;
+
     PoolThreadCache cache;
+
     ByteBuffer tmpNioBuf;
+
+    /**
+     *
+     */
     private ByteBufAllocator allocator;
 
     @SuppressWarnings("unchecked")
