@@ -43,7 +43,9 @@ import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 /**
  * A skeletal implementation of a buffer.
  *
- * netty 的 ByteBuf
+ * netty 的 ByteBuf 骨架实现, 维护读写指针
+ *
+ *  - 下划线开头的方法都是抽象方法，由具体子类实现
  */
 public abstract class AbstractByteBuf extends ByteBuf {
 
@@ -812,6 +814,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
     public byte readByte() {
         checkReadableBytes0(1);
         int i = readerIndex;
+        // 下划线开头的方法都是抽象方法，由具体子类实现
         byte b = _getByte(i);
         readerIndex = i + 1;
         return b;

@@ -83,6 +83,8 @@ final class PoolThreadCache {
                     int tinyCacheSize, int smallCacheSize, int normalCacheSize,
                     int maxCachedBufferCapacity, int freeSweepAllocationThreshold) {
 
+        System.out.println(Thread.currentThread().getName() + " PoolThreadCache 构造器执行");
+
         checkPositiveOrZero(maxCachedBufferCapacity, "maxCachedBufferCapacity");
 
         this.freeSweepAllocationThreshold = freeSweepAllocationThreshold;
@@ -135,8 +137,7 @@ final class PoolThreadCache {
                 || tinySubPageHeapCaches != null || smallSubPageHeapCaches != null || normalHeapCaches != null)
                 && freeSweepAllocationThreshold < 1) {
 
-            throw new IllegalArgumentException("freeSweepAllocationThreshold: "
-                    + freeSweepAllocationThreshold + " (expected: > 0)");
+            throw new IllegalArgumentException("freeSweepAllocationThreshold: " + freeSweepAllocationThreshold + " (expected: > 0)");
         }
 
     }
@@ -153,11 +154,15 @@ final class PoolThreadCache {
             int cacheSize, int numCaches, SizeClass sizeClass) {
 
         if (cacheSize > 0 && numCaches > 0) {
+
             @SuppressWarnings("unchecked")
             MemoryRegionCache<T>[] cache = new MemoryRegionCache[numCaches];
+
             for (int i = 0; i < cache.length; i++) {
                 // TODO: maybe use cacheSize / cache.length
-                cache[i] = new SubPageMemoryRegionCache<T>(cacheSize, sizeClass);
+                SubPageMemoryRegionCache<T> memoryRegionCache = new SubPageMemoryRegionCache<T>(cacheSize, sizeClass);
+                cache[i] = memoryRegionCache;
+                System.out.println(Thread.currentThread().getName() + " createSubPageCaches " + sizeClass + i + " = " + memoryRegionCache);
             }
             return cache;
         } else {
@@ -182,9 +187,13 @@ final class PoolThreadCache {
 
             @SuppressWarnings("unchecked")
             MemoryRegionCache<T>[] cache = new MemoryRegionCache[arraySize];
+
             for (int i = 0; i < cache.length; i++) {
-                cache[i] = new NormalMemoryRegionCache<T>(cacheSize);
+                NormalMemoryRegionCache<T> memoryRegionCache = new NormalMemoryRegionCache<T>(cacheSize);
+                cache[i] = memoryRegionCache;
+                System.out.println(Thread.currentThread().getName() + " createNormalCaches " + i + " = " + memoryRegionCache);
             }
+
             return cache;
         } else {
             return null;
@@ -383,13 +392,13 @@ final class PoolThreadCache {
      *
      */
     private static final class SubPageMemoryRegionCache<T> extends MemoryRegionCache<T> {
+
         SubPageMemoryRegionCache(int size, SizeClass sizeClass) {
             super(size, sizeClass);
         }
 
         @Override
-        protected void initBuf(
-                PoolChunk<T> chunk, ByteBuffer nioBuffer, long handle, PooledByteBuf<T> buf, int reqCapacity) {
+        protected void initBuf(PoolChunk<T> chunk, ByteBuffer nioBuffer, long handle, PooledByteBuf<T> buf, int reqCapacity) {
             chunk.initBufWithSubpage(buf, nioBuffer, handle, reqCapacity);
         }
     }
@@ -401,13 +410,13 @@ final class PoolThreadCache {
      *
      */
     private static final class NormalMemoryRegionCache<T> extends MemoryRegionCache<T> {
+
         NormalMemoryRegionCache(int size) {
             super(size, SizeClass.Normal);
         }
 
         @Override
-        protected void initBuf(
-                PoolChunk<T> chunk, ByteBuffer nioBuffer, long handle, PooledByteBuf<T> buf, int reqCapacity) {
+        protected void initBuf(PoolChunk<T> chunk, ByteBuffer nioBuffer, long handle, PooledByteBuf<T> buf, int reqCapacity) {
             chunk.initBuf(buf, nioBuffer, handle, reqCapacity);
         }
     }
@@ -439,6 +448,7 @@ final class PoolThreadCache {
             //
             queue = PlatformDependent.newFixedMpscQueue(this.size);
             this.sizeClass = sizeClass;
+
         }
 
         /**

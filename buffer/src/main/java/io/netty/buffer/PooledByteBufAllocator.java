@@ -185,7 +185,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             new PooledByteBufAllocator(PlatformDependent.directBufferPreferred());
 
     /**
-     * 和下面2个list 装的东西一样
+     * 和下面2个list 装的东西一样   下面构造器初始化
      */
     private final PoolArena<byte[]>[] heapArenas;
     private final PoolArena<ByteBuffer>[] directArenas;
@@ -294,6 +294,9 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
                         pageSize, maxOrder, pageShifts, chunkSize,
                         directMemoryCacheAlignment);
                 heapArenas[i] = arena;
+
+                System.out.println(Thread.currentThread().getName() + " 分配器创建PoolArena.HeapArena " + i + " = " + arena);
+
                 metrics.add(arena);
             }
             heapArenaMetrics = Collections.unmodifiableList(metrics);
@@ -309,6 +312,9 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
                 PoolArena.DirectArena arena = new PoolArena.DirectArena(
                         this, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
                 directArenas[i] = arena;
+
+                System.out.println(Thread.currentThread().getName() + " 分配器创建PoolArena.DirectArena " + i + " = " + arena);
+
                 metrics.add(arena);
             }
             directArenaMetrics = Collections.unmodifiableList(metrics);
@@ -316,6 +322,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             directArenas = null;
             directArenaMetrics = Collections.emptyList();
         }
+
         // metric 只是简单的包装一层this
         metric = new PooledByteBufAllocatorMetric(this);
     }
@@ -505,12 +512,15 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         }
 
         /**
-         *
+         * 初始化
          * @return PoolThreadCache
          */
         @Override
         protected synchronized PoolThreadCache initialValue() {
+            System.out.println(Thread.currentThread().getName() + " PoolThreadLocalCache.initialValue() 初始化");
+            //
             final PoolArena<byte[]> heapArena = leastUsedArena(heapArenas);
+            //
             final PoolArena<ByteBuffer> directArena = leastUsedArena(directArenas);
 
             Thread current = Thread.currentThread();
@@ -529,6 +539,12 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             threadCache.free();
         }
 
+        /**
+         *
+         * @param arenas
+         * @param <T>
+         * @return
+         */
         private <T> PoolArena<T> leastUsedArena(PoolArena<T>[] arenas) {
             if (arenas == null || arenas.length == 0) {
                 return null;
@@ -545,7 +561,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             return minArena;
         }
 
-    } // PoolThreadLocalCache end
+    } // ---------- PoolThreadLocalCache end ---------------
 
     @Override
     public PooledByteBufAllocatorMetric metric() {

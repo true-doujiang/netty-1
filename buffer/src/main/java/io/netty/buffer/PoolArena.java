@@ -122,6 +122,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         directMemoryCacheAlignment = cacheAlignment;
         directMemoryCacheAlignmentMask = cacheAlignment - 1;
         subpageOverflowMask = ~(pageSize - 1);
+
         // len=32
         tinySubpagePools = newSubpagePoolArray(numTinySubpagePools);
         for (int i = 0; i < tinySubpagePools.length; i ++) {
@@ -129,6 +130,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         }
 
         numSmallSubpagePools = pageShifts - 9;
+
         // len=4
         smallSubpagePools = newSubpagePoolArray(numSmallSubpagePools);
         for (int i = 0; i < smallSubpagePools.length; i ++) {
@@ -742,8 +744,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
         HeapArena(PooledByteBufAllocator parent, int pageSize, int maxOrder,
                 int pageShifts, int chunkSize, int directMemoryCacheAlignment) {
-            super(parent, pageSize, maxOrder, pageShifts, chunkSize,
-                    directMemoryCacheAlignment);
+            super(parent, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
         }
 
         private static byte[] newByteArray(int size) {
@@ -793,8 +794,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
         DirectArena(PooledByteBufAllocator parent, int pageSize, int maxOrder,
                 int pageShifts, int chunkSize, int directMemoryCacheAlignment) {
-            super(parent, pageSize, maxOrder, pageShifts, chunkSize,
-                    directMemoryCacheAlignment);
+            super(parent, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
         }
 
         @Override
