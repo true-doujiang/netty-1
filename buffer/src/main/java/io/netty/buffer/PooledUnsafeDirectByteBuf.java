@@ -42,6 +42,7 @@ final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
     };
 
     /**
+     * 使用对象池创建一个ByteBuffer
      *
      * @param maxCapacity
      * @return
