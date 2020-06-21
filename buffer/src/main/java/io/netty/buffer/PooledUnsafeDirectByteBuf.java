@@ -29,7 +29,7 @@ import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 
 /**
- * 池化 unsafe 直接内存
+ * 池化 unsafe 直接内存  T: ByteBuffer
  */
 final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
 

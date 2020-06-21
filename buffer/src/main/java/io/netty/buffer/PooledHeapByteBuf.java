@@ -27,7 +27,7 @@ import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 
 /**
- *
+ * T: byte[]
  */
 class PooledHeapByteBuf extends PooledByteBuf<byte[]> {
 

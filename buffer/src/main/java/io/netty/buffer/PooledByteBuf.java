@@ -23,8 +23,14 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
+ * 4个子类
+ *        heap
+ *              safe
+ *              unsafe
+ *       direct
+ *              safe
+ *              unsafe
  *
- * @param <T>
  */
 abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
@@ -35,7 +41,16 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
      */
     protected PoolChunk<T> chunk;
     protected long handle;
+
+    /**
+     * heap： 用数组
+     * direct： 用directBuffer
+     */
     protected T memory;
+
+    /**
+     *
+     */
     protected int offset;
     protected int length;
     int maxLength;

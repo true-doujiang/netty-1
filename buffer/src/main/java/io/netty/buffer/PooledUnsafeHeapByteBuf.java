@@ -20,7 +20,7 @@ import io.netty.util.Recycler.Handle;
 import io.netty.util.internal.PlatformDependent;
 
 /**
- *
+ * 再加个 Unsafe   T: byte[]
  */
 final class PooledUnsafeHeapByteBuf extends PooledHeapByteBuf {
 
