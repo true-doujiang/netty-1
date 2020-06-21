@@ -183,6 +183,7 @@ final class PlatformDependent0 {
                     @Override
                     public Object run() {
                         try {
+                            // 获取内存地址嘛  todo
                             final Field field = Buffer.class.getDeclaredField("address");
                             // Use Unsafe to read value of the address field. This way it will not fail on JDK9+ which
                             // will forbid changing the access level via reflection.

@@ -115,6 +115,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
             buf = noCleaner ? new InstrumentedUnpooledUnsafeNoCleanerDirectByteBuf(this, initialCapacity, maxCapacity) :
                     new InstrumentedUnpooledUnsafeDirectByteBuf(this, initialCapacity, maxCapacity);
         } else {
+            // safe
             buf = new InstrumentedUnpooledDirectByteBuf(this, initialCapacity, maxCapacity);
         }
         return disableLeakDetector ? buf : toLeakAwareBuffer(buf);

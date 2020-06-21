@@ -44,7 +44,7 @@ public class UnpooledDirectByteBuf extends AbstractReferenceCountedByteBuf {
     private final ByteBufAllocator alloc;
 
     /**
-     *
+     * DirectByteBuffer
      */
     private ByteBuffer buffer;
     private ByteBuffer tmpNioBuf;
@@ -223,7 +223,7 @@ public class UnpooledDirectByteBuf extends AbstractReferenceCountedByteBuf {
     }
 
     /**
-     *
+     * 直接调用jdk API 就可以了
      * @param index
      * @return
      */
