@@ -43,12 +43,12 @@ final class PoolThreadCache {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PoolThreadCache.class);
 
     /**
-     * 这是内存区域，所有数据都缓存在我这里
+     * 从分配器中获取到的一块内存区域
      */
     final PoolArena<byte[]> heapArena;
 
     /**
-     * 这是内存区域，所有数据都缓存在我这里
+     * 从分配器中获取到的一块内存区域
      */
     final PoolArena<ByteBuffer> directArena;
 
@@ -102,6 +102,7 @@ final class PoolThreadCache {
             // len = 3
             normalDirectCaches = createNormalCaches(normalCacheSize, maxCachedBufferCapacity, directArena);
 
+            // 这块区域被使用了就加1 这样leastUsedArena() 就会选择下一块区域
             directArena.numThreadCaches.getAndIncrement();
         } else {
             // No directArea is configured so just null out all caches
@@ -123,6 +124,7 @@ final class PoolThreadCache {
             // len = 3
             normalHeapCaches = createNormalCaches(normalCacheSize, maxCachedBufferCapacity, heapArena);
 
+            // 这块区域被使用了就加1 这样leastUsedArena() 就会选择下一块区域
             heapArena.numThreadCaches.getAndIncrement();
         } else {
             // No heapArea is configured so just null out all caches
@@ -159,9 +161,11 @@ final class PoolThreadCache {
             MemoryRegionCache<T>[] cache = new MemoryRegionCache[numCaches];
 
             for (int i = 0; i < cache.length; i++) {
+
                 // TODO: maybe use cacheSize / cache.length
                 SubPageMemoryRegionCache<T> memoryRegionCache = new SubPageMemoryRegionCache<T>(cacheSize, sizeClass);
                 cache[i] = memoryRegionCache;
+
                 System.out.println(Thread.currentThread().getName() + " createSubPageCaches " + sizeClass + i + " = " + memoryRegionCache);
             }
             return cache;
@@ -191,6 +195,7 @@ final class PoolThreadCache {
             for (int i = 0; i < cache.length; i++) {
                 NormalMemoryRegionCache<T> memoryRegionCache = new NormalMemoryRegionCache<T>(cacheSize);
                 cache[i] = memoryRegionCache;
+
                 System.out.println(Thread.currentThread().getName() + " createNormalCaches " + i + " = " + memoryRegionCache);
             }
 
@@ -353,7 +358,7 @@ final class PoolThreadCache {
         }
         cache.trim();
     }
-
+    // todo
     private MemoryRegionCache<?> cacheForTiny(PoolArena<?> area, int normCapacity) {
         int idx = PoolArena.tinyIdx(normCapacity);
         if (area.isDirect()) {
@@ -361,7 +366,7 @@ final class PoolThreadCache {
         }
         return cache(tinySubPageHeapCaches, idx);
     }
-
+    // todo
     private MemoryRegionCache<?> cacheForSmall(PoolArena<?> area, int normCapacity) {
         int idx = PoolArena.smallIdx(normCapacity);
         if (area.isDirect()) {
@@ -369,7 +374,7 @@ final class PoolThreadCache {
         }
         return cache(smallSubPageHeapCaches, idx);
     }
-
+    // todo
     private MemoryRegionCache<?> cacheForNormal(PoolArena<?> area, int normCapacity) {
         if (area.isDirect()) {
             int idx = log2(normCapacity >> numShiftsNormalDirect);

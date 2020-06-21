@@ -13,7 +13,7 @@ public class TestPooledByteBufAllocator {
 
     public static void test1() {
         ByteBufAllocator alloc = PooledByteBufAllocator.DEFAULT;
-
+        // PooledUnsafeHeapByteBuf(ridx: 0, widx: 0, cap: 254)
         ByteBuf byteBuf = alloc.heapBuffer(254);
 
         byteBuf.writeInt(126);

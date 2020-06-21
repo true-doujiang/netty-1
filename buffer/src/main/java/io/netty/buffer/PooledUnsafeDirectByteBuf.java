@@ -29,7 +29,7 @@ import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 
 /**
- *
+ * 池化 unsafe 直接内存
  */
 final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
 
@@ -41,6 +41,11 @@ final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
         }
     };
 
+    /**
+     *
+     * @param maxCapacity
+     * @return
+     */
     static PooledUnsafeDirectByteBuf newInstance(int maxCapacity) {
         PooledUnsafeDirectByteBuf buf = RECYCLER.get();
         buf.reuse(maxCapacity);

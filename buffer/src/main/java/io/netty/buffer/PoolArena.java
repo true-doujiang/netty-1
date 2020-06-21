@@ -98,7 +98,11 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     // We need to use the LongCounter here as this is not guarded via synchronized block.
     private final LongCounter deallocationsHuge = PlatformDependent.newLongCounter();
 
-    // Number of thread caches backed by this arena.
+
+    /**
+     * Number of thread caches backed by this arena.
+     * 计数器
+     */
     final AtomicInteger numThreadCaches = new AtomicInteger();
 
     // TODO: Test if adding padding helps under contention
@@ -119,6 +123,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         this.maxOrder = maxOrder;
         this.pageShifts = pageShifts;
         this.chunkSize = chunkSize;
+        //
         directMemoryCacheAlignment = cacheAlignment;
         directMemoryCacheAlignmentMask = cacheAlignment - 1;
         subpageOverflowMask = ~(pageSize - 1);
@@ -184,6 +189,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
 
     /**
+     * 内存规格化入口
      *
      * @param cache
      * @param reqCapacity
@@ -192,6 +198,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
      */
     PooledByteBuf<T> allocate(PoolThreadCache cache, int reqCapacity, int maxCapacity) {
         PooledByteBuf<T> buf = newByteBuf(maxCapacity);
+        // 规格化
         allocate(cache, buf, reqCapacity);
         return buf;
     }
@@ -217,7 +224,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
     // normCapacity < 512
     static boolean isTiny(int normCapacity) {
-        // 小于512的是tiny
+        // 小于512的是tiny  =512则返回false
         return (normCapacity & 0xFFFFFE00) == 0;
     }
 
@@ -230,7 +237,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
      * @param reqCapacity
      */
     private void allocate(PoolThreadCache cache, PooledByteBuf<T> buf, final int reqCapacity) {
-        // 规格化
+        // 内存规格化
         final int normCapacity = normalizeCapacity(reqCapacity);
 
         // 小于pageSize(默认是8K)
@@ -411,7 +418,8 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             return directMemoryCacheAlignment == 0 ? reqCapacity : alignCapacity(reqCapacity);
         }
 
-        if (!isTiny(reqCapacity)) { // >= 512
+        if (!isTiny(reqCapacity)) {
+            // >= 512
             // Doubled  找个2的幂次方数 大于等于 reqCapacity
 
             int normalizedCapacity = reqCapacity;
@@ -771,6 +779,11 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             // Rely on GC.
         }
 
+        /**
+         *
+         * @param maxCapacity
+         * @return
+         */
         @Override
         protected PooledByteBuf<byte[]> newByteBuf(int maxCapacity) {
             return HAS_UNSAFE ? PooledUnsafeHeapByteBuf.newUnsafeInstance(maxCapacity)
@@ -785,6 +798,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
             System.arraycopy(src, srcOffset, dst, dstOffset, length);
         }
+
     } // HeapArena end
 
     /**
@@ -855,6 +869,11 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             }
         }
 
+        /**
+         *
+         * @param maxCapacity
+         * @return
+         */
         @Override
         protected PooledByteBuf<ByteBuffer> newByteBuf(int maxCapacity) {
             if (HAS_UNSAFE) {

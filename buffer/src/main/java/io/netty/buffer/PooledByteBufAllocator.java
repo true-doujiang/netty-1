@@ -41,11 +41,12 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PooledByteBufAllocator.class);
 
     /**
-     * 这些静态熟悉 都是在static{} 代码块中初始化的
-     * 8
+     *  在static{} 代码块中初始化的   8  nHeapArena  cup核心数2倍，每个线程取一个 heapArena
      */
     private static final int DEFAULT_NUM_HEAP_ARENA;
-    // 8
+    /**
+     * 在static{} 代码块中初始化的   8   nDirectArena  cup核心数2倍，每个线程取一个 directArena
+     */
     private static final int DEFAULT_NUM_DIRECT_ARENA;
 
     // 8192
@@ -72,7 +73,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     // true
     private static final boolean DEFAULT_USE_CACHE_FOR_ALL_THREADS;
 
-    // 0
+    // 0  传到PoolArena中了   有啥用 todo
     private static final int DEFAULT_DIRECT_MEMORY_CACHE_ALIGNMENT;
 
     // 1023
@@ -186,10 +187,12 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
     /**
      * 和下面2个list 装的东西一样   下面构造器初始化
+     * 内存区域
      */
     private final PoolArena<byte[]>[] heapArenas;
     private final PoolArena<ByteBuffer>[] directArenas;
 
+    // 上面的静态常量会初始化这些常量
     private final int tinyCacheSize;
     private final int smallCacheSize;
     private final int normalCacheSize;
@@ -370,11 +373,13 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
      */
     @Override
     protected ByteBuf newHeapBuffer(int initialCapacity, int maxCapacity) {
+        // 从当前线程缓存中获取一块内存,会触发threadlocal的initValue()
         PoolThreadCache cache = threadCache.get();
         PoolArena<byte[]> heapArena = cache.heapArena;
 
         final ByteBuf buf;
         if (heapArena != null) {
+            // 内存规格化
             buf = heapArena.allocate(cache, initialCapacity, maxCapacity);
         } else {
             buf = PlatformDependent.hasUnsafe() ?
@@ -393,6 +398,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
      */
     @Override
     protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity) {
+        // 从当前线程缓存中获取一块内存,会触发threadlocal的initValue()
         PoolThreadCache cache = threadCache.get();
         PoolArena<ByteBuffer> directArena = cache.directArena;
 
@@ -517,6 +523,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
          */
         @Override
         protected synchronized PoolThreadCache initialValue() {
+
             System.out.println(Thread.currentThread().getName() + " PoolThreadLocalCache.initialValue() 初始化");
             //
             final PoolArena<byte[]> heapArena = leastUsedArena(heapArenas);
