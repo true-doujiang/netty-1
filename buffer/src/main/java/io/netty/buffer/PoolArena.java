@@ -765,6 +765,14 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             return false;
         }
 
+        /**
+         *
+         * @param pageSize
+         * @param maxOrder
+         * @param pageShifts
+         * @param chunkSize
+         * @return
+         */
         @Override
         protected PoolChunk<byte[]> newChunk(int pageSize, int maxOrder, int pageShifts, int chunkSize) {
             return new PoolChunk<byte[]>(this, newByteArray(chunkSize), pageSize, maxOrder, pageShifts, chunkSize, 0);
@@ -829,31 +837,32 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             return directMemoryCacheAlignment - remainder;
         }
 
+        /**
+         *
+         * @param pageSize
+         * @param maxOrder
+         * @param pageShifts
+         * @param chunkSize
+         * @return
+         */
         @Override
-        protected PoolChunk<ByteBuffer> newChunk(int pageSize, int maxOrder,
-                int pageShifts, int chunkSize) {
+        protected PoolChunk<ByteBuffer> newChunk(int pageSize, int maxOrder, int pageShifts, int chunkSize) {
             if (directMemoryCacheAlignment == 0) {
-                return new PoolChunk<ByteBuffer>(this,
-                        allocateDirect(chunkSize), pageSize, maxOrder,
-                        pageShifts, chunkSize, 0);
+                return new PoolChunk<ByteBuffer>(this, allocateDirect(chunkSize), pageSize, maxOrder, pageShifts, chunkSize, 0);
             }
-            final ByteBuffer memory = allocateDirect(chunkSize
-                    + directMemoryCacheAlignment);
-            return new PoolChunk<ByteBuffer>(this, memory, pageSize,
-                    maxOrder, pageShifts, chunkSize,
-                    offsetCacheLine(memory));
+
+            final ByteBuffer memory = allocateDirect(chunkSize + directMemoryCacheAlignment);
+
+            return new PoolChunk<ByteBuffer>(this, memory, pageSize, maxOrder, pageShifts, chunkSize, offsetCacheLine(memory));
         }
 
         @Override
         protected PoolChunk<ByteBuffer> newUnpooledChunk(int capacity) {
             if (directMemoryCacheAlignment == 0) {
-                return new PoolChunk<ByteBuffer>(this,
-                        allocateDirect(capacity), capacity, 0);
+                return new PoolChunk<ByteBuffer>(this, allocateDirect(capacity), capacity, 0);
             }
-            final ByteBuffer memory = allocateDirect(capacity
-                    + directMemoryCacheAlignment);
-            return new PoolChunk<ByteBuffer>(this, memory, capacity,
-                    offsetCacheLine(memory));
+            final ByteBuffer memory = allocateDirect(capacity + directMemoryCacheAlignment);
+            return new PoolChunk<ByteBuffer>(this, memory, capacity, offsetCacheLine(memory));
         }
 
         private static ByteBuffer allocateDirect(int capacity) {
