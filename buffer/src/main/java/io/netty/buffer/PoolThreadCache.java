@@ -63,6 +63,11 @@ final class PoolThreadCache {
 
     /**
      * 直接内存
+     * tinySubPageDirectCaches 长度32
+     * 第一个节点 不存数据
+     * 第二个节点 16B   每个节点上又是一个queue
+     * 第三个节点 32B   每个节点上又是一个queue
+     * 第32个节点 496B  每个节点上又是一个queue
      */
     private final MemoryRegionCache<ByteBuffer>[] tinySubPageDirectCaches;
     private final MemoryRegionCache<ByteBuffer>[] smallSubPageDirectCaches;
@@ -358,7 +363,10 @@ final class PoolThreadCache {
         }
         cache.trim();
     }
-    // todo
+    /**
+     * todo
+     * 找一个合适大小的MemoryRegionCache
+     */
     private MemoryRegionCache<?> cacheForTiny(PoolArena<?> area, int normCapacity) {
         int idx = PoolArena.tinyIdx(normCapacity);
         if (area.isDirect()) {
