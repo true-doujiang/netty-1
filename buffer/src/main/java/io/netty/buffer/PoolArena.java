@@ -204,6 +204,11 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         return buf;
     }
 
+    /**
+     * 除以16
+     * @param normCapacity
+     * @return
+     */
     static int tinyIdx(int normCapacity) {
         return normCapacity >>> 4;
     }
