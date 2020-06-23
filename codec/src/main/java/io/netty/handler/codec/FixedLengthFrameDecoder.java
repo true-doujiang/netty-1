@@ -52,6 +52,9 @@ public class FixedLengthFrameDecoder extends ByteToMessageDecoder {
         this.frameLength = frameLength;
     }
 
+    /**
+     * 实现具体解码功能
+     */
     @Override
     protected final void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         Object decoded = decode(ctx, in);
