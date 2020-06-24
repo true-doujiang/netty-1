@@ -1,11 +1,16 @@
-package com.yhh.decoder;
+package com.yhh.decoder.server;
 
+import com.yhh.decoder.MyProtocolBean;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 public class MyProtocolDecoder extends LengthFieldBasedFrameDecoder {
+
+
     private static final int HEADER_SIZE = 6;
+
+
     /**
      *
      * @param maxFrameLength  帧的最大长度

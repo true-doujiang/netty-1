@@ -51,4 +51,14 @@ public class MyProtocolBean {
     public void setContent(String content) {
         this.content = content;
     }
+
+    @Override
+    public String toString() {
+        return "MyProtocolBean{" +
+                "type=" + type +
+                ", flag=" + flag +
+                ", length=" + length +
+                ", content='" + content + '\'' +
+                '}';
+    }
 }

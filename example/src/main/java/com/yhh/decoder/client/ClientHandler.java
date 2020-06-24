@@ -1,5 +1,6 @@
-package com.yhh.decoder;
+package com.yhh.decoder.client;
 
+import com.yhh.decoder.MyProtocolBean;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 

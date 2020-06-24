@@ -1,4 +1,4 @@
-package com.yhh.decoder;
+package com.yhh.decoder.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -9,7 +9,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
-public class Client {
+public class ClientEncoder {
 
 
     static final String HOST = System.getProperty("host", "127.0.0.1");

@@ -1,5 +1,6 @@
-package com.yhh.decoder;
+package com.yhh.decoder.server;
 
+import com.yhh.decoder.MyProtocolBean;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -9,6 +10,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
         MyProtocolBean myProtocolBean = (MyProtocolBean)msg;  //直接转化成协议消息实体
         System.out.println("ServerHandler.MyProtocolBean");
         System.out.println(myProtocolBean.getContent());
+        System.out.println(myProtocolBean.toString());
     }
 
     @Override

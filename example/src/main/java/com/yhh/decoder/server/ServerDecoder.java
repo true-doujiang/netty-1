@@ -1,15 +1,14 @@
-package com.yhh.decoder;
+package com.yhh.decoder.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
-public class Server {
+public class ServerDecoder {
 
     private static final int MAX_FRAME_LENGTH = 1024 * 1024;  //最大长度
     private static final int LENGTH_FIELD_LENGTH = 4;  //长度字段所占的字节数
@@ -23,7 +22,9 @@ public class Server {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-        MyProtocolDecoder decoder = new MyProtocolDecoder(MAX_FRAME_LENGTH, LENGTH_FIELD_OFFSET, LENGTH_FIELD_LENGTH, LENGTH_ADJUSTMENT, INITIAL_BYTES_TO_STRIP, false);
+        MyProtocolDecoder decoder = new MyProtocolDecoder(MAX_FRAME_LENGTH, LENGTH_FIELD_OFFSET,
+                LENGTH_FIELD_LENGTH, LENGTH_ADJUSTMENT,
+                INITIAL_BYTES_TO_STRIP, false);
 
         try {
             ServerBootstrap sbs = new ServerBootstrap()
