@@ -57,7 +57,7 @@ public final class Server {
                     .handler(serverHandler)
                     .childHandler(currentChildHandler);
 
-            ChannelFuture bindCF = b.bind(8080);
+            ChannelFuture bindCF = b.bind(8082);
 
             //false
             System.out.println(Thread.currentThread().getName() + " bindCF.isDone = " + bindCF.isDone());

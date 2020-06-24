@@ -183,18 +183,30 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
  * +------+--------+------+----------------+      +------+----------------+
  * </pre>
  * @see LengthFieldPrepender
+ *
+ * 自定义长度解码器
  */
 public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
 
     /** */
     private final ByteOrder byteOrder;
+
+    // 发送的数据帧最大长度
     private final int maxFrameLength;
+
     private final int lengthFieldOffset;
     private final int lengthFieldLength;
     private final int lengthFieldEndOffset;
     private final int lengthAdjustment;
     private final int initialBytesToStrip;
+
+    /*
+     * true: 读取到长度域超过maxFrameLength，就抛出一个 TooLongFrameException。
+     * false: 只有真正读取完长度域的值表示的字节之后，才会抛出 TooLongFrameException，
+     * 默认情况下设置为true，建议不要修改，否则可能会造成内存溢出
+     **/
     private final boolean failFast;
+
     /** true: 丢弃模式  false: 非丢弃模式*/
     private boolean discardingTooLongFrame;
     /** 本次要丢弃的那个数据包的长度 */

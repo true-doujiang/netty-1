@@ -3,7 +3,12 @@ package com.yhh;
 public class TestBinary {
 
     public static void main(String[] args) {
-       f2();
+        // F=15  C=12
+        System.out.println(0x000F);
+        System.out.println(0x000E);
+        System.out.println(0x000D);
+        System.out.println(0x000C);
+       //f2();
     }
 
     public static void f1() {
@@ -51,4 +56,6 @@ public class TestBinary {
         System.out.println(Integer.toBinaryString(100));
         System.out.println((100 & ~15));
     }
+
+
 }
