@@ -1005,7 +1005,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         }
 
         /**
-         * 把数据写入socket
+         * 把数据写入 缓冲区 entity链表结构 ,flush() 后会把entity链表的数据写入socket
          *
          * @param msg
          * @param promise
@@ -1045,7 +1045,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         }
 
         /**
-         *
+         * flush() 后会把entity链表的数据写入socket
          */
         @Override
         public final void flush() {
@@ -1091,6 +1091,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             }
 
             try {
+                //
                 doWrite(outboundBuffer);
             } catch (Throwable t) {
                 if (t instanceof IOException && config().isAutoClose()) {

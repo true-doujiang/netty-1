@@ -115,13 +115,17 @@ public final class ChannelOutboundBuffer {
     public void addMessage(Object msg, int size, ChannelPromise promise) {
         Entry entry = Entry.newInstance(msg, size, total(msg), promise);
         if (tailEntry == null) {
+            // 第一次进入这里
             flushedEntry = null;
         } else {
             Entry tail = tailEntry;
             tail.next = entry;
         }
+
         tailEntry = entry;
+
         if (unflushedEntry == null) {
+            // 第一次进入这里
             unflushedEntry = entry;
         }
 
@@ -154,6 +158,7 @@ public final class ChannelOutboundBuffer {
                 if (!entry.promise.setUncancellable()) {
                     // Was cancelled so make sure we free up memory and notify about the freed bytes
                     int pending = entry.cancel();
+                    //
                     decrementPendingOutboundBytes(pending, false, true);
                 }
                 entry = entry.next;
@@ -172,6 +177,11 @@ public final class ChannelOutboundBuffer {
         incrementPendingOutboundBytes(size, true);
     }
 
+    /**
+     *
+     * @param size
+     * @param invokeLater
+     */
     private void incrementPendingOutboundBytes(long size, boolean invokeLater) {
         if (size == 0) {
             return;

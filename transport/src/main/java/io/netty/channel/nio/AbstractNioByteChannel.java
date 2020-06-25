@@ -224,8 +224,12 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
      *     data was accepted</li>
      * </ul>
      * @throws Exception if an I/O exception occurs during write.
+     *
+     *
+     *
      */
     protected final int doWrite0(ChannelOutboundBuffer in) throws Exception {
+        // 拿到第一个flushedEntry
         Object msg = in.current();
         if (msg == null) {
             // Directly return here so incompleteWrite(...) is not called.
@@ -251,15 +255,23 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                 return 0;
             }
 
+
+            // 通常是 NioSocketChannel   闪电侠：自旋锁写入  我这里没有了
             final int localFlushedAmount = doWriteBytes(buf);
+
             if (localFlushedAmount > 0) {
+
                 in.progress(localFlushedAmount);
+
                 if (!buf.isReadable()) {
+                    // 移除已经写入的entity
                     in.remove();
                 }
                 return 1;
             }
+
         } else if (msg instanceof FileRegion) {
+
             FileRegion region = (FileRegion) msg;
             if (region.transferred() >= region.count()) {
                 in.remove();
@@ -298,7 +310,10 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                 // Directly return here so incompleteWrite(...) is not called.
                 return;
             }
+
+            //
             writeSpinCount -= doWriteInternal(in, msg);
+
         } while (writeSpinCount > 0);
 
         incompleteWrite(writeSpinCount < 0);

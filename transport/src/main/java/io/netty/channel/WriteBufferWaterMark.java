@@ -32,7 +32,9 @@ import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
  */
 public final class WriteBufferWaterMark {
 
+    // 低于32k后channel置位可写状态
     private static final int DEFAULT_LOW_WATER_MARK = 32 * 1024;
+    // 高于64k后channel置位不可写状态
     private static final int DEFAULT_HIGH_WATER_MARK = 64 * 1024;
 
     public static final WriteBufferWaterMark DEFAULT =

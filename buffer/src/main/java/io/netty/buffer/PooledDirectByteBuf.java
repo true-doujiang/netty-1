@@ -212,12 +212,22 @@ final class PooledDirectByteBuf extends PooledByteBuf<ByteBuffer> {
         return getBytes(index, out, length, false);
     }
 
+    /**
+     *
+     * @param index
+     * @param out
+     * @param length
+     * @param internal
+     * @return
+     * @throws IOException
+     */
     private int getBytes(int index, GatheringByteChannel out, int length, boolean internal) throws IOException {
         checkIndex(index, length);
         if (length == 0) {
             return 0;
         }
 
+        // jdk buf
         ByteBuffer tmpBuf;
         if (internal) {
             tmpBuf = internalNioBuffer();
