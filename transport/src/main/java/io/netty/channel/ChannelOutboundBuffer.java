@@ -790,6 +790,9 @@ public final class ChannelOutboundBuffer {
         return e != null && e != unflushedEntry;
     }
 
+    /**
+     *
+     */
     public interface MessageProcessor {
         /**
          * Will be called for each flushed message until it either there are no more flushed messages or this
@@ -798,6 +801,9 @@ public final class ChannelOutboundBuffer {
         boolean processMessage(Object msg) throws Exception;
     }
 
+    /**
+     *
+     */
     static final class Entry {
 
         private static final Recycler<Entry> RECYCLER = new Recycler<Entry>() {

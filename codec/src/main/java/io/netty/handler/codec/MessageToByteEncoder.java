@@ -47,6 +47,9 @@ import io.netty.util.internal.TypeParameterMatcher;
  */
 public abstract class MessageToByteEncoder<I> extends ChannelOutboundHandlerAdapter {
 
+    /**
+     * 类型判断器
+     */
     private final TypeParameterMatcher matcher;
     private final boolean preferDirect;
 

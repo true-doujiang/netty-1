@@ -34,6 +34,7 @@ public abstract class TypeParameterMatcher {
     };
 
     public static TypeParameterMatcher get(final Class<?> parameterType) {
+
         final Map<Class<?>, TypeParameterMatcher> getCache =
                 InternalThreadLocalMap.get().typeParameterMatcherGetCache();
 

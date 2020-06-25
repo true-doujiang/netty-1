@@ -1005,6 +1005,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         }
 
         /**
+         * 把数据写入socket
          *
          * @param msg
          * @param promise
@@ -1211,7 +1212,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         }
 
     }
-    // ------------------ AbstractUnsafe over
+    // ------------------ AbstractUnsafe end ----------------
 
 
 

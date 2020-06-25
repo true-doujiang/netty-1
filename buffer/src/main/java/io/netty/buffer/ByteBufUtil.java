@@ -54,6 +54,7 @@ import static io.netty.util.internal.StringUtil.isSurrogate;
 public final class ByteBufUtil {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ByteBufUtil.class);
+
     private static final FastThreadLocal<byte[]> BYTE_ARRAYS = new FastThreadLocal<byte[]>() {
         @Override
         protected byte[] initialValue() throws Exception {
@@ -64,13 +65,14 @@ public final class ByteBufUtil {
     private static final byte WRITE_UTF_UNKNOWN = (byte) '?';
     private static final int MAX_CHAR_BUFFER_SIZE;
     private static final int THREAD_LOCAL_BUFFER_SIZE;
-    private static final int MAX_BYTES_PER_CHAR_UTF8 =
-            (int) CharsetUtil.encoder(CharsetUtil.UTF_8).maxBytesPerChar();
+    private static final int MAX_BYTES_PER_CHAR_UTF8 = (int) CharsetUtil.encoder(CharsetUtil.UTF_8).maxBytesPerChar();
 
     static final int WRITE_CHUNK_SIZE = 8192;
+    // 静态static 根据实际情况初始化
     static final ByteBufAllocator DEFAULT_ALLOCATOR;
 
     static {
+
         String allocType = SystemPropertyUtil.get(
                 "io.netty.allocator.type", PlatformDependent.isAndroid() ? "unpooled" : "pooled");
         allocType = allocType.toLowerCase(Locale.US).trim();
@@ -87,6 +89,7 @@ public final class ByteBufUtil {
             logger.debug("-Dio.netty.allocator.type: pooled (unknown: {})", allocType);
         }
 
+        System.out.println(Thread.currentThread().getName() + " ByteBufUtil 根据实际情况初始化: " + alloc);
         DEFAULT_ALLOCATOR = alloc;
 
         THREAD_LOCAL_BUFFER_SIZE = SystemPropertyUtil.getInt("io.netty.threadLocalDirectBufferSize", 0);
