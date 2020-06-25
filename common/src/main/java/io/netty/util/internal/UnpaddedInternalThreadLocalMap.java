@@ -36,6 +36,7 @@ class UnpaddedInternalThreadLocalMap {
      *
      */
     static final ThreadLocal<InternalThreadLocalMap> slowThreadLocalMap = new ThreadLocal<InternalThreadLocalMap>();
+    // 给每个FastThreadLocal实例一个索引值index
     static final AtomicInteger nextIndex = new AtomicInteger();
 
     /** Used by {@link FastThreadLocal} */

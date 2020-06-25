@@ -43,6 +43,9 @@ import java.util.Set;
  */
 public class FastThreadLocal<V> {
 
+    /**
+     *
+     */
     private static final int variablesToRemoveIndex = InternalThreadLocalMap.nextVariableIndex();
 
     /**
@@ -122,6 +125,9 @@ public class FastThreadLocal<V> {
         variablesToRemove.remove(variable);
     }
 
+    /**
+     *
+     */
     private final int index;
 
     public FastThreadLocal() {
@@ -134,6 +140,7 @@ public class FastThreadLocal<V> {
      */
     @SuppressWarnings("unchecked")
     public final V get() {
+        //
         InternalThreadLocalMap threadLocalMap = InternalThreadLocalMap.get();
         Object v = threadLocalMap.indexedVariable(index);
         if (v != InternalThreadLocalMap.UNSET) {

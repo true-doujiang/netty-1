@@ -7,11 +7,13 @@ public class FastThreadLocalTest {
     private static FastThreadLocal<Object> threadLocal0 = new FastThreadLocal<Object>() {
         @Override
         protected Object initialValue() {
+            System.out.println(Thread.currentThread().getName() + " initialValue");
             return new Object();
         }
 
         @Override
         protected void onRemoval(Object value) throws Exception {
+            System.out.println(Thread.currentThread().getName() + " onRemoval value= " + value);
             System.out.println("onRemoval");
         }
     };
@@ -19,6 +21,7 @@ public class FastThreadLocalTest {
     private static FastThreadLocal<Object> threadLocal1 = new FastThreadLocal<Object>() {
         @Override
         protected Object initialValue() {
+            System.out.println(Thread.currentThread().getName() + " threadLocal1 initialValue");
             return new Object();
         }
     };
@@ -42,7 +45,7 @@ public class FastThreadLocalTest {
 //                }
 //            }
             }
-        }).start();
+        }, "test-thread-0").start();
 
         new Thread(new Runnable() {
             @Override
@@ -50,6 +53,7 @@ public class FastThreadLocalTest {
                 Object object = threadLocal0.get();
                 // ... do with object
                 System.out.println(object);
+
                 while (true) {
                     System.out.println(threadLocal0.get() == object);
                     try {
@@ -59,6 +63,9 @@ public class FastThreadLocalTest {
                     }
                 }
             }
-        }).start();
+        }, "test-thread-1").start();
     }
+
+
+
 }

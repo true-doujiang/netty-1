@@ -65,15 +65,25 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         return slowThreadLocalMap.get();
     }
 
+    /**
+     *
+     * @return
+     */
     public static InternalThreadLocalMap get() {
         Thread thread = Thread.currentThread();
         if (thread instanceof FastThreadLocalThread) {
             return fastGet((FastThreadLocalThread) thread);
         } else {
+            // jdk
             return slowGet();
         }
     }
 
+    /**
+     *
+     * @param thread
+     * @return
+     */
     private static InternalThreadLocalMap fastGet(FastThreadLocalThread thread) {
         InternalThreadLocalMap threadLocalMap = thread.threadLocalMap();
         if (threadLocalMap == null) {
@@ -82,7 +92,12 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         return threadLocalMap;
     }
 
+    /**
+     *
+     * @return
+     */
     private static InternalThreadLocalMap slowGet() {
+        // jdk threadLocal
         ThreadLocal<InternalThreadLocalMap> slowThreadLocalMap = UnpaddedInternalThreadLocalMap.slowThreadLocalMap;
         InternalThreadLocalMap ret = slowThreadLocalMap.get();
         if (ret == null) {
@@ -105,6 +120,10 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
         slowThreadLocalMap.remove();
     }
 
+    /**
+     *
+     * @return
+     */
     public static int nextVariableIndex() {
         int index = nextIndex.getAndIncrement();
         if (index < 0) {
