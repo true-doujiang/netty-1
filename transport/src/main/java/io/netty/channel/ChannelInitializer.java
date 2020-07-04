@@ -70,7 +70,8 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
 
-        System.out.println(Thread.currentThread().getName() + " ChannelInitializer = " + this + " handlerAdded(ctx) 执行");
+        System.out.println(Thread.currentThread().getName() + " ChannelInitializer = "
+                + this + " handlerAdded(ctx) 执行 ctx = " + ctx);
 
         if (ctx.channel().isRegistered()) {
             // This should always be true with our current DefaultChannelPipeline implementation.
@@ -96,7 +97,8 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
     @SuppressWarnings("unchecked")
     public final void channelRegistered(ChannelHandlerContext ctx) throws Exception {
 
-        System.out.println(Thread.currentThread().getName() + " ChannelInitializer = " + this + " channelRegistered(ctx) 执行");
+        System.out.println(Thread.currentThread().getName()
+                + " ChannelInitializer = " + this + " channelRegistered(ctx) 执行 ctx = " + ctx);
 
         // Normally this method will never be called as handlerAdded(...) should call initChannel(...) and remove
         // the handler.

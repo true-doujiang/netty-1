@@ -27,7 +27,11 @@ import java.util.Queue;
  * A combination of {@link HttpRequestDecoder} and {@link HttpResponseEncoder}
  * which enables easier server side HTTP implementation.
  *
- * @see HttpClientCodec
+ * @see HttpClientCodec   对应的客户端codec
+ *
+ * 针对http请求处理   有这2个功能
+ *      HttpRequestDecoder
+ *      HttpResponseEncoder
  */
 public final class HttpServerCodec extends CombinedChannelDuplexHandler<HttpRequestDecoder, HttpResponseEncoder>
         implements HttpServerUpgradeHandler.SourceCodec {
