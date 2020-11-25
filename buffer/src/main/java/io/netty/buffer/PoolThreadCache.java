@@ -223,21 +223,27 @@ final class PoolThreadCache {
      * Try to allocate a tiny buffer out of the cache. Returns {@code true} if successful {@code false} otherwise
      */
     boolean allocateTiny(PoolArena<?> area, PooledByteBuf<?> buf, int reqCapacity, int normCapacity) {
-        return allocate(cacheForTiny(area, normCapacity), buf, reqCapacity);
+        // tiny
+        MemoryRegionCache<?> memoryRegionCache = cacheForTiny(area, normCapacity);
+        return allocate(memoryRegionCache, buf, reqCapacity);
     }
 
     /**
      * Try to allocate a small buffer out of the cache. Returns {@code true} if successful {@code false} otherwise
      */
     boolean allocateSmall(PoolArena<?> area, PooledByteBuf<?> buf, int reqCapacity, int normCapacity) {
-        return allocate(cacheForSmall(area, normCapacity), buf, reqCapacity);
+        // small
+        MemoryRegionCache<?> memoryRegionCache = cacheForSmall(area, normCapacity);
+        return allocate(memoryRegionCache, buf, reqCapacity);
     }
 
     /**
      * Try to allocate a small buffer out of the cache. Returns {@code true} if successful {@code false} otherwise
      */
     boolean allocateNormal(PoolArena<?> area, PooledByteBuf<?> buf, int reqCapacity, int normCapacity) {
-        return allocate(cacheForNormal(area, normCapacity), buf, reqCapacity);
+        // normal
+        MemoryRegionCache<?> memoryRegionCache = cacheForNormal(area, normCapacity);
+        return allocate(memoryRegionCache, buf, reqCapacity);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -374,6 +380,7 @@ final class PoolThreadCache {
         }
         return cache(tinySubPageHeapCaches, idx);
     }
+
     // todo
     private MemoryRegionCache<?> cacheForSmall(PoolArena<?> area, int normCapacity) {
         int idx = PoolArena.smallIdx(normCapacity);
@@ -382,6 +389,7 @@ final class PoolThreadCache {
         }
         return cache(smallSubPageHeapCaches, idx);
     }
+
     // todo
     private MemoryRegionCache<?> cacheForNormal(PoolArena<?> area, int normCapacity) {
         if (area.isDirect()) {
