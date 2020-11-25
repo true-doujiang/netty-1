@@ -366,6 +366,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     }
 
     /**
+     * 堆内存
      *
      * @param initialCapacity
      * @param maxCapacity
@@ -391,6 +392,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     }
 
     /**
+     * 直接内存
      *
      * @param initialCapacity
      * @param maxCapacity
@@ -404,7 +406,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
         final ByteBuf buf;
         if (directArena != null) {
-            //
+            // 开始分配内存
             buf = directArena.allocate(cache, initialCapacity, maxCapacity);
         } else {
             buf = PlatformDependent.hasUnsafe() ?
@@ -507,6 +509,11 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         threadCache.remove();
     }
 
+
+
+
+
+
     /**
      * FastThreadLocal
      */
@@ -570,6 +577,18 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         }
 
     } // ---------- PoolThreadLocalCache end ---------------
+
+
+
+
+
+
+
+
+
+
+
+
 
     @Override
     public PooledByteBufAllocatorMetric metric() {

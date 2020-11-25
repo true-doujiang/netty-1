@@ -48,6 +48,7 @@ final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
      * @return
      */
     static PooledUnsafeDirectByteBuf newInstance(int maxCapacity) {
+        // 有就拿来直接用, 没有则新创建一个
         PooledUnsafeDirectByteBuf buf = RECYCLER.get();
         buf.reuse(maxCapacity);
         return buf;

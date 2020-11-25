@@ -30,12 +30,15 @@ import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 import static java.lang.Math.max;
 
 /**
- * 2 个实现类 内部类
+ * 2 个实现类 内部类实现类
  *    DirectArena
  *    HeapArena
+ *
+ *    竞技场
  */
 abstract class PoolArena<T> implements PoolArenaMetric {
 
+    //
     static final boolean HAS_UNSAFE = PlatformDependent.hasUnsafe();
 
     /**
@@ -197,7 +200,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
      * @return
      */
     PooledByteBuf<T> allocate(PoolThreadCache cache, int reqCapacity, int maxCapacity) {
-        //
+        // 创建一个空的byteBuffer
         PooledByteBuf<T> buf = newByteBuf(maxCapacity);
         // 规格化
         allocate(cache, buf, reqCapacity);
@@ -411,6 +414,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     }
 
     /**
+     * 内存规格化
      *
      * @param reqCapacity
      * @return
@@ -751,7 +755,18 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         }
     }
 
+
+
+
+
+
+
+
+
     /**
+     *
+     *
+     *
      * T: byte[]
      */
     static final class HeapArena extends PoolArena<byte[]> {
@@ -815,7 +830,17 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
     } // HeapArena end
 
+
+
+
+
+
+
     /**
+     *
+     *
+     *
+     *
      * T: ByteBuffer
      */
     static final class DirectArena extends PoolArena<ByteBuffer> {
