@@ -119,8 +119,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
      * @param chunkSize
      * @param cacheAlignment
      */
-    protected PoolArena(PooledByteBufAllocator parent, int pageSize,
-          int maxOrder, int pageShifts, int chunkSize, int cacheAlignment) {
+    protected PoolArena(PooledByteBufAllocator parent, int pageSize, int maxOrder, int pageShifts, int chunkSize, int cacheAlignment) {
         this.parent = parent;
         this.pageSize = pageSize;
         this.maxOrder = maxOrder;
@@ -172,6 +171,13 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         chunkListMetrics = Collections.unmodifiableList(metrics);
     }
 
+
+
+
+
+
+
+
     private PoolSubpage<T> newSubpagePoolHead(int pageSize) {
         PoolSubpage<T> head = new PoolSubpage<T>(pageSize);
         head.prev = head;
@@ -210,7 +216,6 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     /**
      * 除以16
      * @param normCapacity
-     * @return
      */
     static int tinyIdx(int normCapacity) {
         return normCapacity >>> 4;
@@ -218,6 +223,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
     static int smallIdx(int normCapacity) {
         int tableIdx = 0;
+        // 除以1024
         int i = normCapacity >>> 10;
         while (i != 0) {
             i >>>= 1;

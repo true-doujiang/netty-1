@@ -130,6 +130,10 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
         return this;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public boolean release() {
         return release0(1);
@@ -140,10 +144,16 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
         return release0(checkPositive(decrement, "decrement"));
     }
 
+    /**
+     *
+     * @param decrement
+     * @return
+     */
     private boolean release0(int decrement) {
         int rawCnt = nonVolatileRawCnt(), realCnt = toLiveRealCnt(rawCnt, decrement);
         if (decrement == realCnt) {
             if (refCntUpdater.compareAndSet(this, rawCnt, 1)) {
+                //引用的次数 和 这次要减掉的次数相等  则回收改buf
                 deallocate();
                 return true;
             }

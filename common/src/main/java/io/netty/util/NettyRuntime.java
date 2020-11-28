@@ -43,11 +43,8 @@ public final class NettyRuntime {
         synchronized void setAvailableProcessors(final int availableProcessors) {
             ObjectUtil.checkPositive(availableProcessors, "availableProcessors");
             if (this.availableProcessors != 0) {
-                final String message = String.format(
-                        Locale.ROOT,
-                        "availableProcessors is already set to [%d], rejecting [%d]",
-                        this.availableProcessors,
-                        availableProcessors);
+                final String message = String.format(Locale.ROOT, "availableProcessors is already set to [%d], rejecting [%d]",
+                        this.availableProcessors, availableProcessors);
                 throw new IllegalStateException(message);
             }
             this.availableProcessors = availableProcessors;
@@ -64,9 +61,7 @@ public final class NettyRuntime {
         synchronized int availableProcessors() {
             if (this.availableProcessors == 0) {
                 final int availableProcessors =
-                        SystemPropertyUtil.getInt(
-                                "io.netty.availableProcessors",
-                                Runtime.getRuntime().availableProcessors());
+                        SystemPropertyUtil.getInt("io.netty.availableProcessors", Runtime.getRuntime().availableProcessors());
                 setAvailableProcessors(availableProcessors);
             }
             return this.availableProcessors;

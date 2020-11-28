@@ -34,27 +34,26 @@ import java.nio.ByteOrder;
  */
 abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
+    //
     private final Recycler.Handle<PooledByteBuf<T>> recyclerHandle;
 
-    /**
-     *
-     */
+    //
     protected PoolChunk<T> chunk;
+    // 4611686018427389952
     protected long handle;
 
     /**
      * heap： 用数组
-     * direct： 用directBuffer
+     * direct： 用directBuffer java.nio.DirectByteBuffer[pos=0 lim=16777216 cap=16777216]
      */
     protected T memory;
 
-    /**
-     *
-     */
+    //
     protected int offset;
     protected int length;
     int maxLength;
 
+    //
     PoolThreadCache cache;
 
     ByteBuffer tmpNioBuf;
@@ -63,6 +62,9 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
      *
      */
     private ByteBufAllocator allocator;
+
+
+
 
     @SuppressWarnings("unchecked")
     protected PooledByteBuf(Recycler.Handle<? extends PooledByteBuf<T>> recyclerHandle, int maxCapacity) {
@@ -190,9 +192,13 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
     protected abstract ByteBuffer newInternalNioBuffer(T memory);
 
+    /**
+     *
+     */
     @Override
     protected final void deallocate() {
         if (handle >= 0) {
+
             final long handle = this.handle;
             this.handle = -1;
             memory = null;
@@ -203,6 +209,9 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
         }
     }
 
+    /**
+     *
+     */
     private void recycle() {
         recyclerHandle.recycle(this);
     }

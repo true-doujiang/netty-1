@@ -85,13 +85,19 @@ public abstract class AbstractDerivedByteBuf extends AbstractByteBuf {
         return this;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public final boolean release() {
         return release0();
     }
 
     boolean release0() {
-        return unwrap().release();
+        //
+        ByteBuf unwrap = unwrap();
+        return unwrap.release();
     }
 
     @Override

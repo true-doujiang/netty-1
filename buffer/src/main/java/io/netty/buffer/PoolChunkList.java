@@ -48,6 +48,9 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     private final int maxCapacity;
     private PoolChunk<T> head;
 
+    /**
+     * 上一个节点
+     */
     // This is only update once when create the linked like list of PoolChunkList in PoolArena constructor.
     private PoolChunkList<T> prevList;
 
@@ -62,6 +65,10 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
         this.maxUsage = maxUsage;
         maxCapacity = calculateMaxCapacity(minUsage, chunkSize);
     }
+
+
+
+
 
     /**
      * Calculates the maximum capacity of a buffer that will ever be possible to allocate out of the {@link PoolChunk}s

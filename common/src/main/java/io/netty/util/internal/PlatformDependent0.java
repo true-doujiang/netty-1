@@ -153,8 +153,7 @@ final class PlatformDependent0 {
                     @Override
                     public Object run() {
                         try {
-                            finalUnsafe.getClass().getDeclaredMethod(
-                                    "copyMemory", Object.class, long.class, Object.class, long.class, long.class);
+                            finalUnsafe.getClass().getDeclaredMethod("copyMemory", Object.class, long.class, Object.class, long.class, long.class);
                             return null;
                         } catch (NoSuchMethodException e) {
                             return e;
@@ -254,8 +253,7 @@ final class PlatformDependent0 {
                             @Override
                             public Object run() {
                                 try {
-                                    final Constructor<?> constructor =
-                                            direct.getClass().getDeclaredConstructor(long.class, int.class);
+                                    final Constructor<?> constructor = direct.getClass().getDeclaredConstructor(long.class, int.class);
                                     Throwable cause = ReflectionUtil.trySetAccessible(constructor, true);
                                     if (cause != null) {
                                         return cause;
@@ -284,9 +282,7 @@ final class PlatformDependent0 {
                         directBufferConstructor = null;
                     }
                 } else {
-                    logger.debug(
-                            "direct buffer constructor: unavailable",
-                            (Throwable) maybeDirectBufferConstructor);
+                    logger.debug("direct buffer constructor: unavailable", (Throwable) maybeDirectBufferConstructor);
                     directBufferConstructor = null;
                 }
             } finally {
@@ -309,8 +305,7 @@ final class PlatformDependent0 {
                 @Override
                 public Object run() {
                     try {
-                        Class<?> bitsClass =
-                                Class.forName("java.nio.Bits", false, getSystemClassLoader());
+                        Class<?> bitsClass = Class.forName("java.nio.Bits", false, getSystemClassLoader());
                         int version = javaVersion();
                         if (version >= 9) {
                             // Java9/10 use all lowercase and later versions all uppercase.
@@ -371,8 +366,7 @@ final class PlatformDependent0 {
                         try {
                             // Java9 has jdk.internal.misc.Unsafe and not all methods are propagated to
                             // sun.misc.Unsafe
-                            Class<?> internalUnsafeClass = getClassLoader(PlatformDependent0.class)
-                                    .loadClass("jdk.internal.misc.Unsafe");
+                            Class<?> internalUnsafeClass = getClassLoader(PlatformDependent0.class).loadClass("jdk.internal.misc.Unsafe");
                             Method method = internalUnsafeClass.getDeclaredMethod("getUnsafe");
                             return method.invoke(null);
                         } catch (Throwable e) {
@@ -380,6 +374,7 @@ final class PlatformDependent0 {
                         }
                     }
                 });
+
                 if (!(maybeException instanceof Throwable)) {
                     internalUnsafe = maybeException;
                     final Object finalInternalUnsafe = internalUnsafe;
@@ -387,8 +382,7 @@ final class PlatformDependent0 {
                         @Override
                         public Object run() {
                             try {
-                                return finalInternalUnsafe.getClass().getDeclaredMethod(
-                                        "allocateUninitializedArray", Class.class, int.class);
+                                return finalInternalUnsafe.getClass().getDeclaredMethod("allocateUninitializedArray", Class.class, int.class);
                             } catch (NoSuchMethodException e) {
                                 return e;
                             } catch (SecurityException e) {
@@ -412,8 +406,7 @@ final class PlatformDependent0 {
                 }
 
                 if (maybeException instanceof Throwable) {
-                    logger.debug("jdk.internal.misc.Unsafe.allocateUninitializedArray(int): unavailable",
-                            (Throwable) maybeException);
+                    logger.debug("jdk.internal.misc.Unsafe.allocateUninitializedArray(int): unavailable", (Throwable) maybeException);
                 } else {
                     logger.debug("jdk.internal.misc.Unsafe.allocateUninitializedArray(int): available");
                 }
@@ -426,8 +419,7 @@ final class PlatformDependent0 {
         // null
         INTERNAL_UNSAFE = internalUnsafe;
 
-        logger.debug("java.nio.DirectByteBuffer.<init>(long, int): {}",
-                DIRECT_BUFFER_CONSTRUCTOR != null ? "available" : "unavailable");
+        logger.debug("java.nio.DirectByteBuffer.<init>(long, int): {}", DIRECT_BUFFER_CONSTRUCTOR != null ? "available" : "unavailable");
     }
     // ------------static end ----------------
 

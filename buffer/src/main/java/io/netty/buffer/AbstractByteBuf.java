@@ -42,10 +42,8 @@ import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 
 /**
  * A skeletal implementation of a buffer.
- *
  * netty 的 ByteBuf 骨架实现, 维护读写指针
- *
- *  - 下划线开头的方法都是抽象方法，由具体子类实现
+ * 下划线开头的方法都是抽象方法，由具体子类实现
  */
 public abstract class AbstractByteBuf extends ByteBuf {
 
@@ -73,9 +71,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
     static final ResourceLeakDetector<ByteBuf> leakDetector =
             ResourceLeakDetectorFactory.instance().newResourceLeakDetector(ByteBuf.class);
 
-    /**
-     * 读写指针
-     */
+    // 读写指针
     int readerIndex;
     int writerIndex;
     private int markedReaderIndex;
@@ -85,6 +81,10 @@ public abstract class AbstractByteBuf extends ByteBuf {
     private int maxCapacity;
 
 
+    /**
+     * 构造器
+     * @param maxCapacity
+     */
     protected AbstractByteBuf(int maxCapacity) {
         checkPositiveOrZero(maxCapacity, "maxCapacity");
         this.maxCapacity = maxCapacity;

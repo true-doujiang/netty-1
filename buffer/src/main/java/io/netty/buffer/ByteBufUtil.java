@@ -105,8 +105,7 @@ public final class ByteBufUtil {
      * Allocates a new array if minLength > {@link ByteBufUtil#MAX_TL_ARRAY_LEN}
      */
     static byte[] threadLocalTempArray(int minLength) {
-        return minLength <= MAX_TL_ARRAY_LEN ? BYTE_ARRAYS.get()
-            : PlatformDependent.allocateUninitializedArray(minLength);
+        return minLength <= MAX_TL_ARRAY_LEN ? BYTE_ARRAYS.get() : PlatformDependent.allocateUninitializedArray(minLength);
     }
 
     /**

@@ -113,21 +113,16 @@ final class PoolChunk<T> implements PoolChunkMetric {
 
     private static final int INTEGER_SIZE_MINUS_ONE = Integer.SIZE - 1;
 
-    /**
-     *
-     */
+    //
     final PoolArena<T> arena;
     final T memory;
     final boolean unpooled;
     final int offset;
 
-    /**
-     *
-     */
+    //
     private final byte[] memoryMap;
 
-    /**
-     * depthMap数组值为0表示可以分配16M空间，如果为1 表示可以分配8M，
+    /** depthMap数组值为0表示可以分配16M空间，如果为1 表示可以分配8M，
      * 如果为2表示嗯可以分配4M，如果为3表示可以分配2M ……………………如果为11表示可以分配8k空间
      */
     private final byte[] depthMap;
@@ -163,7 +158,9 @@ final class PoolChunk<T> implements PoolChunkMetric {
 
     // TODO: Test if adding padding helps under contention
     //private long pad0, pad1, pad2, pad3, pad4, pad5, pad6, pad7;
-
+    /**
+     * 构造器
+     */
     PoolChunk(PoolArena<T> arena, T memory, int pageSize, int maxOrder, int pageShifts, int chunkSize, int offset) {
         unpooled = false;
         this.arena = arena;
@@ -424,6 +421,9 @@ final class PoolChunk<T> implements PoolChunkMetric {
         }
     }
 
+    /**
+     * 分配normal级别的容量
+     */
     void initBuf(PooledByteBuf<T> buf, ByteBuffer nioBuffer, long handle, int reqCapacity) {
         int memoryMapIdx = memoryMapIdx(handle);
         int bitmapIdx = bitmapIdx(handle);
@@ -437,10 +437,15 @@ final class PoolChunk<T> implements PoolChunkMetric {
         }
     }
 
+    /**
+     * 分配page级别的容量
+     */
     void initBufWithSubpage(PooledByteBuf<T> buf, ByteBuffer nioBuffer, long handle, int reqCapacity) {
         initBufWithSubpage(buf, nioBuffer, handle, bitmapIdx(handle), reqCapacity);
     }
 
+    /**
+     */
     private void initBufWithSubpage(PooledByteBuf<T> buf, ByteBuffer nioBuffer,
                                     long handle, int bitmapIdx, int reqCapacity) {
         assert bitmapIdx != 0;
@@ -451,8 +456,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
         assert subpage.doNotDestroy;
         assert reqCapacity <= subpage.elemSize;
 
-        buf.init(
-            this, nioBuffer, handle,
+        buf.init(this, nioBuffer, handle,
             runOffset(memoryMapIdx) + (bitmapIdx & 0x3FFFFFFF) * subpage.elemSize + offset,
                 reqCapacity, subpage.elemSize, arena.parent.threadCache());
     }

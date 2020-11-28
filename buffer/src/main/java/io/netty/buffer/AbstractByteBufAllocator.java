@@ -26,10 +26,9 @@ import io.netty.util.internal.StringUtil;
 /**
  * Skeletal {@link ByteBufAllocator} implementation to extend.
  *
- * 内存分配器 抽象类，实现了大部分功能，实现类：
- *                           PooledByteBufAllocator
- *                           UnpooledByteBufAllocator
- *
+ * 内存分配器 抽象类，实现了大部分功能，它有2个实现类：
+ *       PooledByteBufAllocator
+ *       UnpooledByteBufAllocator
  */
 public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
 

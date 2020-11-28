@@ -185,8 +185,7 @@ public final class PlatformDependent {
         System.out.println(Thread.currentThread().getName() + " CLEANER = " + CLEANER);
 
         // We should always prefer direct buffers by default if we can use a Cleaner to release direct buffers.
-        DIRECT_BUFFER_PREFERRED = CLEANER != NOOP
-                                  && !SystemPropertyUtil.getBoolean("io.netty.noPreferDirect", false);
+        DIRECT_BUFFER_PREFERRED = CLEANER != NOOP && !SystemPropertyUtil.getBoolean("io.netty.noPreferDirect", false);
         if (logger.isDebugEnabled()) {
             logger.debug("-Dio.netty.noPreferDirect: {}", !DIRECT_BUFFER_PREFERRED);
         }
