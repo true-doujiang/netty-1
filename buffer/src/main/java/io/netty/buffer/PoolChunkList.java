@@ -34,23 +34,17 @@ import java.nio.ByteBuffer;
 final class PoolChunkList<T> implements PoolChunkListMetric {
     private static final Iterator<PoolChunkMetric> EMPTY_METRICS = Collections.<PoolChunkMetric>emptyList().iterator();
 
-    /**
-     *
-     */
+    //
     private final PoolArena<T> arena;
 
-    /**
-     * 下一个节点
-     */
+    // 下一个节点
     private final PoolChunkList<T> nextList;
     private final int minUsage;
     private final int maxUsage;
     private final int maxCapacity;
     private PoolChunk<T> head;
 
-    /**
-     * 上一个节点
-     */
+    // 上一个节点
     // This is only update once when create the linked like list of PoolChunkList in PoolArena constructor.
     private PoolChunkList<T> prevList;
 

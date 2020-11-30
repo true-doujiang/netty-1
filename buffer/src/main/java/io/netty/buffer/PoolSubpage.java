@@ -28,14 +28,9 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
     private final int pageSize;
     private final long[] bitmap;
 
-    /**
-     *
-     */
+    //
     PoolSubpage<T> prev;
-
-    /**
-     *
-     */
+    //
     PoolSubpage<T> next;
 
     boolean doNotDestroy;

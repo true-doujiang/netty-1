@@ -252,7 +252,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
                                   int tinyCacheSize, int smallCacheSize, int normalCacheSize,
                                   boolean useCacheForAllThreads, int directMemoryCacheAlignment) {
         super(preferDirect);
-        //
+        // PoolThreadLocalCache 内部类  为了能获取本类 heapArenas, heapArenas
         threadCache = new PoolThreadLocalCache(useCacheForAllThreads);
 
         this.tinyCacheSize = tinyCacheSize;// 512
@@ -272,7 +272,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             throw new IllegalArgumentException("directMemoryCacheAlignment: "
                     + directMemoryCacheAlignment + " (expected: power of two)");
         }
-
+        // 2^13 = 8192
         int pageShifts = validateAndCalculatePageShifts(pageSize);
 
         if (nHeapArena > 0) {
@@ -280,9 +280,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             List<PoolArenaMetric> metrics = new ArrayList<PoolArenaMetric>(heapArenas.length);
             for (int i = 0; i < heapArenas.length; i ++) {
 
-                PoolArena.HeapArena arena = new PoolArena.HeapArena(this,
-                        pageSize, maxOrder, pageShifts, chunkSize,
-                        directMemoryCacheAlignment);
+                PoolArena.HeapArena arena = new PoolArena.HeapArena(this, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
                 heapArenas[i] = arena;
 
                 System.out.println(Thread.currentThread().getName() + " 分配器创建PoolArena.HeapArena " + i + " = " + arena);
@@ -299,8 +297,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             directArenas = newArenaArray(nDirectArena);
             List<PoolArenaMetric> metrics = new ArrayList<PoolArenaMetric>(directArenas.length);
             for (int i = 0; i < directArenas.length; i ++) {
-                PoolArena.DirectArena arena = new PoolArena.DirectArena(
-                        this, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
+                PoolArena.DirectArena arena = new PoolArena.DirectArena(this, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
                 directArenas[i] = arena;
 
                 System.out.println(Thread.currentThread().getName() + " 分配器创建PoolArena.DirectArena " + i + " = " + arena);

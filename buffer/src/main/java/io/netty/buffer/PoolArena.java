@@ -777,8 +777,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
      */
     static final class HeapArena extends PoolArena<byte[]> {
 
-        HeapArena(PooledByteBufAllocator parent, int pageSize, int maxOrder,
-                int pageShifts, int chunkSize, int directMemoryCacheAlignment) {
+        HeapArena(PooledByteBufAllocator parent, int pageSize, int maxOrder, int pageShifts, int chunkSize, int directMemoryCacheAlignment) {
             super(parent, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
         }
 
@@ -821,8 +820,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
          */
         @Override
         protected PooledByteBuf<byte[]> newByteBuf(int maxCapacity) {
-            return HAS_UNSAFE ? PooledUnsafeHeapByteBuf.newUnsafeInstance(maxCapacity)
-                    : PooledHeapByteBuf.newInstance(maxCapacity);
+            return HAS_UNSAFE ? PooledUnsafeHeapByteBuf.newUnsafeInstance(maxCapacity) : PooledHeapByteBuf.newInstance(maxCapacity);
         }
 
         @Override
@@ -851,8 +849,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
      */
     static final class DirectArena extends PoolArena<ByteBuffer> {
 
-        DirectArena(PooledByteBufAllocator parent, int pageSize, int maxOrder,
-                int pageShifts, int chunkSize, int directMemoryCacheAlignment) {
+        DirectArena(PooledByteBufAllocator parent, int pageSize, int maxOrder, int pageShifts, int chunkSize, int directMemoryCacheAlignment) {
             super(parent, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
         }
 
@@ -866,8 +863,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             // We can only calculate the offset if Unsafe is present as otherwise directBufferAddress(...) will
             // throw an NPE.
             int remainder = HAS_UNSAFE
-                    ? (int) (PlatformDependent.directBufferAddress(memory) & directMemoryCacheAlignmentMask)
-                    : 0;
+                    ? (int) (PlatformDependent.directBufferAddress(memory) & directMemoryCacheAlignmentMask) : 0;
 
             // offset = alignment - address & (alignment - 1)
             return directMemoryCacheAlignment - remainder;
