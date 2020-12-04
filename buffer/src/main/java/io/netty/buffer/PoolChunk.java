@@ -326,8 +326,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
             }
         }
         byte value = value(id);
-        assert value == d && (id & initial) == 1 << d : String.format("val = %d, id & initial = %d, d = %d",
-                value, id & initial, d);
+        assert value == d && (id & initial) == 1 << d : String.format("val = %d, id & initial = %d, d = %d", value, id & initial, d);
         setValue(id, unusable); // mark as unusable
         updateParentsAlloc(id);
         return id;
@@ -411,6 +410,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
                 }
             }
         }
+
         freeBytes += runLength(memoryMapIdx);
         setValue(memoryMapIdx, depth(memoryMapIdx));
         updateParentsFree(memoryMapIdx);

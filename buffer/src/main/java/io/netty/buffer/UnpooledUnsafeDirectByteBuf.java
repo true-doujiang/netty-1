@@ -38,18 +38,14 @@ import java.nio.channels.ScatteringByteChannel;
  */
 public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf {
 
-    /**
-     *
-     */
+    //
     private final ByteBufAllocator alloc;
 
     private ByteBuffer tmpNioBuf;
     private int capacity;
     private boolean doNotFree;
 
-    /**
-     * 内存是 DirectBuffer
-     */
+    // 内存是 DirectBuffer
     ByteBuffer buffer;
     // buffer的内存地址
     long memoryAddress;
@@ -68,8 +64,7 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
         checkPositiveOrZero(initialCapacity, "initialCapacity");
         checkPositiveOrZero(maxCapacity, "maxCapacity");
         if (initialCapacity > maxCapacity) {
-            throw new IllegalArgumentException(String.format(
-                    "initialCapacity(%d) > maxCapacity(%d)", initialCapacity, maxCapacity));
+            throw new IllegalArgumentException(String.format("initialCapacity(%d) > maxCapacity(%d)", initialCapacity, maxCapacity));
         }
 
         this.alloc = alloc;

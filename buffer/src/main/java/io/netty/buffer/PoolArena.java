@@ -104,7 +104,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
     /**
      * Number of thread caches backed by this arena.
-     * 计数器
+     * 计数器  io.netty.buffer.PooledByteBufAllocator.PoolThreadLocalCache#leastUsedArena(io.netty.buffer.PoolArena[]) 调用
      */
     final AtomicInteger numThreadCaches = new AtomicInteger();
 
@@ -143,6 +143,8 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         for (int i = 0; i < smallSubpagePools.length; i ++) {
             smallSubpagePools[i] = newSubpagePoolHead(pageSize);
         }
+
+        // todo 为毛没有normal
 
         /**
          *
@@ -206,7 +208,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
      * @return
      */
     PooledByteBuf<T> allocate(PoolThreadCache cache, int reqCapacity, int maxCapacity) {
-        // 创建一个空的byteBuffer
+        // 创建一个空的byteBuffer 创建buffer的流程要分析
         PooledByteBuf<T> buf = newByteBuf(maxCapacity);
         // 规格化
         allocate(cache, buf, reqCapacity);
@@ -792,11 +794,6 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
         /**
          *
-         * @param pageSize
-         * @param maxOrder
-         * @param pageShifts
-         * @param chunkSize
-         * @return
          */
         @Override
         protected PoolChunk<byte[]> newChunk(int pageSize, int maxOrder, int pageShifts, int chunkSize) {
@@ -862,8 +859,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         int offsetCacheLine(ByteBuffer memory) {
             // We can only calculate the offset if Unsafe is present as otherwise directBufferAddress(...) will
             // throw an NPE.
-            int remainder = HAS_UNSAFE
-                    ? (int) (PlatformDependent.directBufferAddress(memory) & directMemoryCacheAlignmentMask) : 0;
+            int remainder = HAS_UNSAFE ? (int) (PlatformDependent.directBufferAddress(memory) & directMemoryCacheAlignmentMask) : 0;
 
             // offset = alignment - address & (alignment - 1)
             return directMemoryCacheAlignment - remainder;
@@ -871,11 +867,6 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
         /**
          *
-         * @param pageSize
-         * @param maxOrder
-         * @param pageShifts
-         * @param chunkSize
-         * @return
          */
         @Override
         protected PoolChunk<ByteBuffer> newChunk(int pageSize, int maxOrder, int pageShifts, int chunkSize) {
@@ -898,8 +889,14 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         }
 
         private static ByteBuffer allocateDirect(int capacity) {
-            return PlatformDependent.useDirectBufferNoCleaner() ?
-                    PlatformDependent.allocateDirectNoCleaner(capacity) : ByteBuffer.allocateDirect(capacity);
+            boolean b = PlatformDependent.useDirectBufferNoCleaner();
+            if (b) {
+                return PlatformDependent.allocateDirectNoCleaner(capacity);
+            }
+            return ByteBuffer.allocateDirect(capacity);
+
+//            return PlatformDependent.useDirectBufferNoCleaner() ?
+//                    PlatformDependent.allocateDirectNoCleaner(capacity) : ByteBuffer.allocateDirect(capacity);
         }
 
         @Override

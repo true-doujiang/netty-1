@@ -92,9 +92,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         return buf;
     }
 
-    /**
-     *
-     */
+    //
     private final boolean directByDefault;
     private final ByteBuf emptyBuf;
 

@@ -187,10 +187,9 @@ public final class PlatformDependent {
         // We should always prefer direct buffers by default if we can use a Cleaner to release direct buffers.
         DIRECT_BUFFER_PREFERRED = CLEANER != NOOP && !SystemPropertyUtil.getBoolean("io.netty.noPreferDirect", false);
         if (logger.isDebugEnabled()) {
+            // true
             logger.debug("-Dio.netty.noPreferDirect: {}", !DIRECT_BUFFER_PREFERRED);
         }
-        // true
-        System.out.println("-Dio.netty.noPreferDirect = " + DIRECT_BUFFER_PREFERRED);
 
         /*
          * We do not want to log this message if unsafe is explicitly disabled. Do not remove the explicit no unsafe

@@ -83,7 +83,6 @@ public abstract class AbstractByteBuf extends ByteBuf {
 
     /**
      * 构造器
-     * @param maxCapacity
      */
     protected AbstractByteBuf(int maxCapacity) {
         checkPositiveOrZero(maxCapacity, "maxCapacity");

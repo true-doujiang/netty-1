@@ -39,13 +39,9 @@ final class PlatformDependent0 {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PlatformDependent0.class);
 
-    /**
-     *
-     */
+    //
     private static final long ADDRESS_FIELD_OFFSET;
-    /**
-     *
-     */
+    //
     private static final long BYTE_ARRAY_BASE_OFFSET;
 
     private static final Constructor<?> DIRECT_BUFFER_CONSTRUCTOR;

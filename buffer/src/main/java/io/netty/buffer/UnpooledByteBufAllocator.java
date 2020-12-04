@@ -251,8 +251,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
      */
     private static final class InstrumentedUnpooledUnsafeDirectByteBuf extends UnpooledUnsafeDirectByteBuf {
 
-        InstrumentedUnpooledUnsafeDirectByteBuf(
-                UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
+        InstrumentedUnpooledUnsafeDirectByteBuf(UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
             super(alloc, initialCapacity, maxCapacity);
         }
 

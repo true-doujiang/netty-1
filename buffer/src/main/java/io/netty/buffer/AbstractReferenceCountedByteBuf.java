@@ -55,6 +55,10 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
         return (rawCnt & 1) != 0 ? 0 : rawCnt >>> 1;
     }
 
+
+    /**
+     * 构造器
+     */
     protected AbstractReferenceCountedByteBuf(int maxCapacity) {
         super(maxCapacity);
     }
