@@ -98,14 +98,11 @@ final class PoolThreadCache {
         if (directArena != null) {
             // len = 32   tinyCacheSize=512
             tinySubPageDirectCaches = createSubPageCaches(tinyCacheSize, PoolArena.numTinySubpagePools, SizeClass.Tiny);
-
             // len = 4    smallCacheSize=256
             smallSubPageDirectCaches = createSubPageCaches(smallCacheSize, directArena.numSmallSubpagePools, SizeClass.Small);
-
             numShiftsNormalDirect = log2(directArena.pageSize);
             // len = 3     normalCacheSize=64
             normalDirectCaches = createNormalCaches(normalCacheSize, maxCachedBufferCapacity, directArena);
-
             // 这块区域被使用了就加1 这样leastUsedArena() 就会选择下一块区域
             directArena.numThreadCaches.getAndIncrement();
         } else {
@@ -117,17 +114,13 @@ final class PoolThreadCache {
         }
 
         if (heapArena != null) {
-
             // Create the caches for the heap allocations    len = 32
             tinySubPageHeapCaches = createSubPageCaches(tinyCacheSize, PoolArena.numTinySubpagePools, SizeClass.Tiny);
-
             // len = 4
             smallSubPageHeapCaches = createSubPageCaches(smallCacheSize, heapArena.numSmallSubpagePools, SizeClass.Small);
-
             numShiftsNormalHeap = log2(heapArena.pageSize);
             // len = 3
             normalHeapCaches = createNormalCaches(normalCacheSize, maxCachedBufferCapacity, heapArena);
-
             // 这块区域被使用了就加1 这样leastUsedArena() 就会选择下一块区域
             heapArena.numThreadCaches.getAndIncrement();
         } else {
@@ -142,7 +135,6 @@ final class PoolThreadCache {
         if ((tinySubPageDirectCaches != null || smallSubPageDirectCaches != null || normalDirectCaches != null
                 || tinySubPageHeapCaches != null || smallSubPageHeapCaches != null || normalHeapCaches != null)
                 && freeSweepAllocationThreshold < 1) {
-
             throw new IllegalArgumentException("freeSweepAllocationThreshold: " + freeSweepAllocationThreshold + " (expected: > 0)");
         }
     }

@@ -39,42 +39,29 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PooledByteBufAllocator.class);
 
-    /**
-     *  在static{} 代码块中初始化的   8  nHeapArena  cup核心数2倍，每个线程取一个 heapArena
-     */
+    // 在static{} 代码块中初始化的   8  nHeapArena  cup核心数2倍，每个线程取一个 heapArena
     private static final int DEFAULT_NUM_HEAP_ARENA;
-    /**
-     * 在static{} 代码块中初始化的   8   nDirectArena  cup核心数2倍，每个线程取一个 directArena
-     */
+    // 在static{} 代码块中初始化的   8   nDirectArena  cup核心数2倍，每个线程取一个 directArena
     private static final int DEFAULT_NUM_DIRECT_ARENA;
 
     // 8192
     private static final int DEFAULT_PAGE_SIZE;
-
     // 11
     private static final int DEFAULT_MAX_ORDER; // 8192 << 11 = 16 MiB per chunk
-
     // 512
     private static final int DEFAULT_TINY_CACHE_SIZE;
-
     // 256
     private static final int DEFAULT_SMALL_CACHE_SIZE;
-
     // 64
     private static final int DEFAULT_NORMAL_CACHE_SIZE;
-
     // 32768
     private static final int DEFAULT_MAX_CACHED_BUFFER_CAPACITY;
-
     // 8192
     private static final int DEFAULT_CACHE_TRIM_INTERVAL;
-
     // true
     private static final boolean DEFAULT_USE_CACHE_FOR_ALL_THREADS;
-
     // 0  传到PoolArena中了   有啥用 todo
     private static final int DEFAULT_DIRECT_MEMORY_CACHE_ALIGNMENT;
-
     // 1023
     static final int DEFAULT_MAX_CACHED_BYTEBUFFERS_PER_CHUNK;
 
@@ -261,8 +248,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         }
 
         if ((directMemoryCacheAlignment & -directMemoryCacheAlignment) != directMemoryCacheAlignment) {
-            throw new IllegalArgumentException("directMemoryCacheAlignment: "
-                    + directMemoryCacheAlignment + " (expected: power of two)");
+            throw new IllegalArgumentException("directMemoryCacheAlignment: " + directMemoryCacheAlignment + " (expected: power of two)");
         }
         // 2^13 = 8192
         int pageShifts = validateAndCalculatePageShifts(pageSize);
@@ -271,12 +257,9 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             heapArenas = newArenaArray(nHeapArena);
             List<PoolArenaMetric> metrics = new ArrayList<PoolArenaMetric>(heapArenas.length);
             for (int i = 0; i < heapArenas.length; i ++) {
-
                 PoolArena.HeapArena arena = new PoolArena.HeapArena(this, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
                 heapArenas[i] = arena;
-
                 //System.out.println(Thread.currentThread().getName() + " 分配器创建PoolArena.HeapArena " + i + " = " + arena);
-
                 metrics.add(arena);
             }
             heapArenaMetrics = Collections.unmodifiableList(metrics);
@@ -291,9 +274,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             for (int i = 0; i < directArenas.length; i ++) {
                 PoolArena.DirectArena arena = new PoolArena.DirectArena(this, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
                 directArenas[i] = arena;
-
                 //System.out.println(Thread.currentThread().getName() + " 分配器创建PoolArena.DirectArena " + i + " = " + arena);
-
                 metrics.add(arena);
             }
             directArenaMetrics = Collections.unmodifiableList(metrics);
@@ -333,8 +314,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         int chunkSize = pageSize;
         for (int i = maxOrder; i > 0; i --) {
             if (chunkSize > MAX_CHUNK_SIZE / 2) {
-                throw new IllegalArgumentException(String.format(
-                        "pageSize (%d) << maxOrder (%d) must not exceed %d", pageSize, maxOrder, MAX_CHUNK_SIZE));
+                throw new IllegalArgumentException(String.format("pageSize (%d) << maxOrder (%d) must not exceed %d", pageSize, maxOrder, MAX_CHUNK_SIZE));
             }
             chunkSize <<= 1;
         }

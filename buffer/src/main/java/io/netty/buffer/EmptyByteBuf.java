@@ -39,6 +39,7 @@ import java.nio.charset.Charset;
 public final class EmptyByteBuf extends ByteBuf {
 
     static final int EMPTY_BYTE_BUF_HASH_CODE = 1;
+    //干嘛用的  todo
     private static final ByteBuffer EMPTY_BYTE_BUFFER = ByteBuffer.allocateDirect(0);
     private static final long EMPTY_BYTE_BUFFER_ADDRESS;
 

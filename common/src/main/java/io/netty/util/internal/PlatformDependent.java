@@ -80,9 +80,7 @@ public final class PlatformDependent {
 
     private static final boolean CAN_ENABLE_TCP_NODELAY_BY_DEFAULT = !isAndroid();
 
-    /**
-     *
-     */
+    //null
     private static final Throwable UNSAFE_UNAVAILABILITY_CAUSE = unsafeUnavailabilityCause0();
     private static final boolean DIRECT_BUFFER_PREFERRED;
     private static final long MAX_DIRECT_MEMORY = maxDirectMemory0();
@@ -162,10 +160,8 @@ public final class PlatformDependent {
         logger.debug("-Dio.netty.maxDirectMemory: {} bytes", maxDirectMemory);
         DIRECT_MEMORY_LIMIT = maxDirectMemory >= 1 ? maxDirectMemory : MAX_DIRECT_MEMORY;
 
-        int tryAllocateUninitializedArray =
-                SystemPropertyUtil.getInt("io.netty.uninitializedArrayAllocationThreshold", 1024);
-        UNINITIALIZED_ARRAY_ALLOCATION_THRESHOLD = javaVersion() >= 9 && PlatformDependent0.hasAllocateArrayMethod() ?
-                tryAllocateUninitializedArray : -1;
+        int tryAllocateUninitializedArray = SystemPropertyUtil.getInt("io.netty.uninitializedArrayAllocationThreshold", 1024);
+        UNINITIALIZED_ARRAY_ALLOCATION_THRESHOLD = javaVersion() >= 9 && PlatformDependent0.hasAllocateArrayMethod() ? tryAllocateUninitializedArray : -1;
         logger.debug("-Dio.netty.uninitializedArrayAllocationThreshold: {}", UNINITIALIZED_ARRAY_ALLOCATION_THRESHOLD);
 
         MAYBE_SUPER_USER = maybeSuperUser0();
@@ -203,6 +199,10 @@ public final class PlatformDependent {
         }
     }
     // -----------static end-----------
+
+
+
+
 
     public static boolean hasDirectBufferNoCleanerConstructor() {
         return PlatformDependent0.hasDirectBufferNoCleanerConstructor();
