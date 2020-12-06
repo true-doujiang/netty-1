@@ -44,7 +44,6 @@ final class PoolThreadCache {
 
     // 从分配器中获取到的一块内存区域
     final PoolArena<byte[]> heapArena;
-
     // 从分配器中获取到的一块内存区域
     final PoolArena<ByteBuffer> directArena;
 
@@ -96,12 +95,12 @@ final class PoolThreadCache {
         this.directArena = directArena;
 
         if (directArena != null) {
-            // len = 32   tinyCacheSize=512
+            // len = 32   tinyCacheSize=512     里面的队列长度512
             tinySubPageDirectCaches = createSubPageCaches(tinyCacheSize, PoolArena.numTinySubpagePools, SizeClass.Tiny);
-            // len = 4    smallCacheSize=256
+            // len = 4    smallCacheSize=256    里面的队列长度256
             smallSubPageDirectCaches = createSubPageCaches(smallCacheSize, directArena.numSmallSubpagePools, SizeClass.Small);
             numShiftsNormalDirect = log2(directArena.pageSize);
-            // len = 3     normalCacheSize=64
+            // len = 3     normalCacheSize=64   里面的队列长度64
             normalDirectCaches = createNormalCaches(normalCacheSize, maxCachedBufferCapacity, directArena);
             // 这块区域被使用了就加1 这样leastUsedArena() 就会选择下一块区域
             directArena.numThreadCaches.getAndIncrement();

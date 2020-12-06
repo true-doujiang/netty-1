@@ -493,11 +493,15 @@ final class PlatformDependent0 {
         return newDirectBuffer(UNSAFE.reallocateMemory(directBufferAddress(buffer), capacity), capacity);
     }
 
+    /**
+     *
+     */
     static ByteBuffer allocateDirectNoCleaner(int capacity) {
         // Calling malloc with capacity of 0 may return a null ptr or a memory address that can be used.
         // Just use 1 to make it safe to use in all cases:
         // See: http://pubs.opengroup.org/onlinepubs/009695399/functions/malloc.html
-        return newDirectBuffer(UNSAFE.allocateMemory(Math.max(1, capacity)), capacity);
+        long address = UNSAFE.allocateMemory(Math.max(1, capacity));
+        return newDirectBuffer(address, capacity);
     }
 
     static boolean hasAllocateArrayMethod() {
@@ -515,14 +519,10 @@ final class PlatformDependent0 {
     }
 
     /**
-     *
-     * @param address
-     * @param capacity
-     * @return
+     * 反射创建一个 directBuffer
      */
     static ByteBuffer newDirectBuffer(long address, int capacity) {
         ObjectUtil.checkPositiveOrZero(capacity, "capacity");
-
         try {
             return (ByteBuffer) DIRECT_BUFFER_CONSTRUCTOR.newInstance(address, capacity);
         } catch (Throwable cause) {
@@ -536,8 +536,6 @@ final class PlatformDependent0 {
 
     /**
      *
-     * @param buffer
-     * @return
      */
     static long directBufferAddress(ByteBuffer buffer) {
         return getLong(buffer, ADDRESS_FIELD_OFFSET);

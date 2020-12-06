@@ -41,6 +41,9 @@ public abstract class Recycler<T> {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(Recycler.class);
 
+    /**
+     *
+     */
     @SuppressWarnings("rawtypes")
     private static final Handle NOOP_HANDLE = new Handle() {
         @Override
@@ -48,6 +51,7 @@ public abstract class Recycler<T> {
             // NOOP
         }
     };
+
     private static final AtomicInteger ID_GENERATOR = new AtomicInteger(Integer.MIN_VALUE);
     private static final int OWN_THREAD_ID = ID_GENERATOR.getAndIncrement();
     private static final int DEFAULT_INITIAL_MAX_CAPACITY_PER_THREAD = 4 * 1024; // Use 4k instances as default.
@@ -71,8 +75,7 @@ public abstract class Recycler<T> {
         DEFAULT_MAX_CAPACITY_PER_THREAD = maxCapacityPerThread;
 
         MAX_SHARED_CAPACITY_FACTOR = max(2,
-                SystemPropertyUtil.getInt("io.netty.recycler.maxSharedCapacityFactor",
-                        2));
+                SystemPropertyUtil.getInt("io.netty.recycler.maxSharedCapacityFactor", 2));
 
         MAX_DELAYED_QUEUES_PER_THREAD = max(0,
                 SystemPropertyUtil.getInt("io.netty.recycler.maxDelayedQueuesPerThread",
@@ -109,6 +112,7 @@ public abstract class Recycler<T> {
     private final int ratioMask;
     private final int maxDelayedQueuesPerThread;
 
+    //
     private final FastThreadLocal<Stack<T>> threadLocal = new FastThreadLocal<Stack<T>>() {
         @Override
         protected Stack<T> initialValue() {
@@ -155,11 +159,17 @@ public abstract class Recycler<T> {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public final T get() {
         if (maxCapacityPerThread == 0) {
+            // 没有则调用子类方法
             return newObject((Handle<T>) NOOP_HANDLE);
         }
+
         Stack<T> stack = threadLocal.get();
         DefaultHandle<T> handle = stack.pop();
         if (handle == null) {
@@ -195,6 +205,9 @@ public abstract class Recycler<T> {
         return threadLocal.get().size;
     }
 
+    /**
+     * 抽象方法，子类实现
+     */
     protected abstract T newObject(Handle<T> handle);
 
     /**
@@ -207,7 +220,6 @@ public abstract class Recycler<T> {
 
     /**
      *
-     * @param <T>
      */
     static final class DefaultHandle<T> implements Handle<T> {
         private int lastRecycledId;
@@ -240,8 +252,7 @@ public abstract class Recycler<T> {
     /**
      *
      */
-    private static final FastThreadLocal<Map<Stack<?>, WeakOrderQueue>> DELAYED_RECYCLED =
-            new FastThreadLocal<Map<Stack<?>, WeakOrderQueue>>() {
+    private static final FastThreadLocal<Map<Stack<?>, WeakOrderQueue>> DELAYED_RECYCLED = new FastThreadLocal<Map<Stack<?>, WeakOrderQueue>>() {
         @Override
         protected Map<Stack<?>, WeakOrderQueue> initialValue() {
             return new WeakHashMap<Stack<?>, WeakOrderQueue>();
@@ -358,8 +369,7 @@ public abstract class Recycler<T> {
          */
         static WeakOrderQueue allocate(Stack<?> stack, Thread thread) {
             // We allocated a Link so reserve the space
-            return Head.reserveSpace(stack.availableSharedCapacity, LINK_CAPACITY)
-                    ? newQueue(stack, thread) : null;
+            return Head.reserveSpace(stack.availableSharedCapacity, LINK_CAPACITY) ? newQueue(stack, thread) : null;
         }
 
         void add(DefaultHandle<?> handle) {
@@ -460,7 +470,6 @@ public abstract class Recycler<T> {
 
     /**
      *
-     * @param <T>
      */
     static final class Stack<T> {
 
@@ -672,8 +681,15 @@ public abstract class Recycler<T> {
             return false;
         }
 
+        /**
+         * 创建一个defaultHandler
+         */
         DefaultHandle<T> newHandle() {
             return new DefaultHandle<T>(this);
         }
     }
+    // -----Stack end -------------------
+
+
+
 }

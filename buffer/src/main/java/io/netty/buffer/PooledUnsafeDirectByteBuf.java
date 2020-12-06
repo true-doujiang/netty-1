@@ -37,15 +37,14 @@ final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
     private static final Recycler<PooledUnsafeDirectByteBuf> RECYCLER = new Recycler<PooledUnsafeDirectByteBuf>() {
         @Override
         protected PooledUnsafeDirectByteBuf newObject(Handle<PooledUnsafeDirectByteBuf> handle) {
-            return new PooledUnsafeDirectByteBuf(handle, 0);
+            PooledUnsafeDirectByteBuf byteBuf = new PooledUnsafeDirectByteBuf(handle, 0);
+            System.out.println("对象池没又有可用的.  new byteBuf = " + byteBuf);
+            return byteBuf;
         }
     };
 
     /**
      * 使用对象池创建一个ByteBuffer
-     *
-     * @param maxCapacity
-     * @return
      */
     static PooledUnsafeDirectByteBuf newInstance(int maxCapacity) {
         // 有就拿来直接用, 没有则新创建一个
@@ -54,15 +53,19 @@ final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
         return buf;
     }
 
+    // 等于nio directBuffer中address字段
     private long memoryAddress;
 
+
+    /**
+     * 构造器
+     */
     private PooledUnsafeDirectByteBuf(Recycler.Handle<PooledUnsafeDirectByteBuf> recyclerHandle, int maxCapacity) {
         super(recyclerHandle, maxCapacity);
     }
 
     @Override
-    void init(PoolChunk<ByteBuffer> chunk, ByteBuffer nioBuffer,
-              long handle, int offset, int length, int maxLength, PoolThreadCache cache) {
+    void init(PoolChunk<ByteBuffer> chunk, ByteBuffer nioBuffer, long handle, int offset, int length, int maxLength, PoolThreadCache cache) {
         super.init(chunk, nioBuffer, handle, offset, length, maxLength, cache);
         initMemoryAddress();
     }
@@ -73,6 +76,9 @@ final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
         initMemoryAddress();
     }
 
+    /**
+     * 获取nio buffer的存储空间的内存地址
+     */
     private void initMemoryAddress() {
         memoryAddress = PlatformDependent.directBufferAddress(memory) + offset;
     }

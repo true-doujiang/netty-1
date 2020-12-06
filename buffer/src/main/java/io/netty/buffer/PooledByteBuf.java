@@ -30,7 +30,6 @@ import java.nio.ByteOrder;
  *       direct
  *              safe
  *              unsafe
- *
  */
 abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
@@ -55,25 +54,22 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
     //
     PoolThreadCache cache;
-
     ByteBuffer tmpNioBuf;
 
-    /**
-     *
-     */
+    //
     private ByteBufAllocator allocator;
 
 
-
-
+    /**
+     * 构造器
+     */
     @SuppressWarnings("unchecked")
     protected PooledByteBuf(Recycler.Handle<? extends PooledByteBuf<T>> recyclerHandle, int maxCapacity) {
         super(maxCapacity);
         this.recyclerHandle = (Handle<PooledByteBuf<T>>) recyclerHandle;
     }
 
-    void init(PoolChunk<T> chunk, ByteBuffer nioBuffer,
-              long handle, int offset, int length, int maxLength, PoolThreadCache cache) {
+    void init(PoolChunk<T> chunk, ByteBuffer nioBuffer, long handle, int offset, int length, int maxLength, PoolThreadCache cache) {
         init0(chunk, nioBuffer, handle, offset, length, maxLength, cache);
     }
 
@@ -81,8 +77,7 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
         init0(chunk, null, 0, chunk.offset, length, length, null);
     }
 
-    private void init0(PoolChunk<T> chunk, ByteBuffer nioBuffer,
-                       long handle, int offset, int length, int maxLength, PoolThreadCache cache) {
+    private void init0(PoolChunk<T> chunk, ByteBuffer nioBuffer, long handle, int offset, int length, int maxLength, PoolThreadCache cache) {
         assert handle >= 0;
         assert chunk != null;
 

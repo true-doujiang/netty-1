@@ -67,6 +67,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     final int chunkSize;
     //
     final int subpageOverflowMask;
+    //
     final int numSmallSubpagePools;
     final int directMemoryCacheAlignment;
     final int directMemoryCacheAlignmentMask;
@@ -248,10 +249,6 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     /**
      * 先看下分配内存的入口方法allocate
      * 这个方法进行具体申请内存的操作
-     *
-     * @param cache
-     * @param buf
-     * @param reqCapacity
      */
     private void allocate(PoolThreadCache cache, PooledByteBuf<T> buf, final int reqCapacity) {
         // 内存规格化
@@ -264,7 +261,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             boolean tiny = isTiny(normCapacity);
 
             if (tiny) { // < 512
-                // 使用缓存
+                // 优先使用缓存
                 if (cache.allocateTiny(this, buf, reqCapacity, normCapacity)) {
                     // was able to allocate out of the cache so move on
                     return;
@@ -272,7 +269,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
                 tableIdx = tinyIdx(normCapacity);
                 table = tinySubpagePools;
             } else {
-                // 512-8K
+                // // 优先使用缓存   512-8K
                 if (cache.allocateSmall(this, buf, reqCapacity, normCapacity)) {
                     // was able to allocate out of the cache so move on
                     return;
@@ -309,7 +306,9 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             return;
         }
 
+        // normal级别处理
         if (normCapacity <= chunkSize) {
+            // 优先使用缓存
             if (cache.allocateNormal(this, buf, reqCapacity, normCapacity)) {
                 // was able to allocate out of the cache so move on
                 return;
@@ -324,6 +323,9 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         }
     }
 
+    /**
+     * 调用该方法必须加锁
+     */
     // Method must be called inside synchronized(this) { ... } block
     private void allocateNormal(PooledByteBuf<T> buf, int reqCapacity, int normCapacity) {
         if (q050.allocate(buf, reqCapacity, normCapacity) || q025.allocate(buf, reqCapacity, normCapacity) ||
@@ -871,11 +873,12 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         @Override
         protected PoolChunk<ByteBuffer> newChunk(int pageSize, int maxOrder, int pageShifts, int chunkSize) {
             if (directMemoryCacheAlignment == 0) {
-                return new PoolChunk<ByteBuffer>(this, allocateDirect(chunkSize), pageSize, maxOrder, pageShifts, chunkSize, 0);
+                // 创建个nio directBuffer
+                ByteBuffer directBuffer = allocateDirect(chunkSize);
+                return new PoolChunk<ByteBuffer>(this, directBuffer, pageSize, maxOrder, pageShifts, chunkSize, 0);
             }
 
             final ByteBuffer memory = allocateDirect(chunkSize + directMemoryCacheAlignment);
-
             return new PoolChunk<ByteBuffer>(this, memory, pageSize, maxOrder, pageShifts, chunkSize, offsetCacheLine(memory));
         }
 
