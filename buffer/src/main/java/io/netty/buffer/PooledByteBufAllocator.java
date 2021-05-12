@@ -227,17 +227,21 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
                 useCacheForAllThreads, DEFAULT_DIRECT_MEMORY_CACHE_ALIGNMENT);
     }
 
+    /**
+     * 最终还是调用我
+     */
     public PooledByteBufAllocator(boolean preferDirect, int nHeapArena, int nDirectArena, int pageSize, int maxOrder,
                                   int tinyCacheSize, int smallCacheSize, int normalCacheSize,
                                   boolean useCacheForAllThreads, int directMemoryCacheAlignment) {
         super(preferDirect);
+
         // PoolThreadLocalCache 内部类  为了能获取本类 heapArenas, heapArenas
         threadCache = new PoolThreadLocalCache(useCacheForAllThreads);
 
         this.tinyCacheSize = tinyCacheSize;// 512
         this.smallCacheSize = smallCacheSize;//256
         this.normalCacheSize = normalCacheSize;//64
-        chunkSize = validateAndCalculateChunkSize(pageSize, maxOrder);//16777214
+        chunkSize = validateAndCalculateChunkSize(pageSize, maxOrder);//16777216
 
         checkPositiveOrZero(nHeapArena, "nHeapArena");
         checkPositiveOrZero(nDirectArena, "nDirectArena");

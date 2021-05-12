@@ -147,7 +147,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
     //
     // This may be null if the PoolChunk is unpooled as pooling the ByteBuffer instances does not make any sense here.
     private final Deque<ByteBuffer> cachedNioBuffers;
-
+    // 记录还有多少内存字节可以使用
     private int freeBytes;
 
     // 双向链表
@@ -170,6 +170,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
         this.maxOrder = maxOrder;
         this.chunkSize = chunkSize;
         this.offset = offset;
+
         unusable = (byte) (maxOrder + 1);
         log2ChunkSize = log2(chunkSize);
         subpageOverflowMask = ~(pageSize - 1);
@@ -178,7 +179,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
         assert maxOrder < 30 : "maxOrder should be < 30, but is: " + maxOrder;
         maxSubpageAllocs = 1 << maxOrder;
 
-        // Generate the memory map.
+        // Generate the memory map.  memoryMap/depthMap长度都是4096
         memoryMap = new byte[maxSubpageAllocs << 1];
         depthMap = new byte[memoryMap.length];
 
@@ -309,8 +310,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
     }
 
     /**
-     * Algorithm to allocate an index in memoryMap when we query for a free node
-     * at depth d
+     * Algorithm to allocate an index in memoryMap when we query for a free node at depth d
      *
      * @param d depth
      * @return index in memoryMap
@@ -318,10 +318,12 @@ final class PoolChunk<T> implements PoolChunkMetric {
     private int allocateNode(int d) {
         int id = 1;
         int initial = - (1 << d); // has last d bits = 0 and rest all = 1
+        // memoryMap[id];
         byte val = value(id);
         if (val > d) { // unusable
             return -1;
         }
+
         while (val < d || (id & initial) == 0) { // id & initial == 1 << d for all ids at depth d, for < d it is 0
             id <<= 1;
             val = value(id);
@@ -330,9 +332,14 @@ final class PoolChunk<T> implements PoolChunkMetric {
                 val = value(id);
             }
         }
+
         byte value = value(id);
         assert value == d && (id & initial) == 1 << d : String.format("val = %d, id & initial = %d, d = %d", value, id & initial, d);
-        setValue(id, unusable); // mark as unusable
+
+        // mark as unusable
+        setValue(id, unusable);
+
+        //上层节点也标记为不可以用
         updateParentsAlloc(id);
         return id;
     }
@@ -347,11 +354,13 @@ final class PoolChunk<T> implements PoolChunkMetric {
      */
     private long allocateRun(int normCapacity) {
         int d = maxOrder - (log2(normCapacity) - pageShifts);
+        // index in memoryMap
         int id = allocateNode(d);
         if (id < 0) {
             return id;
         }
-        freeBytes -= runLength(id);
+        int len = runLength(id);
+        freeBytes -= len;
         return id;
     }
 
@@ -434,10 +443,15 @@ final class PoolChunk<T> implements PoolChunkMetric {
         int bitmapIdx = bitmapIdx(handle);
 
         if (bitmapIdx == 0) {
+            // memoryMap[id]; 前面已做过unusable标记
             byte val = value(memoryMapIdx);
             assert val == unusable : String.valueOf(val);
-            int i = runOffset(memoryMapIdx) + offset;
-            buf.init(this, nioBuffer, handle, i, reqCapacity, runLength(memoryMapIdx), arena.parent.threadCache());
+
+            int offset = runOffset(memoryMapIdx) + this.offset;
+            int length = runLength(memoryMapIdx);
+            PoolThreadCache poolThreadCache = arena.parent.threadCache();
+
+            buf.init(this, nioBuffer, handle, offset, reqCapacity, length, poolThreadCache);
         } else {
             initBufWithSubpage(buf, nioBuffer, handle, bitmapIdx, reqCapacity);
         }

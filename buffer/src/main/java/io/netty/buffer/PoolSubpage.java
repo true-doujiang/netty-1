@@ -22,7 +22,10 @@ package io.netty.buffer;
  */
 final class PoolSubpage<T> implements PoolSubpageMetric {
 
+
     final PoolChunk<T> chunk;
+
+
     private final int memoryMapIdx;
     private final int runOffset;
     private final int pageSize;
@@ -44,15 +47,24 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
     //private long pad0, pad1, pad2, pad3, pad4, pad5, pad6, pad7;
 
     /** Special constructor that creates a linked list head */
+    /**
+     * 构造器1
+     * 调用方： io.netty.buffer.PoolArena#newSubpagePoolHead(int)
+     */
     PoolSubpage(int pageSize) {
         chunk = null;
+
         memoryMapIdx = -1;
         runOffset = -1;
         elemSize = -1;
+
         this.pageSize = pageSize;
         bitmap = null;
     }
 
+    /**
+     * 构造器2
+     */
     PoolSubpage(PoolSubpage<T> head, PoolChunk<T> chunk, int memoryMapIdx, int runOffset, int pageSize, int elemSize) {
         this.chunk = chunk;
         this.memoryMapIdx = memoryMapIdx;
@@ -61,6 +73,9 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
         bitmap = new long[pageSize >>> 10]; // pageSize / 16 / 64
         init(head, elemSize);
     }
+
+
+
 
     void init(PoolSubpage<T> head, int elemSize) {
         doNotDestroy = true;
@@ -84,6 +99,7 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
      * Returns the bitmap index of the subpage allocation.
      */
     long allocate() {
+
         if (elemSize == 0) {
             return toHandle(0);
         }
@@ -95,7 +111,9 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
         final int bitmapIdx = getNextAvail();
         int q = bitmapIdx >>> 6;
         int r = bitmapIdx & 63;
+
         assert (bitmap[q] >>> r & 1) == 0;
+
         bitmap[q] |= 1L << r;
 
         if (-- numAvail == 0) {
@@ -110,9 +128,11 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
      *         {@code false} if this subpage is not used by its chunk and thus it's OK to be released.
      */
     boolean free(PoolSubpage<T> head, int bitmapIdx) {
+
         if (elemSize == 0) {
             return true;
         }
+
         int q = bitmapIdx >>> 6;
         int r = bitmapIdx & 63;
         assert (bitmap[q] >>> r & 1) != 0;

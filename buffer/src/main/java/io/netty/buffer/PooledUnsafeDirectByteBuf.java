@@ -53,7 +53,7 @@ final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
         return buf;
     }
 
-    // 等于nio directBuffer中address字段
+    // 分到nio directBuffer中内存的那块地址
     private long memoryAddress;
 
 

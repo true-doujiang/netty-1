@@ -32,6 +32,7 @@ import java.nio.ByteBuffer;
  * @param <T>
  */
 final class PoolChunkList<T> implements PoolChunkListMetric {
+
     private static final Iterator<PoolChunkMetric> EMPTY_METRICS = Collections.<PoolChunkMetric>emptyList().iterator();
 
     //
@@ -42,15 +43,22 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     private final int minUsage;
     private final int maxUsage;
     private final int maxCapacity;
+
+    //
     private PoolChunk<T> head;
 
     // 上一个节点
     // This is only update once when create the linked like list of PoolChunkList in PoolArena constructor.
     private PoolChunkList<T> prevList;
 
+
+
     // TODO: Test if adding padding helps under contention
     //private long pad0, pad1, pad2, pad3, pad4, pad5, pad6, pad7;
-
+    /**
+     * 构造器
+     *
+     */
     PoolChunkList(PoolArena<T> arena, PoolChunkList<T> nextList, int minUsage, int maxUsage, int chunkSize) {
         assert minUsage <= maxUsage;
         this.arena = arena;
@@ -84,12 +92,19 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
         return  (int) (chunkSize * (100L - minUsage) / 100L);
     }
 
+    /**
+     * 组装上一个节点
+     */
     void prevList(PoolChunkList<T> prevList) {
         assert this.prevList == null;
         this.prevList = prevList;
     }
 
+    /**
+     *
+     */
     boolean allocate(PooledByteBuf<T> buf, int reqCapacity, int normCapacity) {
+
         if (normCapacity > maxCapacity) {
             // Either this PoolChunkList is empty or the requested capacity is larger then the capacity which can
             // be handled by the PoolChunks that are contained in this PoolChunkList.
@@ -146,10 +161,12 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     }
 
     void add(PoolChunk<T> chunk) {
+
         if (chunk.usage() >= maxUsage) {
             nextList.add(chunk);
             return;
         }
+
         add0(chunk);
     }
 

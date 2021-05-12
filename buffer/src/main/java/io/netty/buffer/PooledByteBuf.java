@@ -36,26 +36,19 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
     //
     private final Recycler.Handle<PooledByteBuf<T>> recyclerHandle;
 
-    //
+    // 记录本buffer使用的内存在哪个chunk上
     protected PoolChunk<T> chunk;
     // 4611686018427389952
     protected long handle;
-
-    /**
-     * heap： 用数组
-     * direct： 用directBuffer java.nio.DirectByteBuffer[pos=0 lim=16777216 cap=16777216]
-     */
+    // chunk上的内存 heap：用数组  direct：用directBuffer
     protected T memory;
-
-    //
+    //memoryMap中节点的偏移量
     protected int offset;
     protected int length;
-    int maxLength;
-
+    int maxLength;// buffer的大小
     //
     PoolThreadCache cache;
     ByteBuffer tmpNioBuf;
-
     //
     private ByteBufAllocator allocator;
 
@@ -69,6 +62,9 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
         this.recyclerHandle = (Handle<PooledByteBuf<T>>) recyclerHandle;
     }
 
+    /**
+     * PoolChunk中调用，给buffer初始化内存
+     */
     void init(PoolChunk<T> chunk, ByteBuffer nioBuffer, long handle, int offset, int length, int maxLength, PoolThreadCache cache) {
         init0(chunk, nioBuffer, handle, offset, length, maxLength, cache);
     }
@@ -77,6 +73,9 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
         init0(chunk, null, 0, chunk.offset, length, length, null);
     }
 
+    /**
+     *
+     */
     private void init0(PoolChunk<T> chunk, ByteBuffer nioBuffer, long handle, int offset, int length, int maxLength, PoolThreadCache cache) {
         assert handle >= 0;
         assert chunk != null;
