@@ -44,7 +44,6 @@ final class PoolThreadCache {
 
     // 从分配器中获取到的一块内存区域
     final PoolArena<byte[]> heapArena;
-
     // 从分配器中获取到的一块内存区域
     final PoolArena<ByteBuffer> directArena;
 
@@ -87,7 +86,7 @@ final class PoolThreadCache {
                     int tinyCacheSize, int smallCacheSize, int normalCacheSize,
                     int maxCachedBufferCapacity, int freeSweepAllocationThreshold) {
 
-        System.out.println(Thread.currentThread().getName() + " PoolThreadCache 构造器执行 " + this);
+        //System.out.println(Thread.currentThread().getName() + " PoolThreadCache 构造器执行 " + this);
 
         checkPositiveOrZero(maxCachedBufferCapacity, "maxCachedBufferCapacity");
 
@@ -96,16 +95,13 @@ final class PoolThreadCache {
         this.directArena = directArena;
 
         if (directArena != null) {
-            // len = 32
+            // len = 32   tinyCacheSize=512     里面的队列长度512
             tinySubPageDirectCaches = createSubPageCaches(tinyCacheSize, PoolArena.numTinySubpagePools, SizeClass.Tiny);
-
-            // len = 4
+            // len = 4    smallCacheSize=256    里面的队列长度256
             smallSubPageDirectCaches = createSubPageCaches(smallCacheSize, directArena.numSmallSubpagePools, SizeClass.Small);
-
             numShiftsNormalDirect = log2(directArena.pageSize);
-            // len = 3
+            // len = 3     normalCacheSize=64   里面的队列长度64
             normalDirectCaches = createNormalCaches(normalCacheSize, maxCachedBufferCapacity, directArena);
-
             // 这块区域被使用了就加1 这样leastUsedArena() 就会选择下一块区域
             directArena.numThreadCaches.getAndIncrement();
         } else {
@@ -117,17 +113,13 @@ final class PoolThreadCache {
         }
 
         if (heapArena != null) {
-
             // Create the caches for the heap allocations    len = 32
             tinySubPageHeapCaches = createSubPageCaches(tinyCacheSize, PoolArena.numTinySubpagePools, SizeClass.Tiny);
-
             // len = 4
             smallSubPageHeapCaches = createSubPageCaches(smallCacheSize, heapArena.numSmallSubpagePools, SizeClass.Small);
-
             numShiftsNormalHeap = log2(heapArena.pageSize);
             // len = 3
             normalHeapCaches = createNormalCaches(normalCacheSize, maxCachedBufferCapacity, heapArena);
-
             // 这块区域被使用了就加1 这样leastUsedArena() 就会选择下一块区域
             heapArena.numThreadCaches.getAndIncrement();
         } else {
@@ -142,18 +134,12 @@ final class PoolThreadCache {
         if ((tinySubPageDirectCaches != null || smallSubPageDirectCaches != null || normalDirectCaches != null
                 || tinySubPageHeapCaches != null || smallSubPageHeapCaches != null || normalHeapCaches != null)
                 && freeSweepAllocationThreshold < 1) {
-
             throw new IllegalArgumentException("freeSweepAllocationThreshold: " + freeSweepAllocationThreshold + " (expected: > 0)");
         }
     }
 
     /**
      *
-     * @param cacheSize
-     * @param numCaches
-     * @param sizeClass
-     * @param <T>
-     * @return
      */
     private static <T> MemoryRegionCache<T>[] createSubPageCaches(int cacheSize, int numCaches, SizeClass sizeClass) {
         if (cacheSize > 0 && numCaches > 0) {
@@ -163,7 +149,7 @@ final class PoolThreadCache {
                 // TODO: maybe use cacheSize / cache.length
                 SubPageMemoryRegionCache<T> memoryRegionCache = new SubPageMemoryRegionCache<T>(cacheSize, sizeClass);
                 memoryRegionCaches[i] = memoryRegionCache;
-                System.out.println(Thread.currentThread().getName() + " createSubPageCaches " + sizeClass + i + " = " + memoryRegionCache);
+                //System.out.println(Thread.currentThread().getName() + " createSubPageCaches " + sizeClass + i + " = " + memoryRegionCache);
             }
             return memoryRegionCaches;
         } else {
@@ -173,14 +159,8 @@ final class PoolThreadCache {
 
     /**
      *
-     * @param cacheSize
-     * @param maxCachedBufferCapacity
-     * @param area
-     * @param <T>
-     * @return
      */
-    private static <T> MemoryRegionCache<T>[] createNormalCaches(
-            int cacheSize, int maxCachedBufferCapacity, PoolArena<T> area) {
+    private static <T> MemoryRegionCache<T>[] createNormalCaches(int cacheSize, int maxCachedBufferCapacity, PoolArena<T> area) {
 
         if (cacheSize > 0 && maxCachedBufferCapacity > 0) {
             int max = Math.min(area.chunkSize, maxCachedBufferCapacity);
@@ -192,8 +172,7 @@ final class PoolThreadCache {
             for (int i = 0; i < memoryRegionCaches.length; i++) {
                 NormalMemoryRegionCache<T> memoryRegionCache = new NormalMemoryRegionCache<T>(cacheSize);
                 memoryRegionCaches[i] = memoryRegionCache;
-
-                System.out.println(Thread.currentThread().getName() + " createNormalCaches " + i + " = " + memoryRegionCache);
+                //System.out.println(Thread.currentThread().getName() + " createNormalCaches " + i + " = " + memoryRegionCache);
             }
 
             return memoryRegionCaches;
@@ -413,7 +392,6 @@ final class PoolThreadCache {
 
         @Override
         protected void initBuf(PoolChunk<T> chunk, ByteBuffer nioBuffer, long handle, PooledByteBuf<T> buf, int reqCapacity) {
-            //
             chunk.initBufWithSubpage(buf, nioBuffer, handle, reqCapacity);
         }
     }
@@ -429,7 +407,6 @@ final class PoolThreadCache {
 
         @Override
         protected void initBuf(PoolChunk<T> chunk, ByteBuffer nioBuffer, long handle, PooledByteBuf<T> buf, int reqCapacity) {
-            //
             chunk.initBuf(buf, nioBuffer, handle, reqCapacity);
         }
     }
@@ -456,7 +433,7 @@ final class PoolThreadCache {
 
         MemoryRegionCache(int size, SizeClass sizeClass) {
             this.size = MathUtil.safeFindNextPositivePowerOfTwo(size);
-            // 啥队列
+            // 啥队列  MpscArrayQueue
             queue = PlatformDependent.newFixedMpscQueue(this.size);
             this.sizeClass = sizeClass;
         }
@@ -564,6 +541,10 @@ final class PoolThreadCache {
         };
 
     } // MemoryRegionCache end
+
+
+
+
 
 
     /**

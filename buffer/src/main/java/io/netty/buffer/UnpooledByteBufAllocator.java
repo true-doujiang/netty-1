@@ -28,19 +28,13 @@ import java.nio.ByteBuffer;
  */
 public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator implements ByteBufAllocatorMetricProvider {
 
-    /**
-     *
-     */
+    //
     private final UnpooledByteBufAllocatorMetric metric = new UnpooledByteBufAllocatorMetric();
     private final boolean disableLeakDetector;
     private final boolean noCleaner;
 
-    /**
-     * Default instance which uses leak-detection for direct buffers.
-     *
-     */
-    public static final UnpooledByteBufAllocator DEFAULT =
-            new UnpooledByteBufAllocator(PlatformDependent.directBufferPreferred());
+    // Default instance which uses leak-detection for direct buffers.
+    public static final UnpooledByteBufAllocator DEFAULT = new UnpooledByteBufAllocator(PlatformDependent.directBufferPreferred());
 
     /**
      * Create a new instance which uses leak-detection for direct buffers.
@@ -79,8 +73,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
     public UnpooledByteBufAllocator(boolean preferDirect, boolean disableLeakDetector, boolean tryNoCleaner) {
         super(preferDirect);
         this.disableLeakDetector = disableLeakDetector;
-        noCleaner = tryNoCleaner && PlatformDependent.hasUnsafe()
-                && PlatformDependent.hasDirectBufferNoCleanerConstructor();
+        noCleaner = tryNoCleaner && PlatformDependent.hasUnsafe() && PlatformDependent.hasDirectBufferNoCleanerConstructor();
     }
 
     /**
@@ -251,8 +244,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
      */
     private static final class InstrumentedUnpooledUnsafeDirectByteBuf extends UnpooledUnsafeDirectByteBuf {
 
-        InstrumentedUnpooledUnsafeDirectByteBuf(
-                UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
+        InstrumentedUnpooledUnsafeDirectByteBuf(UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
             super(alloc, initialCapacity, maxCapacity);
         }
 

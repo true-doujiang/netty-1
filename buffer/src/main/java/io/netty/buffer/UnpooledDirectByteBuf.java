@@ -38,14 +38,10 @@ import java.nio.channels.ScatteringByteChannel;
  */
 public class UnpooledDirectByteBuf extends AbstractReferenceCountedByteBuf {
 
-    /**
-     *
-     */
+    //
     private final ByteBufAllocator alloc;
 
-    /**
-     * DirectByteBuffer
-     */
+    // DirectByteBuffer
     private ByteBuffer buffer;
     private ByteBuffer tmpNioBuf;
 
@@ -66,8 +62,7 @@ public class UnpooledDirectByteBuf extends AbstractReferenceCountedByteBuf {
         checkPositiveOrZero(initialCapacity, "initialCapacity");
         checkPositiveOrZero(maxCapacity, "maxCapacity");
         if (initialCapacity > maxCapacity) {
-            throw new IllegalArgumentException(String.format(
-                    "initialCapacity(%d) > maxCapacity(%d)", initialCapacity, maxCapacity));
+            throw new IllegalArgumentException(String.format("initialCapacity(%d) > maxCapacity(%d)", initialCapacity, maxCapacity));
         }
 
         this.alloc = alloc;
@@ -97,8 +92,7 @@ public class UnpooledDirectByteBuf extends AbstractReferenceCountedByteBuf {
 
         int initialCapacity = initialBuffer.remaining();
         if (initialCapacity > maxCapacity) {
-            throw new IllegalArgumentException(String.format(
-                    "initialCapacity(%d) > maxCapacity(%d)", initialCapacity, maxCapacity));
+            throw new IllegalArgumentException(String.format("initialCapacity(%d) > maxCapacity(%d)", initialCapacity, maxCapacity));
         }
 
         this.alloc = alloc;

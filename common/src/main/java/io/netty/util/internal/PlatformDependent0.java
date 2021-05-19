@@ -39,18 +39,15 @@ final class PlatformDependent0 {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PlatformDependent0.class);
 
-    /**
-     *
-     */
+    // DirectByteBuffer 的address字段偏移地址
     private static final long ADDRESS_FIELD_OFFSET;
-    /**
-     *
-     */
+    // byte[] 数组偏移地址
     private static final long BYTE_ARRAY_BASE_OFFSET;
-
+    // DirectByteBuffer 构造器
     private static final Constructor<?> DIRECT_BUFFER_CONSTRUCTOR;
     // explicitNoUnsafeCause0() 返回 null
     private static final Throwable EXPLICIT_NO_UNSAFE_CAUSE = explicitNoUnsafeCause0();
+    // null
     private static final Method ALLOCATE_ARRAY_METHOD;
     //
     private static final int JAVA_VERSION = javaVersion0();
@@ -82,6 +79,7 @@ final class PlatformDependent0 {
     // ------------static start ----------------
     static {
         final ByteBuffer direct;
+        // Buffer中address字段的反射
         Field addressField = null;
         Method allocateArrayMethod = null;
         Throwable unsafeUnavailabilityCause = null;
@@ -148,7 +146,7 @@ final class PlatformDependent0 {
 
                 final Unsafe finalUnsafe = unsafe;
 
-                // 返回null
+                // 返回null  测试这个unsafe是否可以执行copyMemory方法
                 final Object maybeException = AccessController.doPrivileged(new PrivilegedAction<Object>() {
                     @Override
                     public Object run() {
@@ -182,11 +180,12 @@ final class PlatformDependent0 {
                     @Override
                     public Object run() {
                         try {
-                            // 获取内存地址嘛  todo
+                            // 获取 Buffer对象的address字段在Buffer对象内的便宜地址
                             final Field field = Buffer.class.getDeclaredField("address");
                             // Use Unsafe to read value of the address field. This way it will not fail on JDK9+ which
                             // will forbid changing the access level via reflection.
                             final long offset = finalUnsafe.objectFieldOffset(field);
+                            // 获取地址中的值
                             final long address = finalUnsafe.getLong(direct, offset);
 
                             // if direct really is a direct buffer, address will be non-zero
@@ -243,13 +242,11 @@ final class PlatformDependent0 {
             DIRECT_BUFFER_CONSTRUCTOR = null;
             ALLOCATE_ARRAY_METHOD = null;
         } else {
-
             Constructor<?> directBufferConstructor;
             long address = -1;
             try {
-                // 反射 java.nio.DirectByteBuffer.DirectByteBuffer(long, int)
-                final Object maybeDirectBufferConstructor =
-                        AccessController.doPrivileged(new PrivilegedAction<Object>() {
+                // 反射 java.nio.DirectByteBuffer的构造器
+                final Object maybeDirectBufferConstructor = AccessController.doPrivileged(new PrivilegedAction<Object>() {
                             @Override
                             public Object run() {
                                 try {
@@ -265,13 +262,14 @@ final class PlatformDependent0 {
                                     return e;
                                 }
                             }
-                        });
+                 });
 
                 if (maybeDirectBufferConstructor instanceof Constructor<?>) {
                     address = UNSAFE.allocateMemory(1);
                     // try to use the constructor now
                     try {
-                        ((Constructor<?>) maybeDirectBufferConstructor).newInstance(address, 1);
+                        // directBuffer
+                        Object o = ((Constructor<?>) maybeDirectBufferConstructor).newInstance(address, 1);
                         directBufferConstructor = (Constructor<?>) maybeDirectBufferConstructor;
                         logger.debug("direct buffer constructor: available");
                     } catch (InstantiationException e) {
@@ -287,6 +285,7 @@ final class PlatformDependent0 {
                 }
             } finally {
                 if (address != -1) {
+                    // 释放这块内存
                     UNSAFE.freeMemory(address);
                 }
             }
@@ -428,6 +427,9 @@ final class PlatformDependent0 {
         return EXPLICIT_NO_UNSAFE_CAUSE != null;
     }
 
+    /**
+     * 检查unsafe参数，有没有在系统参数中设置不支持unsafe的参数
+     */
     private static Throwable explicitNoUnsafeCause0() {
         final boolean noUnsafe = SystemPropertyUtil.getBoolean("io.netty.noUnsafe", false);
         logger.debug("-Dio.netty.noUnsafe: {}", noUnsafe);
@@ -479,7 +481,11 @@ final class PlatformDependent0 {
         UNSAFE.throwException(checkNotNull(cause, "cause"));
     }
 
+    /**
+     *
+     */
     static boolean hasDirectBufferNoCleanerConstructor() {
+        // static{} 中初始化, 可以获取到构造器，并且该构造器.newInstance可以构造出一个directBuffer对象
         return DIRECT_BUFFER_CONSTRUCTOR != null;
     }
 
@@ -487,11 +493,15 @@ final class PlatformDependent0 {
         return newDirectBuffer(UNSAFE.reallocateMemory(directBufferAddress(buffer), capacity), capacity);
     }
 
+    /**
+     *
+     */
     static ByteBuffer allocateDirectNoCleaner(int capacity) {
         // Calling malloc with capacity of 0 may return a null ptr or a memory address that can be used.
         // Just use 1 to make it safe to use in all cases:
         // See: http://pubs.opengroup.org/onlinepubs/009695399/functions/malloc.html
-        return newDirectBuffer(UNSAFE.allocateMemory(Math.max(1, capacity)), capacity);
+        long address = UNSAFE.allocateMemory(Math.max(1, capacity));
+        return newDirectBuffer(address, capacity);
     }
 
     static boolean hasAllocateArrayMethod() {
@@ -509,14 +519,10 @@ final class PlatformDependent0 {
     }
 
     /**
-     *
-     * @param address
-     * @param capacity
-     * @return
+     * 反射创建一个 directBuffer
      */
     static ByteBuffer newDirectBuffer(long address, int capacity) {
         ObjectUtil.checkPositiveOrZero(capacity, "capacity");
-
         try {
             return (ByteBuffer) DIRECT_BUFFER_CONSTRUCTOR.newInstance(address, capacity);
         } catch (Throwable cause) {
@@ -530,8 +536,6 @@ final class PlatformDependent0 {
 
     /**
      *
-     * @param buffer
-     * @return
      */
     static long directBufferAddress(ByteBuffer buffer) {
         return getLong(buffer, ADDRESS_FIELD_OFFSET);

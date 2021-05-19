@@ -127,7 +127,9 @@ final class PoolChunk<T> implements PoolChunkMetric {
      */
     private final byte[] depthMap;
 
+    // 只有分配的内存小于pageSize（8k）时才会用到我
     private final PoolSubpage<T>[] subpages;
+
     /** Used to determine if the requested capacity is equal to or greater than pageSize. */
     private final int subpageOverflowMask;
     private final int pageSize;
@@ -148,9 +150,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
 
     private int freeBytes;
 
-    /**
-     * 双向链表
-     */
+    // 双向链表
     PoolChunkList<T> parent;
     PoolChunk<T> prev;
     PoolChunk<T> next;
@@ -181,6 +181,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
         // Generate the memory map.
         memoryMap = new byte[maxSubpageAllocs << 1];
         depthMap = new byte[memoryMap.length];
+
         int memoryMapIndex = 1;
         for (int d = 0; d <= maxOrder; ++ d) { // move down the tree one level at a time
             int depth = 1 << d;
@@ -242,6 +243,9 @@ final class PoolChunk<T> implements PoolChunkMetric {
         return 100 - freePercentage;
     }
 
+    /**
+     *
+     */
     boolean allocate(PooledByteBuf<T> buf, int reqCapacity, int normCapacity) {
         final long handle;
         if ((normCapacity & subpageOverflowMask) != 0) { // >= pageSize
@@ -253,6 +257,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
         if (handle < 0) {
             return false;
         }
+
         ByteBuffer nioBuffer = cachedNioBuffers != null ? cachedNioBuffers.pollLast() : null;
         initBuf(buf, nioBuffer, handle, reqCapacity);
         return true;
@@ -326,8 +331,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
             }
         }
         byte value = value(id);
-        assert value == d && (id & initial) == 1 << d : String.format("val = %d, id & initial = %d, d = %d",
-                value, id & initial, d);
+        assert value == d && (id & initial) == 1 << d : String.format("val = %d, id & initial = %d, d = %d", value, id & initial, d);
         setValue(id, unusable); // mark as unusable
         updateParentsAlloc(id);
         return id;
@@ -411,6 +415,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
                 }
             }
         }
+
         freeBytes += runLength(memoryMapIdx);
         setValue(memoryMapIdx, depth(memoryMapIdx));
         updateParentsFree(memoryMapIdx);
@@ -427,11 +432,12 @@ final class PoolChunk<T> implements PoolChunkMetric {
     void initBuf(PooledByteBuf<T> buf, ByteBuffer nioBuffer, long handle, int reqCapacity) {
         int memoryMapIdx = memoryMapIdx(handle);
         int bitmapIdx = bitmapIdx(handle);
+
         if (bitmapIdx == 0) {
             byte val = value(memoryMapIdx);
             assert val == unusable : String.valueOf(val);
-            buf.init(this, nioBuffer, handle, runOffset(memoryMapIdx) + offset,
-                    reqCapacity, runLength(memoryMapIdx), arena.parent.threadCache());
+            int i = runOffset(memoryMapIdx) + offset;
+            buf.init(this, nioBuffer, handle, i, reqCapacity, runLength(memoryMapIdx), arena.parent.threadCache());
         } else {
             initBufWithSubpage(buf, nioBuffer, handle, bitmapIdx, reqCapacity);
         }
@@ -445,20 +451,18 @@ final class PoolChunk<T> implements PoolChunkMetric {
     }
 
     /**
+     *
      */
-    private void initBufWithSubpage(PooledByteBuf<T> buf, ByteBuffer nioBuffer,
-                                    long handle, int bitmapIdx, int reqCapacity) {
+    private void initBufWithSubpage(PooledByteBuf<T> buf, ByteBuffer nioBuffer, long handle, int bitmapIdx, int reqCapacity) {
         assert bitmapIdx != 0;
-
         int memoryMapIdx = memoryMapIdx(handle);
 
         PoolSubpage<T> subpage = subpages[subpageIdx(memoryMapIdx)];
         assert subpage.doNotDestroy;
         assert reqCapacity <= subpage.elemSize;
 
-        buf.init(this, nioBuffer, handle,
-            runOffset(memoryMapIdx) + (bitmapIdx & 0x3FFFFFFF) * subpage.elemSize + offset,
-                reqCapacity, subpage.elemSize, arena.parent.threadCache());
+        int i = runOffset(memoryMapIdx) + (bitmapIdx & 0x3FFFFFFF) * subpage.elemSize + offset;
+        buf.init(this, nioBuffer, handle, i, reqCapacity, subpage.elemSize, arena.parent.threadCache());
     }
 
     private byte value(int id) {
@@ -483,6 +487,9 @@ final class PoolChunk<T> implements PoolChunkMetric {
         return 1 << log2ChunkSize - depth(id);
     }
 
+    /**
+     *
+     */
     private int runOffset(int id) {
         // represents the 0-based offset in #bytes from start of the byte-array chunk
         int shift = id ^ 1 << depth(id);

@@ -92,10 +92,9 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         return buf;
     }
 
-    /**
-     *
-     */
+    //
     private final boolean directByDefault;
+    // 如果要是要个 初始容量,最大容量都为0的buffer直接返回我就可以了
     private final ByteBuf emptyBuf;
 
     /**

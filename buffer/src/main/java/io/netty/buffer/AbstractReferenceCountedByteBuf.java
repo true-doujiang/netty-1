@@ -30,6 +30,7 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
 
 
     private static final long REFCNT_FIELD_OFFSET;
+    //
     private static final AtomicIntegerFieldUpdater<AbstractReferenceCountedByteBuf> refCntUpdater =
             AtomicIntegerFieldUpdater.newUpdater(AbstractReferenceCountedByteBuf.class, "refCnt");
 
@@ -41,8 +42,7 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
         long refCntFieldOffset = -1;
         try {
             if (PlatformDependent.hasUnsafe()) {
-                refCntFieldOffset = PlatformDependent.objectFieldOffset(
-                        AbstractReferenceCountedByteBuf.class.getDeclaredField("refCnt"));
+                refCntFieldOffset = PlatformDependent.objectFieldOffset(AbstractReferenceCountedByteBuf.class.getDeclaredField("refCnt"));
             }
         } catch (Throwable ignore) {
             refCntFieldOffset = -1;
@@ -55,14 +55,17 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
         return (rawCnt & 1) != 0 ? 0 : rawCnt >>> 1;
     }
 
+
+    /**
+     * 构造器
+     */
     protected AbstractReferenceCountedByteBuf(int maxCapacity) {
         super(maxCapacity);
     }
 
     private int nonVolatileRawCnt() {
         // TODO: Once we compile against later versions of Java we can replace the Unsafe usage here by varhandles.
-        return REFCNT_FIELD_OFFSET != -1 ? PlatformDependent.getInt(this, REFCNT_FIELD_OFFSET)
-                : refCntUpdater.get(this);
+        return REFCNT_FIELD_OFFSET != -1 ? PlatformDependent.getInt(this, REFCNT_FIELD_OFFSET) : refCntUpdater.get(this);
     }
 
     @Override
@@ -72,8 +75,7 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
 
         // This is copied explicitly from the nonVolatileRawCnt() method above to reduce call stack depth,
         // to avoid hitting the default limit for inlining (9)
-        final int rawCnt = REFCNT_FIELD_OFFSET != -1 ? PlatformDependent.getInt(this, REFCNT_FIELD_OFFSET)
-                : refCntUpdater.get(this);
+        final int rawCnt = REFCNT_FIELD_OFFSET != -1 ? PlatformDependent.getInt(this, REFCNT_FIELD_OFFSET) : refCntUpdater.get(this);
 
         // The "real" ref count is > 0 if the rawCnt is even.
         // (x & y) appears to be surprisingly expensive relative to (x == y). Thus the expression below provides
@@ -111,8 +113,7 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
             throw new IllegalReferenceCountException(0, increment);
         }
         // don't pass 0!
-        if ((oldRef <= 0 && oldRef + adjustedIncrement >= 0)
-                || (oldRef >= 0 && oldRef + adjustedIncrement < oldRef)) {
+        if ((oldRef <= 0 && oldRef + adjustedIncrement >= 0) || (oldRef >= 0 && oldRef + adjustedIncrement < oldRef)) {
             // overflow case
             refCntUpdater.getAndAdd(this, -adjustedIncrement);
             throw new IllegalReferenceCountException(realRefCnt(oldRef), increment);
@@ -132,7 +133,6 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
 
     /**
      *
-     * @return
      */
     @Override
     public boolean release() {
@@ -146,8 +146,6 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
 
     /**
      *
-     * @param decrement
-     * @return
      */
     private boolean release0(int decrement) {
         int rawCnt = nonVolatileRawCnt(), realCnt = toLiveRealCnt(rawCnt, decrement);

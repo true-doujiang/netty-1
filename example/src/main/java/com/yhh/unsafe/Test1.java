@@ -54,6 +54,6 @@ public class Test1 {
                 return sum;
             }
         });
-        System.out.println(integer);
+        System.out.println(1);
     }
 }

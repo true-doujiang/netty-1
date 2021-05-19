@@ -9,11 +9,17 @@ public class PooledByteBufTest {
     public static void main(String[] args) {
         ByteBufAllocator alloc = PooledByteBufAllocator.DEFAULT;
         // PooledUnsafeHeapByteBuf(ridx: 0, widx: 0, cap: 254)
-        ByteBuf byteBuf = alloc.heapBuffer(254);
+//        ByteBuf byteBuf = alloc.heapBuffer(254);
+//
+//        byteBuf.writeInt(126);
+//        System.out.println(byteBuf.readInt());
+//
+//        byteBuf.release();
+//
 
-        byteBuf.writeInt(126);
-        System.out.println(byteBuf.readInt());
+        ByteBuf directBuffer = alloc.directBuffer(254);
+        System.out.println("directBuffer = " + directBuffer);
+        directBuffer.writeInt(101);
 
-        byteBuf.release();
     }
 }

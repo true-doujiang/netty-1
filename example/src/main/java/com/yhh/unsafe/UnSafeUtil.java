@@ -8,14 +8,10 @@ import java.lang.reflect.Field;
  * https://tech.meituan.com/2019/02/14/talk-about-java-magic-class-unsafe.html
  *
  */
-public class TestUnSafe {
+public class UnSafeUtil {
 
-    public static void main(String[] args) {
-        Unsafe unsafe = reflectGetUnsafe();
-        System.out.println(unsafe);
-    }
 
-    private static Unsafe reflectGetUnsafe() {
+    public static Unsafe getUnsafe() {
         try {
             Field field = Unsafe.class.getDeclaredField("theUnsafe");
             field.setAccessible(true);

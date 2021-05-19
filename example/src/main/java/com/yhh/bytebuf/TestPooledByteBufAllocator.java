@@ -7,8 +7,8 @@ import io.netty.buffer.PooledByteBufAllocator;
 public class TestPooledByteBufAllocator {
 
     public static void main(String[] args) {
-        test1();
-       // test2();
+        //test1();
+        test2();
     }
 
     public static void test1() {
@@ -29,7 +29,7 @@ public class TestPooledByteBufAllocator {
         ByteBufAllocator alloc = PooledByteBufAllocator.DEFAULT;
 
         //tiny规格内存分配 会变成大于等于16的整数倍的数：这里254 会规格化为256
-        ByteBuf byteBuf = alloc.directBuffer(254);
+        ByteBuf byteBuf = alloc.directBuffer(1024 * 8 * 2);
 
         //读写bytebuf
         byteBuf.writeInt(126);

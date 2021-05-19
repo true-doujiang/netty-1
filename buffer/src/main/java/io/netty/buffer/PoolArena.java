@@ -67,6 +67,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     final int chunkSize;
     //
     final int subpageOverflowMask;
+    //
     final int numSmallSubpagePools;
     final int directMemoryCacheAlignment;
     final int directMemoryCacheAlignmentMask;
@@ -104,7 +105,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
     /**
      * Number of thread caches backed by this arena.
-     * 计数器
+     * 计数器  io.netty.buffer.PooledByteBufAllocator.PoolThreadLocalCache#leastUsedArena(io.netty.buffer.PoolArena[]) 调用
      */
     final AtomicInteger numThreadCaches = new AtomicInteger();
 
@@ -143,6 +144,8 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         for (int i = 0; i < smallSubpagePools.length; i ++) {
             smallSubpagePools[i] = newSubpagePoolHead(pageSize);
         }
+
+        // todo 为毛没有normal
 
         /**
          *
@@ -206,7 +209,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
      * @return
      */
     PooledByteBuf<T> allocate(PoolThreadCache cache, int reqCapacity, int maxCapacity) {
-        // 创建一个空的byteBuffer
+        // 创建一个空的byteBuffer 创建buffer的流程要分析
         PooledByteBuf<T> buf = newByteBuf(maxCapacity);
         // 规格化
         allocate(cache, buf, reqCapacity);
@@ -246,10 +249,6 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     /**
      * 先看下分配内存的入口方法allocate
      * 这个方法进行具体申请内存的操作
-     *
-     * @param cache
-     * @param buf
-     * @param reqCapacity
      */
     private void allocate(PoolThreadCache cache, PooledByteBuf<T> buf, final int reqCapacity) {
         // 内存规格化
@@ -262,7 +261,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             boolean tiny = isTiny(normCapacity);
 
             if (tiny) { // < 512
-                // 使用缓存
+                // 优先使用缓存
                 if (cache.allocateTiny(this, buf, reqCapacity, normCapacity)) {
                     // was able to allocate out of the cache so move on
                     return;
@@ -270,7 +269,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
                 tableIdx = tinyIdx(normCapacity);
                 table = tinySubpagePools;
             } else {
-                // 512-8K
+                // // 优先使用缓存   512-8K
                 if (cache.allocateSmall(this, buf, reqCapacity, normCapacity)) {
                     // was able to allocate out of the cache so move on
                     return;
@@ -307,7 +306,9 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             return;
         }
 
+        // normal级别处理
         if (normCapacity <= chunkSize) {
+            // 优先使用缓存
             if (cache.allocateNormal(this, buf, reqCapacity, normCapacity)) {
                 // was able to allocate out of the cache so move on
                 return;
@@ -322,6 +323,9 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         }
     }
 
+    /**
+     * 调用该方法必须加锁
+     */
     // Method must be called inside synchronized(this) { ... } block
     private void allocateNormal(PooledByteBuf<T> buf, int reqCapacity, int normCapacity) {
         if (q050.allocate(buf, reqCapacity, normCapacity) || q025.allocate(buf, reqCapacity, normCapacity) ||
@@ -792,11 +796,6 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
         /**
          *
-         * @param pageSize
-         * @param maxOrder
-         * @param pageShifts
-         * @param chunkSize
-         * @return
          */
         @Override
         protected PoolChunk<byte[]> newChunk(int pageSize, int maxOrder, int pageShifts, int chunkSize) {
@@ -862,8 +861,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         int offsetCacheLine(ByteBuffer memory) {
             // We can only calculate the offset if Unsafe is present as otherwise directBufferAddress(...) will
             // throw an NPE.
-            int remainder = HAS_UNSAFE
-                    ? (int) (PlatformDependent.directBufferAddress(memory) & directMemoryCacheAlignmentMask) : 0;
+            int remainder = HAS_UNSAFE ? (int) (PlatformDependent.directBufferAddress(memory) & directMemoryCacheAlignmentMask) : 0;
 
             // offset = alignment - address & (alignment - 1)
             return directMemoryCacheAlignment - remainder;
@@ -871,20 +869,16 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
         /**
          *
-         * @param pageSize
-         * @param maxOrder
-         * @param pageShifts
-         * @param chunkSize
-         * @return
          */
         @Override
         protected PoolChunk<ByteBuffer> newChunk(int pageSize, int maxOrder, int pageShifts, int chunkSize) {
             if (directMemoryCacheAlignment == 0) {
-                return new PoolChunk<ByteBuffer>(this, allocateDirect(chunkSize), pageSize, maxOrder, pageShifts, chunkSize, 0);
+                // 创建个nio directBuffer
+                ByteBuffer directBuffer = allocateDirect(chunkSize);
+                return new PoolChunk<ByteBuffer>(this, directBuffer, pageSize, maxOrder, pageShifts, chunkSize, 0);
             }
 
             final ByteBuffer memory = allocateDirect(chunkSize + directMemoryCacheAlignment);
-
             return new PoolChunk<ByteBuffer>(this, memory, pageSize, maxOrder, pageShifts, chunkSize, offsetCacheLine(memory));
         }
 
@@ -898,8 +892,14 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         }
 
         private static ByteBuffer allocateDirect(int capacity) {
-            return PlatformDependent.useDirectBufferNoCleaner() ?
-                    PlatformDependent.allocateDirectNoCleaner(capacity) : ByteBuffer.allocateDirect(capacity);
+            boolean b = PlatformDependent.useDirectBufferNoCleaner();
+            if (b) {
+                return PlatformDependent.allocateDirectNoCleaner(capacity);
+            }
+            return ByteBuffer.allocateDirect(capacity);
+
+//            return PlatformDependent.useDirectBufferNoCleaner() ?
+//                    PlatformDependent.allocateDirectNoCleaner(capacity) : ByteBuffer.allocateDirect(capacity);
         }
 
         @Override

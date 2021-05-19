@@ -22,10 +22,6 @@ import io.netty.util.internal.PlatformDependent;
  */
 class UnpooledUnsafeHeapByteBuf extends UnpooledHeapByteBuf {
 
-    /*
-     * 内存是 byte数组   在父类里
-     */
-
 
     /**
      * Creates a new heap buffer with a newly allocated byte array.
@@ -36,6 +32,10 @@ class UnpooledUnsafeHeapByteBuf extends UnpooledHeapByteBuf {
     UnpooledUnsafeHeapByteBuf(ByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
         super(alloc, initialCapacity, maxCapacity);
     }
+
+
+
+
 
     @Override
     protected byte[] allocateArray(int initialCapacity) {
