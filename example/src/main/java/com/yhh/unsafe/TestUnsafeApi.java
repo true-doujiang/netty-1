@@ -26,9 +26,21 @@ public class TestUnsafeApi {
 
         // todo 为毛没修改成功
         UNSAFE.putInt(UnsafeTestKlass.class, staticFieldOffset, 10);
+        UNSAFE.putInt(UnsafeTestKlass.class, staticFieldOffset, 11);
         System.out.println("静态变量被修改后的值 = " + UnsafeTestKlass.staticNumber);
 
         int anInt = UNSAFE.getInt(UnsafeTestKlass.class, staticFieldOffset);
+        int anInt3 = UNSAFE.getInt(UnsafeTestKlass.class, staticFieldOffset);
+
+        Object base = UNSAFE.staticFieldBase(fieldNumber);
+        int anInt1 = UNSAFE.getInt(base, staticFieldOffset);
+
+        // todo 为毛这里修改成功了
+        Field number1Field = UnsafeTestKlass.class.getDeclaredField("staticNumber");
+        long staticFieldOffset2 = UNSAFE.staticFieldOffset(number1Field);
+        int number = UnsafeTestKlass.staticNumber;
+        UNSAFE.putInt(UnsafeTestKlass.class, staticFieldOffset2, 10);
+        int anInt2 = UNSAFE.getInt(UnsafeTestKlass.class, staticFieldOffset2);
 
 
 

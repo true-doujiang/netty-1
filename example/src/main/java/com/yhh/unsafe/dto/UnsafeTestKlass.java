@@ -1,7 +1,5 @@
 package com.yhh.unsafe.dto;
 
-import com.yhh.unsafe.dto.Hello;
-
 public class UnsafeTestKlass {
 
     public int value;
