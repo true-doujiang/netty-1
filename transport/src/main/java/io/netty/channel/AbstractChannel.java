@@ -103,8 +103,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      */
     protected AbstractChannel(Channel parent) {
         this.parent = parent;
+        // 这个方法定义在本类中 公用
         id = newId();
+        // 抽象方法由具体子类实现， unsafe也是有具体子类实现的
         unsafe = newUnsafe();  //抽象方法
+        // protected 实现留给子类实现的余地， 但基本就用本类的实现了
         pipeline = newChannelPipeline();
     }
 

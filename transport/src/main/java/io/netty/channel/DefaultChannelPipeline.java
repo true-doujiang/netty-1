@@ -95,14 +95,20 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     private boolean registered;
 
     /**
+     * constructor
+     *
      * Pipeline 链表数据结构，节点元素 xxx..HandlerContext
      */
     protected DefaultChannelPipeline(Channel channel) {
+        // 不可以为null
         this.channel = ObjectUtil.checkNotNull(channel, "channel");
+
         succeededFuture = new SucceededChannelFuture(channel, null);
         voidPromise =  new VoidChannelPromise(channel, true);
 
+        // 内部类 inbound
         tail = new TailContext(this);
+        // 内部类 inbound outbound
         head = new HeadContext(this);
 
         head.next = tail;
@@ -125,21 +131,28 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return touch ? ReferenceCountUtil.touch(msg, next) : msg;
     }
 
+    /**
+     * 把handler 封装成 handlerContext
+     */
     private AbstractChannelHandlerContext newContext(EventExecutorGroup group, String name, ChannelHandler handler) {
-        return new DefaultChannelHandlerContext(this, childExecutor(group), name, handler);
+        EventExecutor eventExecutor = childExecutor(group);
+        return new DefaultChannelHandlerContext(this, eventExecutor, name, handler);
     }
 
     /**
      *
      */
     private EventExecutor childExecutor(EventExecutorGroup group) {
+
         if (group == null) {
             return null;
         }
+
         Boolean pinEventExecutor = channel.config().getOption(ChannelOption.SINGLE_EVENTEXECUTOR_PER_GROUP);
         if (pinEventExecutor != null && !pinEventExecutor) {
             return group.next();
         }
+
         Map<EventExecutorGroup, EventExecutor> childExecutors = this.childExecutors;
         if (childExecutors == null) {
             // Use size of 4 as most people only use one extra EventExecutor.
@@ -208,7 +221,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return addLast(null, name, handler);
     }
 
-    // 添加节点
+    /**
+     * 尾部添加节点
+     */
     @Override
     public final ChannelPipeline addLast(EventExecutorGroup group, String name, ChannelHandler handler) {
         final AbstractChannelHandlerContext newCtx;
@@ -220,9 +235,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             // 链表插入操作
             addLast0(newCtx);
 
+            // 注释写的很清楚了
             // If the registered is false it means that the channel was not registered on an eventLoop yet.
             // In this case we add the context to the pipeline and add a task that will call
-            // ChannelHandler.handlerAdded(...) once the channel is registered.   注释写的很清楚了
+            // ChannelHandler.handlerAdded(...) once the channel is registered.
             if (!registered) {
                 newCtx.setAddPending();
                 // 初始化 pendingHandlerCallbackHead 变量
@@ -236,7 +252,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
                 return this;
             }
         }
+
+        //
         callHandlerAdded0(newCtx);
+
         return this;
     }
 
@@ -1176,6 +1195,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     private void callHandlerCallbackLater(AbstractChannelHandlerContext ctx, boolean added) {
         assert !registered;
 
+        //                                             本类的2个内部类
         PendingHandlerCallback task = added ? new PendingHandlerAddedTask(ctx) : new PendingHandlerRemovedTask(ctx);
         PendingHandlerCallback pending = pendingHandlerCallbackHead;
         if (pending == null) {
@@ -1540,7 +1560,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
 
     /**
-     * 接口 下面俩个实现类
+     * 内部接口 下面俩个实现类
      */
     private abstract static class PendingHandlerCallback implements Runnable {
         //
@@ -1551,11 +1571,12 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             this.ctx = ctx;
         }
 
+        // 抽象方法
         abstract void execute();
     }
 
     /**
-     * AddedTask
+     * AddedTask 内部类
      */
     private final class PendingHandlerAddedTask extends PendingHandlerCallback {
 
@@ -1590,7 +1611,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     * RemovedTask
+     * RemovedTask 内部类
      */
     private final class PendingHandlerRemovedTask extends PendingHandlerCallback {
 

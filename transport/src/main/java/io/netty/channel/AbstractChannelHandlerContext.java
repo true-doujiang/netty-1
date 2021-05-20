@@ -68,8 +68,10 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     private final boolean inbound;
     private final boolean outbound;
+    // handler的名字 pipeline.addLast() 一路传过来的
     private final String name;
     private final boolean ordered;
+
     // 虽然 HandlerContext 上没有channel 但是可以通过pipeline 找到
     private final DefaultChannelPipeline pipeline;
 
