@@ -49,6 +49,12 @@ public abstract class AbstractByteBuf extends ByteBuf {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractByteBuf.class);
 
+
+    public String myName;
+
+
+
+
     private static final String LEGACY_PROP_CHECK_ACCESSIBLE = "io.netty.buffer.bytebuf.checkAccessible";
     private static final String PROP_CHECK_ACCESSIBLE = "io.netty.buffer.checkAccessible";
     static final boolean checkAccessible; // accessed from CompositeByteBuf
@@ -1434,6 +1440,9 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return ByteBufUtil.compare(this, that);
     }
 
+    /**
+     *
+     */
     @Override
     public String toString() {
         if (refCnt() == 0) {
@@ -1454,6 +1463,9 @@ public abstract class AbstractByteBuf extends ByteBuf {
             buf.append(", unwrapped: ").append(unwrapped);
         }
         buf.append(')');
+
+        buf.append("   myName:" + myName);
+
         return buf.toString();
     }
 

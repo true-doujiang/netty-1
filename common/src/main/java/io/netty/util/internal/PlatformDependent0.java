@@ -78,7 +78,9 @@ final class PlatformDependent0 {
 
     // ------------static start ----------------
     static {
+
         final ByteBuffer direct;
+
         // Buffer中address字段的反射
         Field addressField = null;
         Method allocateArrayMethod = null;
@@ -93,6 +95,7 @@ final class PlatformDependent0 {
             internalUnsafe = null;
         } else {
 
+            //
             direct = ByteBuffer.allocateDirect(1);
 
             /**
@@ -876,7 +879,8 @@ final class PlatformDependent0 {
 
         // Android sets this property to Dalvik, regardless of whether it actually is.
         String vmName = SystemPropertyUtil.get("java.vm.name");
-        System.out.println(Thread.currentThread().getName() + " java.vm.name = " + vmName);
+        // java hotspot(tm) 64-bit server vm
+        //System.out.println(Thread.currentThread().getName() + " java.vm.name = " + vmName);
 
         boolean isAndroid = "Dalvik".equals(vmName);
         if (isAndroid) {
@@ -935,6 +939,9 @@ final class PlatformDependent0 {
         }
     }
 
+    /**
+     * 构造器私有化  以上全部为静态工具方法
+     */
     private PlatformDependent0() {
     }
 }

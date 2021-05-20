@@ -115,7 +115,9 @@ final class PoolChunk<T> implements PoolChunkMetric {
 
     //
     final PoolArena<T> arena;
+
     final T memory;
+
     final boolean unpooled;
     final int offset;
 
@@ -127,8 +129,12 @@ final class PoolChunk<T> implements PoolChunkMetric {
      */
     private final byte[] depthMap;
 
+
+
     // 只有分配的内存小于pageSize（8k）时才会用到我
     private final PoolSubpage<T>[] subpages;
+
+
 
     /** Used to determine if the requested capacity is equal to or greater than pageSize. */
     private final int subpageOverflowMask;
@@ -150,8 +156,8 @@ final class PoolChunk<T> implements PoolChunkMetric {
     // 记录还有多少内存字节可以使用
     private int freeBytes;
 
-    // 双向链表
     PoolChunkList<T> parent;
+    // 双向链表
     PoolChunk<T> prev;
     PoolChunk<T> next;
 
@@ -376,6 +382,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
         // This is need as we may add it back and so alter the linked-list structure.
         PoolSubpage<T> head = arena.findSubpagePoolHead(normCapacity);
         int d = maxOrder; // subpages are only be allocated from pages i.e., leaves
+
         synchronized (head) {
             int id = allocateNode(d);
             if (id < 0) {

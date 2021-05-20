@@ -72,12 +72,14 @@ public final class PlatformDependent {
     private static final Pattern MAX_DIRECT_MEMORY_SIZE_ARG_PATTERN = Pattern.compile(
             "\\s*-XX:MaxDirectMemorySize\\s*=\\s*([0-9]+)\\s*([kKmMgG]?)\\s*$");
 
+    //
     private static final boolean IS_WINDOWS = isWindows0();
     private static final boolean IS_OSX = isOsx0();
     private static final boolean IS_J9_JVM = isJ9Jvm0();
 
     private static final boolean MAYBE_SUPER_USER;
 
+    //
     private static final boolean CAN_ENABLE_TCP_NODELAY_BY_DEFAULT = !isAndroid();
 
     //null
@@ -1344,6 +1346,7 @@ public final class PlatformDependent {
      *
      */
     private static final class AtomicLongCounter extends AtomicLong implements LongCounter {
+
         private static final long serialVersionUID = 4074772784610639305L;
 
         @Override

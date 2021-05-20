@@ -371,7 +371,9 @@ final class PoolThreadCache {
      * todo 找一个合适大小的 tiny级别 MemoryRegionCache
      */
     private MemoryRegionCache<?> cacheForTiny(PoolArena<?> area, int normCapacity) {
+        // 除以16
         int idx = PoolArena.tinyIdx(normCapacity);
+
         if (area.isDirect()) {
             // = tinySubPageDirectCaches[idx]
             return cache(tinySubPageDirectCaches, idx);
@@ -379,19 +381,29 @@ final class PoolThreadCache {
         return cache(tinySubPageHeapCaches, idx);
     }
 
-    // todo 找一个合适大小的 small级别 MemoryRegionCache
+    /**
+     * todo 找一个合适大小的 small级别 MemoryRegionCache
+     */
     private MemoryRegionCache<?> cacheForSmall(PoolArena<?> area, int normCapacity) {
+        //　除以1024
         int idx = PoolArena.smallIdx(normCapacity);
+
         if (area.isDirect()) {
+            // = tinySubPageDirectCaches[idx]
             return cache(smallSubPageDirectCaches, idx);
         }
         return cache(smallSubPageHeapCaches, idx);
     }
 
-    // todo 找一个合适大小的 normal级别 MemoryRegionCache
+    /**
+     * todo 找一个合适大小的 normal级别 MemoryRegionCache
+     */
     private MemoryRegionCache<?> cacheForNormal(PoolArena<?> area, int normCapacity) {
         if (area.isDirect()) {
+            //
             int idx = log2(normCapacity >> numShiftsNormalDirect);
+
+            // = tinySubPageDirectCaches[idx]
             return cache(normalDirectCaches, idx);
         }
         int idx = log2(normCapacity >> numShiftsNormalHeap);

@@ -174,6 +174,9 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         return heapBuffer(DEFAULT_INITIAL_CAPACITY, DEFAULT_MAX_CAPACITY);
     }
 
+    /**
+     *
+     */
     @Override
     public ByteBuf heapBuffer(int initialCapacity) {
         return heapBuffer(initialCapacity, DEFAULT_MAX_CAPACITY);
@@ -195,8 +198,6 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
 
     /**
      *
-     * @param initialCapacity
-     * @return
      */
     @Override
     public ByteBuf directBuffer(int initialCapacity) {
@@ -252,8 +253,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         checkPositiveOrZero(initialCapacity, "initialCapacity");
         if (initialCapacity > maxCapacity) {
             throw new IllegalArgumentException(String.format(
-                    "initialCapacity: %d (expected: not greater than maxCapacity(%d)",
-                    initialCapacity, maxCapacity));
+                    "initialCapacity: %d (expected: not greater than maxCapacity(%d)", initialCapacity, maxCapacity));
         }
     }
 

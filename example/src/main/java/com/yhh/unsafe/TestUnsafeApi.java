@@ -1,45 +1,70 @@
 package com.yhh.unsafe;
 
+import com.yhh.unsafe.dto.Hello;
+import com.yhh.unsafe.dto.UnsafeTestKlass;
 import sun.misc.Unsafe;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
+
+
+
+
+
+
 
 public class TestUnsafeApi {
 
     public static  Unsafe UNSAFE = UnSafeUtil.getUnsafe();
 
     public static void main(String[] args) throws Exception {
-        UnsafeTestKlass klass = new UnsafeTestKlass();
 
-        long staticFieldOffset = UNSAFE.staticFieldOffset(UnsafeTestKlass.class.getDeclaredField("number"));
-        long unstaticFieldOffset = UNSAFE.objectFieldOffset(klass.getClass().getDeclaredField("name"));
-        long helloFieldOffset = UNSAFE.objectFieldOffset(klass.getClass().getDeclaredField("hello"));
-
+        // 静态变量
+        Field fieldNumber = UnsafeTestKlass.class.getDeclaredField("staticNumber");
+        long staticFieldOffset = UNSAFE.staticFieldOffset(fieldNumber);
         System.out.println("静态变量相对于类内存地址的偏移量 = " + staticFieldOffset);
-        System.out.println("非静态变量相对于实例化对象的偏移量 = " + unstaticFieldOffset);
 
+        // todo 为毛没修改成功
         UNSAFE.putInt(UnsafeTestKlass.class, staticFieldOffset, 10);
-        //2.2 添加非基本数据类型的值，使用putObject(值类型的类类型 ， 内存地址 , 值对象);
-        UNSAFE.putObject(klass, unstaticFieldOffset, "哈哈");
-        UNSAFE.putObject(klass, helloFieldOffset, new Hello());
-
-        UnsafeTestKlass klassOther = new UnsafeTestKlass();
-        UNSAFE.putObject(klassOther, unstaticFieldOffset, "哈哈");
-
-        System.out.println("静态变量被修改后的值 = " + UnsafeTestKlass.number);
-        System.out.println("非静态变量被修改后的值 = " + klass.name);
+        System.out.println("静态变量被修改后的值 = " + UnsafeTestKlass.staticNumber);
 
         int anInt = UNSAFE.getInt(UnsafeTestKlass.class, staticFieldOffset);
+
+
+
+
+        // 非静态变量相对于实例化对象的偏移量
+        UnsafeTestKlass klass1 = new UnsafeTestKlass();
+        Field nameField = klass1.getClass().getDeclaredField("name");
+        Field helloField = klass1.getClass().getDeclaredField("hello");
+
+        long unstaticFieldOffset = UNSAFE.objectFieldOffset(nameField);
+        long helloFieldOffset = UNSAFE.objectFieldOffset(helloField);
+
+        System.out.println("非静态变量相对于实例化对象的偏移量 unstaticFieldOffset=" + unstaticFieldOffset + " helloFieldOffset=" + helloFieldOffset);
+
+        //2.2 添加非基本数据类型的值，使用putObject(值类型的类类型 ， 内存地址 , 值对象);
+        UNSAFE.putObject(klass1, unstaticFieldOffset, "哈哈");
+        UNSAFE.putObject(klass1, helloFieldOffset, new Hello());
+
+        UnsafeTestKlass klass2 = new UnsafeTestKlass();
+        UNSAFE.putObject(klass2, unstaticFieldOffset, "哈哈");
+        System.out.println("非静态变量被修改后的值 = " + klass1.name);
+
+
+
         //2.3 获取object类型值
-        Object o = UNSAFE.getObject(klass, unstaticFieldOffset);
-        Hello h = (Hello) UNSAFE.getObject(klass, helloFieldOffset);
+        Object o = UNSAFE.getObject(klass1, unstaticFieldOffset);
+        Hello h = (Hello) UNSAFE.getObject(klass1, helloFieldOffset);
         System.out.println(h);
         h.name = "胖小子";
-        long hnameFieldOffset = UNSAFE.objectFieldOffset(h.getClass().getDeclaredField("name"));
+
+        Field h_nameField = h.getClass().getDeclaredField("name");
+        long hnameFieldOffset = UNSAFE.objectFieldOffset(h_nameField);
         UNSAFE.putObject(h, hnameFieldOffset, "乖乖滴");
 
 
-        Object[] array = new Object[] {klass};
+        Object[] array = new Object[] {klass1};
         System.out.println(Arrays.toString(array));
         // 为毛每次都是16
         long baseOffset = UNSAFE.arrayBaseOffset(Object[].class);
@@ -108,42 +133,3 @@ public class TestUnsafeApi {
 
 
 
-
-class UnsafeTestKlass {
-
-    public int value;
-    static public int number = 5;
-    public String name;
-    public Hello hello;
-
-    public UnsafeTestKlass() {
-        this(99);
-    }
-
-    public UnsafeTestKlass(int value) {
-        this.value = value;
-    }
-
-
-    public int value() {
-        return value;
-    }
-}
-
-
-class Hello {
-
-    public int value;
-    static public int number = 5;
-    public String name;
-
-    public Hello() {
-        System.out.println(" 默认构造器" );
-    }
-
-    public Hello(String name) {
-        System.out.println("name = " + name );
-        this.name = name;
-    }
-
-}

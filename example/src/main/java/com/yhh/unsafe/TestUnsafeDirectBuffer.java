@@ -2,6 +2,7 @@ package com.yhh.unsafe;
 
 import sun.misc.Unsafe;
 
+import java.lang.reflect.Field;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
@@ -12,10 +13,12 @@ public class TestUnsafeDirectBuffer {
     public static void main(String[] args) throws Exception {
 
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(16);
-        long objectFieldOffset = UNSAFE.objectFieldOffset(Buffer.class.getDeclaredField("address"));
+        Field field = Buffer.class.getDeclaredField("address");
+        long objectFieldOffset = UNSAFE.objectFieldOffset(field);
 
         long address = UNSAFE.getLong(byteBuffer, objectFieldOffset);
         System.out.println("address = " + address);
+
         UNSAFE.putInt(address, 190);
         UNSAFE.putByte(address + 4, (byte)-10);
 

@@ -38,8 +38,11 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     //
     private final PoolArena<T> arena;
 
-    // 下一个节点
+    /*
+     * 下一个节点
+     */
     private final PoolChunkList<T> nextList;
+
     private final int minUsage;
     private final int maxUsage;
     private final int maxCapacity;
@@ -47,7 +50,9 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     //
     private PoolChunk<T> head;
 
-    // 上一个节点
+    /*
+     * 上一个节点
+     */
     // This is only update once when create the linked like list of PoolChunkList in PoolArena constructor.
     private PoolChunkList<T> prevList;
 
@@ -62,6 +67,7 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     PoolChunkList(PoolArena<T> arena, PoolChunkList<T> nextList, int minUsage, int maxUsage, int chunkSize) {
         assert minUsage <= maxUsage;
         this.arena = arena;
+
         this.nextList = nextList;
         this.minUsage = minUsage;
         this.maxUsage = maxUsage;

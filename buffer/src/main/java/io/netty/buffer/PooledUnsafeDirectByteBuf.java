@@ -27,6 +27,7 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 池化 unsafe 直接内存  T: ByteBuffer
@@ -34,17 +35,27 @@ import java.nio.channels.ScatteringByteChannel;
 final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
 
 
+    /**
+     * 匿名内部类：  对象池，要获取ByteBuf就从我里面拿
+     */
     private static final Recycler<PooledUnsafeDirectByteBuf> RECYCLER = new Recycler<PooledUnsafeDirectByteBuf>() {
+
+        private AtomicInteger counter = new AtomicInteger();
+
         @Override
         protected PooledUnsafeDirectByteBuf newObject(Handle<PooledUnsafeDirectByteBuf> handle) {
+            //
             PooledUnsafeDirectByteBuf byteBuf = new PooledUnsafeDirectByteBuf(handle, 0);
-            System.out.println("对象池没又有可用的.  new byteBuf = " + byteBuf);
+            byteBuf.myName = "myByteBuf" + counter.addAndGet(1);
+
+            System.out.println("RECYCLER中没有可用的. so RECYCLER.newObject()  byteBuf = " + byteBuf);
             return byteBuf;
         }
     };
 
     /**
      * 使用对象池创建一个ByteBuffer
+     * 静态工具方法
      */
     static PooledUnsafeDirectByteBuf newInstance(int maxCapacity) {
         // 有就拿来直接用, 没有则新创建一个

@@ -42,7 +42,7 @@ public abstract class Recycler<T> {
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(Recycler.class);
 
     /**
-     *
+     * 匿名内部类： 实现内部接口
      */
     @SuppressWarnings("rawtypes")
     private static final Handle NOOP_HANDLE = new Handle() {
@@ -106,18 +106,30 @@ public abstract class Recycler<T> {
 
         INITIAL_CAPACITY = min(DEFAULT_MAX_CAPACITY_PER_THREAD, 256);
     }
+    // ---- static end ---
 
+    // 4096
     private final int maxCapacityPerThread;
+    // 2
     private final int maxSharedCapacityFactor;
+    // 7
     private final int ratioMask;
+    // 8
     private final int maxDelayedQueuesPerThread;
 
-    //
+    /**
+     * 匿名内部类
+     */
     private final FastThreadLocal<Stack<T>> threadLocal = new FastThreadLocal<Stack<T>>() {
+
+        /**
+         * 初始化一个value
+         */
         @Override
         protected Stack<T> initialValue() {
-            return new Stack<T>(Recycler.this, Thread.currentThread(), maxCapacityPerThread, maxSharedCapacityFactor,
-                    ratioMask, maxDelayedQueuesPerThread);
+            // 这个this 是谁
+            return new Stack<T>(Recycler.this, Thread.currentThread(),
+                    maxCapacityPerThread, maxSharedCapacityFactor, ratioMask, maxDelayedQueuesPerThread);
         }
 
         @Override
@@ -131,6 +143,10 @@ public abstract class Recycler<T> {
         }
     };
 
+    /**
+     * 构造器
+     *
+     */
     protected Recycler() {
         this(DEFAULT_MAX_CAPACITY_PER_THREAD);
     }
@@ -170,12 +186,14 @@ public abstract class Recycler<T> {
             return newObject((Handle<T>) NOOP_HANDLE);
         }
 
+        // 从threadLocal中获取
         Stack<T> stack = threadLocal.get();
         DefaultHandle<T> handle = stack.pop();
         if (handle == null) {
             handle = stack.newHandle();
             handle.value = newObject(handle);
         }
+
         return (T) handle.value;
     }
 
@@ -211,17 +229,17 @@ public abstract class Recycler<T> {
     protected abstract T newObject(Handle<T> handle);
 
     /**
-     *
-     * @param <T>
+     * 内部接口
      */
     public interface Handle<T> {
         void recycle(T object);
     }
 
     /**
-     *
+     * 内部类 实现上面一个接口
      */
     static final class DefaultHandle<T> implements Handle<T> {
+
         private int lastRecycledId;
         private int recycleId;
 
@@ -230,6 +248,9 @@ public abstract class Recycler<T> {
         private Stack<?> stack;
         private Object value;
 
+        /**
+         * 构造器
+         */
         DefaultHandle(Stack<?> stack) {
             this.stack = stack;
         }
@@ -250,15 +271,19 @@ public abstract class Recycler<T> {
     }
 
     /**
-     *
+     * 匿名内部类
      */
     private static final FastThreadLocal<Map<Stack<?>, WeakOrderQueue>> DELAYED_RECYCLED = new FastThreadLocal<Map<Stack<?>, WeakOrderQueue>>() {
+
         @Override
         protected Map<Stack<?>, WeakOrderQueue> initialValue() {
             return new WeakHashMap<Stack<?>, WeakOrderQueue>();
         }
     };
 
+    /**
+     * 内部类
+     */
     // a queue that makes only moderate guarantees about visibility: items are seen in the correct order,
     // but we aren't absolutely guaranteed to ever see anything at all, thereby keeping the queue cheap to maintain
     private static final class WeakOrderQueue {
@@ -469,7 +494,7 @@ public abstract class Recycler<T> {
     }
 
     /**
-     *
+     * 内部类
      */
     static final class Stack<T> {
 
@@ -497,6 +522,10 @@ public abstract class Recycler<T> {
         private WeakOrderQueue cursor, prev;
         private volatile WeakOrderQueue head;
 
+
+        /**
+         * 构造器
+         */
         Stack(Recycler<T> parent, Thread thread, int maxCapacity, int maxSharedCapacityFactor,
               int ratioMask, int maxDelayedQueues) {
             this.parent = parent;

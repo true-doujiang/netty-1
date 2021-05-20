@@ -211,6 +211,8 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     PooledByteBuf<T> allocate(PoolThreadCache cache, int reqCapacity, int maxCapacity) {
         // 创建一个空的byteBuffer 创建buffer的流程要分析
         PooledByteBuf<T> buf = newByteBuf(maxCapacity);
+        System.out.println("allocate 空PooledByteBuf 有可能是从对象池中获取到的  buf = " + buf);
+
         // reqCapacity规格化, 并给buf初始化内存
         allocate(cache, buf, reqCapacity);
         return buf;
@@ -261,6 +263,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
         // 小于pageSize(默认是8K)
         if (isTinyOrSmall(normCapacity)) { // capacity < pageSize
+
             int tableIdx;
             PoolSubpage<T>[] table;
             boolean tiny = isTiny(normCapacity);

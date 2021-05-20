@@ -158,7 +158,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
     /**
      * 和下面2个list 装的东西一样   下面构造器初始化
-     * 内存区域
+     * 内存分配竞技场，每个io线程对应一个竞技场
      */
     private final PoolArena<byte[]>[] heapArenas;
     private final PoolArena<ByteBuffer>[] directArenas;
@@ -481,6 +481,9 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
         private final boolean useCacheForAllThreads;
 
+        /**
+         *  构造器
+         */
         PoolThreadLocalCache(boolean useCacheForAllThreads) {
             this.useCacheForAllThreads = useCacheForAllThreads;
         }
@@ -493,7 +496,8 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         protected synchronized PoolThreadCache initialValue() {
 
             System.out.println(Thread.currentThread().getName() + " PoolThreadLocalCache.initialValue() 初始化");
-            // PoolArena 内部有个计数器, 获取计数器最小的那个
+
+            // PoolArena 内部有个计数器, 获取计数器最小的那个  下面一个方法
             final PoolArena<byte[]> heapArena = leastUsedArena(heapArenas);
             final PoolArena<ByteBuffer> directArena = leastUsedArena(directArenas);
 
@@ -515,9 +519,6 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
         /**
          *
-         * @param arenas
-         * @param <T>
-         * @return
          */
         private <T> PoolArena<T> leastUsedArena(PoolArena<T>[] arenas) {
             if (arenas == null || arenas.length == 0) {

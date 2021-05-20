@@ -12,7 +12,7 @@ public class Test1 {
 
     public static void main(String[] args) {
 
-        f2();
+        f1();
     }
 
     private static void f1() {
@@ -22,10 +22,17 @@ public class Test1 {
             public Object run() {
                 try {
                     final Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
-                    Throwable cause = ReflectionUtil.trySetAccessible(unsafeField, false);
-                    if (cause != null) {
-                        return cause;
+                    //Throwable cause = ReflectionUtil.trySetAccessible(unsafeField, false);
+
+                    try {
+                        unsafeField.setAccessible(true);
+                    } catch (SecurityException e) {
+                        return e;
+                    } catch (RuntimeException e) {
+                        return new RuntimeException(e);
                     }
+
+
                     return unsafeField.get(null);
                 } catch (NoSuchFieldException e) {
                     return e;
@@ -54,6 +61,6 @@ public class Test1 {
                 return sum;
             }
         });
-        System.out.println(1);
+        System.out.println(integer);
     }
 }

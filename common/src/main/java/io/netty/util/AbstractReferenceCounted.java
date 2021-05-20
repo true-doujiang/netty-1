@@ -25,7 +25,11 @@ import io.netty.util.internal.PlatformDependent;
  * Abstract base class for classes wants to implement {@link ReferenceCounted}.
  */
 public abstract class AbstractReferenceCounted implements ReferenceCounted {
+
+
     private static final long REFCNT_FIELD_OFFSET;
+
+
     private static final AtomicIntegerFieldUpdater<AbstractReferenceCounted> refCntUpdater =
             AtomicIntegerFieldUpdater.newUpdater(AbstractReferenceCounted.class, "refCnt");
 
@@ -46,6 +50,8 @@ public abstract class AbstractReferenceCounted implements ReferenceCounted {
 
         REFCNT_FIELD_OFFSET = refCntFieldOffset;
     }
+
+
 
     private static int realRefCnt(int rawCnt) {
         return (rawCnt & 1) != 0 ? 0 : rawCnt >>> 1;
