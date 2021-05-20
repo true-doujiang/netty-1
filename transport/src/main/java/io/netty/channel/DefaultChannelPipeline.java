@@ -1580,6 +1580,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
      */
     private final class PendingHandlerAddedTask extends PendingHandlerCallback {
 
+        // ctx = "ServerBootstrap的ChannelInitializer匿名内部类"
         PendingHandlerAddedTask(AbstractChannelHandlerContext ctx) {
             super(ctx);
         }
@@ -1589,6 +1590,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             callHandlerAdded0(ctx);
         }
 
+        // 执行的是我哦  不是run()
         @Override
         void execute() {
             EventExecutor executor = ctx.executor();
