@@ -62,6 +62,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     private static final AtomicReferenceFieldUpdater<DefaultChannelPipeline, MessageSizeEstimator.Handle> ESTIMATOR =
             AtomicReferenceFieldUpdater.newUpdater(DefaultChannelPipeline.class, MessageSizeEstimator.Handle.class, "estimatorHandle");
 
+    // 每个pipeline实例都要有头尾节点  构造器中初始化
     final AbstractChannelHandlerContext head;
     final AbstractChannelHandlerContext tail;
 
@@ -114,6 +115,11 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         head.next = tail;
         tail.prev = head;
     }
+
+
+
+
+
 
 
     final MessageSizeEstimator.Handle estimatorHandle() {
@@ -867,7 +873,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
 
     // -----------------------ChannelInboundInvoker-----------start-
-    // 都是把head节点传进去  入站是从头节点往后执行
+    // 都是把head节点传进去  入站是从头节点往后执行  return 都是this
 
     @Override
     public final ChannelPipeline fireChannelRegistered() {
@@ -1016,6 +1022,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     public final ChannelFuture writeAndFlush(Object msg) {
         return tail.writeAndFlush(msg);
     }
+
+
+
+
 
     @Override
     public final ChannelPromise newPromise() {

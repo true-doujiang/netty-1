@@ -241,6 +241,7 @@ public class DefaultChannelPipelineTest {
         pipeline.addLast("handler1", handler1);
         pipeline.addLast("handler2", handler1);
         pipeline.addLast("handler3", handler1);
+
         assertSame(pipeline.get("handler1"), handler1);
         assertSame(pipeline.get("handler2"), handler1);
         assertSame(pipeline.get("handler3"), handler1);

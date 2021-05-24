@@ -57,6 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class ChannelInitializer<C extends Channel> extends ChannelInboundHandlerAdapter {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ChannelInitializer.class);
+
     // We use a Set as a ChannelInitializer is usually shared between all Channels in a Bootstrap /
     // ServerBootstrap. This way we can reduce the memory usage compared to use Attributes.
     private final Set<ChannelHandlerContext> initMap = Collections.newSetFromMap(new ConcurrentHashMap<ChannelHandlerContext, Boolean>());
@@ -70,8 +71,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
 
-        System.out.println(Thread.currentThread().getName() + " ChannelInitializer = "
-                + this + " handlerAdded(ctx) 执行 ctx = " + ctx);
+        System.out.println(Thread.currentThread().getName() + " ChannelInitializer = " + this + " handlerAdded(ctx) 执行 ctx = " + ctx);
 
         if (ctx.channel().isRegistered()) {
             // This should always be true with our current DefaultChannelPipeline implementation.
@@ -97,8 +97,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
     @SuppressWarnings("unchecked")
     public final void channelRegistered(ChannelHandlerContext ctx) throws Exception {
 
-        System.out.println(Thread.currentThread().getName()
-                + " ChannelInitializer = " + this + " channelRegistered(ctx) 执行 ctx = " + ctx);
+        System.out.println(Thread.currentThread().getName() + " ChannelInitializer = " + this + " channelRegistered(ctx) 执行 ctx = " + ctx);
 
         // Normally this method will never be called as handlerAdded(...) should call initChannel(...) and remove
         // the handler.
@@ -133,6 +132,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
     @SuppressWarnings("unchecked")
     private boolean initChannel(ChannelHandlerContext ctx) throws Exception {
         // Guard against re-entrance.
+
         if (initMap.add(ctx)) {
             try {
                 Channel channel = ctx.channel();
@@ -150,6 +150,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
                     pipeline.remove(this);
                 }
             }
+
             return true;
         }
 

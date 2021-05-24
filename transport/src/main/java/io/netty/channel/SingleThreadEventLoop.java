@@ -50,6 +50,7 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
                                     boolean addTaskWakesUp, int maxPendingTasks,
                                     RejectedExecutionHandler rejectedExecutionHandler) {
         super(parent, threadFactory, addTaskWakesUp, maxPendingTasks, rejectedExecutionHandler);
+        //
         tailTasks = newTaskQueue(maxPendingTasks);
     }
 
@@ -87,6 +88,7 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
     public ChannelFuture register(final ChannelPromise promise) {
         ObjectUtil.checkNotNull(promise, "promise");
         Channel channel = promise.channel();
+        //
         Channel.Unsafe unsafe = channel.unsafe();
 
         // unsafe 是 AbstractChannel.AbstractUnsafe

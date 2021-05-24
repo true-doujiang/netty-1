@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class MultithreadEventExecutorGroup extends AbstractEventExecutorGroup {
 
     /**
-     * NioEventLoops
+     * NioEventLoop[]
      */
     private final EventExecutor[] children;
 
@@ -42,8 +42,10 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
     private final AtomicInteger terminatedChildren = new AtomicInteger();
     private final Promise<?> terminationFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);
 
-    // NioEventLoopGroup中的 NioEventLoop 选择器 放在这里的
+    // NioEventLoopGroup中的 NioEventLoop 选择器 放在这里的  构造器中初始化，根据是否为2的幂次方
     private final EventExecutorChooserFactory.EventExecutorChooser chooser;
+
+
 
     /**
      * Create a new instance.
@@ -57,13 +59,14 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
     }
 
     /**
-     * Create a new instance.
+     * Create a new instance. 构造器
      *
      * @param nThreads          the number of threads that will be used by this instance.
      * @param executor          the Executor to use, or {@code null} if the default should be used.
      * @param args              arguments which will passed to each {@link #newChild(Executor, Object...)} call
      */
     protected MultithreadEventExecutorGroup(int nThreads, Executor executor, Object... args) {
+        //
         this(nThreads, executor, DefaultEventExecutorChooserFactory.INSTANCE, args);
     }
 
@@ -101,6 +104,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
                 // TODO: Think about if this is a good exception type
                 throw new IllegalStateException("failed to create a child event loop", e);
             } finally {
+
                 if (!success) {
                     for (int j = 0; j < i; j ++) {
                         children[j].shutdownGracefully();
@@ -172,8 +176,10 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
     }
 
     /**
+     * 抽象方法
      * Create a new EventExecutor which will later then accessible via the {@link #next()}  method. This method will be
      * called for each thread that will serve this {@link MultithreadEventExecutorGroup}.
+     *
      *  NioEventLoopGroup 具体实现
      */
     protected abstract EventExecutor newChild(Executor executor, Object... args) throws Exception;

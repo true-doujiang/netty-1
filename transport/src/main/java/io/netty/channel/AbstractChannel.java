@@ -543,6 +543,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
              * 注册的线程一定要在 NioEventLoop 线程上
              */
             AbstractChannel.this.eventLoop = eventLoop;
+
             if (eventLoop.inEventLoop()) {
                 register0(promise);
             } else {

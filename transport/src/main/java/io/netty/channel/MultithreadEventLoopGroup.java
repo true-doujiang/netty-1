@@ -34,7 +34,9 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(MultithreadEventLoopGroup.class);
 
+    // 2倍cpu核心数
     private static final int DEFAULT_EVENT_LOOP_THREADS;
+
 
     static {
         DEFAULT_EVENT_LOOP_THREADS = Math.max(1, SystemPropertyUtil.getInt(
@@ -46,7 +48,8 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
     }
 
     /**
-     * @see MultithreadEventExecutorGroup#MultithreadEventExecutorGroup(int, Executor, Object...)
+     * 构造器
+     * 调用方 NioEventLoopGroup#NioEventLoopGroup()
      */
     protected MultithreadEventLoopGroup(int nThreads, Executor executor, Object... args) {
         //super(nThreads == 0 ? DEFAULT_EVENT_LOOP_THREADS : nThreads, executor, args);
@@ -70,6 +73,9 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
         super(nThreads == 0 ? DEFAULT_EVENT_LOOP_THREADS : nThreads, executor, chooserFactory, args);
     }
 
+
+
+
     @Override
     protected ThreadFactory newDefaultThreadFactory() {
         DefaultThreadFactory defaultThreadFactory = new DefaultThreadFactory(getClass(), Thread.MAX_PRIORITY);
@@ -85,6 +91,7 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
     }
 
     /**
+     * 父类中定义的  我这里只是再重新声明一下， 注释掉也可以的
      * NioEventLoopGroup 具体实现
      */
     @Override
@@ -98,12 +105,14 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
 
     @Override
     public ChannelFuture register(ChannelPromise promise) {
-        return next().register(promise);
+        EventLoop next = next();
+        return next.register(promise);
     }
 
     @Deprecated
     @Override
     public ChannelFuture register(Channel channel, ChannelPromise promise) {
-        return next().register(channel, promise);
+        EventLoop next = next();
+        return next.register(channel, promise);
     }
 }
