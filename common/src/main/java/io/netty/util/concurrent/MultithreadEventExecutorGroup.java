@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Abstract base class for {@link EventExecutorGroup} implementations that handles their tasks with multiple threads at
  * the same time.
  *
- *
+ *                     抽象类
  */
 public abstract class MultithreadEventExecutorGroup extends AbstractEventExecutorGroup {
 
@@ -37,8 +37,9 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
      */
     private final EventExecutor[] children;
 
-    // 同上，只是不能修改
+    // 此set是对上方的执行器数组的一个副本，并且这个副本只读
     private final Set<EventExecutor> readonlyChildren;
+
     private final AtomicInteger terminatedChildren = new AtomicInteger();
     private final Promise<?> terminationFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);
 
@@ -97,7 +98,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
         for (int i = 0; i < nThreads; i ++) {
             boolean success = false;
             try {
-                // 初始化 NioEventLoop
+                // 初始化NioEventLoop   NioEventLoopGroup类中实现
                 children[i] = newChild(executor, args);
                 success = true;
             } catch (Exception e) {
@@ -128,6 +129,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
 
         chooser = chooserFactory.newChooser(children);
 
+        // 为每个EventLoop线程添加 线程终止监听器
         final FutureListener<Object> terminationListener = new FutureListener<Object>() {
             @Override
             public void operationComplete(Future<Object> future) throws Exception {
@@ -147,7 +149,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
     }
 
     /**
-     *
+     * 获取默认的线程工厂并且传入当前类名，  居然被子类重写了
      */
     protected ThreadFactory newDefaultThreadFactory() {
         Class<? extends MultithreadEventExecutorGroup> clazz = getClass();
@@ -181,6 +183,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
      * called for each thread that will serve this {@link MultithreadEventExecutorGroup}.
      *
      *  NioEventLoopGroup 具体实现
+     *  声明了一个创建执行器的方法并且抽象的，因为每个执行器的实现都有特殊的操作所以此处抽象
      */
     protected abstract EventExecutor newChild(Executor executor, Object... args) throws Exception;
 
