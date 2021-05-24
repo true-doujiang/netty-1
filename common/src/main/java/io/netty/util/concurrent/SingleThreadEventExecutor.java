@@ -81,7 +81,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             AtomicReferenceFieldUpdater.newUpdater(
                     SingleThreadEventExecutor.class, ThreadProperties.class, "threadProperties");
 
-    // 别的别的线程往这里丢任务,当前线程 也会丢任务
+    // 别的线程往这里丢任务,当前线程 也会丢任务
     private final Queue<Runnable> taskQueue;
 
     @SuppressWarnings("unused")

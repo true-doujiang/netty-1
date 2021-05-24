@@ -38,6 +38,10 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
     //
     private final Queue<Runnable> tailTasks;
 
+
+    /**
+     *
+     */
     protected SingleThreadEventLoop(EventLoopGroup parent, ThreadFactory threadFactory, boolean addTaskWakesUp) {
         this(parent, threadFactory, addTaskWakesUp, DEFAULT_MAX_PENDING_TASKS, RejectedExecutionHandlers.reject());
     }
@@ -46,6 +50,9 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
         this(parent, executor, addTaskWakesUp, DEFAULT_MAX_PENDING_TASKS, RejectedExecutionHandlers.reject());
     }
 
+    /**
+     *
+     */
     protected SingleThreadEventLoop(EventLoopGroup parent, ThreadFactory threadFactory,
                                     boolean addTaskWakesUp, int maxPendingTasks,
                                     RejectedExecutionHandler rejectedExecutionHandler) {

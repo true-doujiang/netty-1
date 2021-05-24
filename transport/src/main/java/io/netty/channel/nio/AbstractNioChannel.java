@@ -59,6 +59,8 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     private final SelectableChannel ch;
     //将来要关心的事件
     protected final int readInterestOp;
+
+
     // 注册时返回的 SelectionKey
     volatile SelectionKey selectionKey;
 

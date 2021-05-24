@@ -58,8 +58,12 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(NioSocketChannel.class);
 
+    //
     private static final SelectorProvider DEFAULT_SELECTOR_PROVIDER = SelectorProvider.provider();
 
+
+
+    // 创建JDK nio SocketChannel
     private static SocketChannel newSocket(SelectorProvider provider) {
         try {
             /**
@@ -105,6 +109,7 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
      */
     public NioSocketChannel(Channel parent, SocketChannel socket) {
         super(parent, socket);
+        // 绑定配置类
         config = new NioSocketChannelConfig(this, socket.socket());
     }
 
@@ -118,6 +123,9 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         return config;
     }
 
+    /**
+     *
+     */
     @Override
     protected SocketChannel javaChannel() {
         return (SocketChannel) super.javaChannel();
@@ -492,8 +500,16 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         }
     }
 
+    /**
+     * 内部类
+     */
     private final class NioSocketChannelConfig extends DefaultSocketChannelConfig {
+
         private volatile int maxBytesPerGatheringWrite = Integer.MAX_VALUE;
+
+        /**
+         * 构造器
+         */
         private NioSocketChannelConfig(NioSocketChannel channel, Socket javaSocket) {
             super(channel, javaSocket);
             calculateMaxBytesPerGatheringWrite();

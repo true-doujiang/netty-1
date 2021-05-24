@@ -23,10 +23,14 @@ import java.net.InetSocketAddress;
  * A TCP/IP {@link ServerChannel} which accepts incoming TCP/IP connections.
  */
 public interface ServerSocketChannel extends ServerChannel {
+
+    // 三个都是channel接口中定义的，这里重申一次有啥意思啊
     @Override
     ServerSocketChannelConfig config();
+
     @Override
     InetSocketAddress localAddress();
+
     @Override
     InetSocketAddress remoteAddress();
 }
