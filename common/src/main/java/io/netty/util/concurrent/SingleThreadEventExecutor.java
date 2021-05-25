@@ -46,7 +46,9 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
  * Abstract base class for {@link OrderedEventExecutor}'s that execute all its submitted tasks in a single thread.
  *
  */
-public abstract class SingleThreadEventExecutor extends AbstractScheduledEventExecutor implements OrderedEventExecutor {
+public abstract class SingleThreadEventExecutor
+              extends AbstractScheduledEventExecutor
+           implements OrderedEventExecutor {
 
 
     static final int DEFAULT_MAX_PENDING_EXECUTOR_TASKS = Math.max(16,
@@ -119,8 +121,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      * @param addTaskWakesUp    {@code true} if and only if invocation of {@link #addTask(Runnable)} will wake up the
      *                          executor thread
      */
-    protected SingleThreadEventExecutor(
-            EventExecutorGroup parent, ThreadFactory threadFactory, boolean addTaskWakesUp) {
+    protected SingleThreadEventExecutor(EventExecutorGroup parent, ThreadFactory threadFactory, boolean addTaskWakesUp) {
         this(parent, new ThreadPerTaskExecutor(threadFactory), addTaskWakesUp);
     }
 
@@ -134,8 +135,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      * @param maxPendingTasks   the maximum number of pending tasks before new tasks will be rejected.
      * @param rejectedHandler   the {@link RejectedExecutionHandler} to use.
      */
-    protected SingleThreadEventExecutor(
-            EventExecutorGroup parent, ThreadFactory threadFactory,
+    protected SingleThreadEventExecutor(EventExecutorGroup parent, ThreadFactory threadFactory,
             boolean addTaskWakesUp, int maxPendingTasks, RejectedExecutionHandler rejectedHandler) {
         this(parent, new ThreadPerTaskExecutor(threadFactory), addTaskWakesUp, maxPendingTasks, rejectedHandler);
     }
@@ -161,15 +161,22 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      *                          executor thread
      * @param maxPendingTasks   the maximum number of pending tasks before new tasks will be rejected.
      * @param rejectedHandler   the {@link RejectedExecutionHandler} to use.
+     *
+     *
      */
-    protected SingleThreadEventExecutor(EventExecutorGroup parent, Executor executor,
-                                        boolean addTaskWakesUp, int maxPendingTasks,
+    protected SingleThreadEventExecutor(EventExecutorGroup parent,
+                                        Executor executor,
+                                        boolean addTaskWakesUp,
+                                        int maxPendingTasks,
                                         RejectedExecutionHandler rejectedHandler) {
+        //
         super(parent);
+
         this.addTaskWakesUp = addTaskWakesUp;
         this.maxPendingTasks = Math.max(16, maxPendingTasks);
         // executor: ThreadPerTaskExecutor
         this.executor = ObjectUtil.checkNotNull(executor, "executor");
+
         // 干什么用的: 别的别的线程往这里丢任务   加入荣的是ServerBootstrap中 ServerBootstrapAcceptor
         taskQueue = newTaskQueue(this.maxPendingTasks);
         rejectedExecutionHandler = ObjectUtil.checkNotNull(rejectedHandler, "rejectedHandler");
@@ -177,6 +184,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
     /**
      * @deprecated Please use and override {@link #newTaskQueue(int)}.
+     * 废弃了
      */
     @Deprecated
     protected Queue<Runnable> newTaskQueue() {
@@ -304,7 +312,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     }
 
     /**
-     * @see Queue#isEmpty()
+     * @see Queue#isEmpty() 子类覆盖了
      */
     protected boolean hasTasks() {
         assert inEventLoop();
@@ -832,6 +840,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     private void doStartThread() {
         assert thread == null;
 
+        // 创建一个任务 扔给NioEventLoop中的ThreadPerTaskExecutor（线程工程）
         Runnable r = new Thread("new thread runnable") {
             @Override
             public void run() {
@@ -846,6 +855,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                 }
 
                 boolean success = false;
+
                 updateLastExecutionTime();
                 try {
                     /**

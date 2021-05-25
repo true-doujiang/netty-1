@@ -446,7 +446,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     }
 
     /**
-     *
+     * SingleThreadEventExecutor中定义的run()方法
      */
     @Override
     protected void run() {

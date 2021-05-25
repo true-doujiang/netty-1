@@ -85,8 +85,8 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
             throw new IllegalArgumentException(String.format("nThreads: %d (expected: > 0)", nThreads));
         }
 
+        // 默认使用线程工厂是 DefaultThreadFactory
         if (executor == null) {
-            //System.out.println("start 创建 ThreadPerTaskExecutor");
             // DefaultThreadFactory
             ThreadFactory threadFactory = newDefaultThreadFactory();
             executor = new ThreadPerTaskExecutor(threadFactory);
@@ -99,18 +99,19 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
             boolean success = false;
             try {
                 // 初始化NioEventLoop   NioEventLoopGroup类中实现
+                // 给每个NioEventLoop绑定一个线程工程
                 children[i] = newChild(executor, args);
                 success = true;
             } catch (Exception e) {
                 // TODO: Think about if this is a good exception type
                 throw new IllegalStateException("failed to create a child event loop", e);
             } finally {
-
+                // 没成功，把已有的线程优雅关闭
                 if (!success) {
                     for (int j = 0; j < i; j ++) {
                         children[j].shutdownGracefully();
                     }
-
+                    // 没有完全关闭的线程让它一直等待
                     for (int j = 0; j < i; j ++) {
                         EventExecutor e = children[j];
                         try {

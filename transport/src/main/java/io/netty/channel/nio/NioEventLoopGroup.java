@@ -32,7 +32,7 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * {@link MultithreadEventLoopGroup} implementations which is used for NIO {@link Selector} based {@link Channel}s.
- *
+ *  祖先是 ScheduledExecutorService 是 jdk 中的线程池的一个接口
  *                                          抽象类
  */
 public class NioEventLoopGroup extends MultithreadEventLoopGroup {
@@ -135,8 +135,10 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
      */
     @Override
     protected EventLoop newChild(Executor executor, Object... args) throws Exception {
+
         // this 启动的时候创建的 NioEventLoopGroup
-        NioEventLoop nioEventLoop = new NioEventLoop(this, executor,
+        NioEventLoop nioEventLoop = new NioEventLoop(this,
+                executor,
                 (SelectorProvider) args[0],
                 ((SelectStrategyFactory) args[1]).newSelectStrategy(),
                 (RejectedExecutionHandler) args[2]);
