@@ -289,15 +289,24 @@ public abstract class SingleThreadEventExecutor
         }
     }
 
+    /**
+     * 这个方法的意思是从定时任务队列中聚合任务, 也就是将定时任务中找到可以执行的任务添加到taskQueue中
+     * 参考：https://www.cnblogs.com/xiangnan6122/p/10203169.html
+     */
     private boolean fetchFromScheduledTaskQueue() {
         long nanoTime = AbstractScheduledEventExecutor.nanoTime();
+        // 从优先级队列中获取，似乎没用到这个队列 为null，场景不对
         Runnable scheduledTask  = pollScheduledTask(nanoTime);
         while (scheduledTask != null) {
+            //如果添加到普通任务队列过程中失败
             if (!taskQueue.offer(scheduledTask)) {
+                //则重新添加到定时任务队列中
                 // No space left in the task queue add it back to the scheduledTaskQueue so we pick it up again.
                 scheduledTaskQueue().add((ScheduledFutureTask<?>) scheduledTask);
                 return false;
             }
+            //继续从定时任务队列中拉取任务
+            //方法执行完成之后, 所有符合运行条件的定时任务队列, 都添加到了普通任务队列中
             scheduledTask  = pollScheduledTask(nanoTime);
         }
         return true;
@@ -315,7 +324,7 @@ public abstract class SingleThreadEventExecutor
      * @see Queue#isEmpty() 子类覆盖了
      */
     protected boolean hasTasks() {
-        assert inEventLoop();
+        //assert inEventLoop();
         return !taskQueue.isEmpty();
     }
 
@@ -418,7 +427,9 @@ public abstract class SingleThreadEventExecutor
      * the tasks in the task queue and returns if it ran longer than {@code timeoutNanos}.
      */
     protected boolean runAllTasks(long timeoutNanos) {
+        //定时任务队列中聚合任务
         fetchFromScheduledTaskQueue();
+
         Runnable task = pollTask();
 
         if (task == null) {
@@ -430,6 +441,7 @@ public abstract class SingleThreadEventExecutor
         long runTasks = 0;
         long lastExecutionTime;
 
+        // 一直for 从taskQueue中取任务执行，直到执行完毕或者超时
         for (;;) {
             System.out.println(Thread.currentThread().getName() + " NioEventLoop run() taskQueue -----取出任务执行2  task: " + task);
             // 执行任务  task.run()
@@ -790,12 +802,14 @@ public abstract class SingleThreadEventExecutor
         }
 
         boolean inEventLoop = inEventLoop();
+        System.out.println(Thread.currentThread().getName() + " inEventLoop = " + inEventLoop);
+
         // 添加到 taskQueue 这个队列中   还有一个tailQueue队列
         addTask(task);
 
         if (!inEventLoop) {
 
-            // 启动NioEventLoop 中Thread   执行 task
+            // 启动NioEventLoop中Thread   执行task 下一个方法
             startThread();
 
             if (isShutdown()) {

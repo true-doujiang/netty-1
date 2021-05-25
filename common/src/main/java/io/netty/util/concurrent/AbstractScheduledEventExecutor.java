@@ -42,6 +42,9 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
 
     PriorityQueue<ScheduledFutureTask<?>> scheduledTaskQueue;
 
+
+
+
     protected AbstractScheduledEventExecutor() {
     }
 
@@ -53,6 +56,9 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
         return ScheduledFutureTask.nanoTime();
     }
 
+    /**
+     *
+     */
     PriorityQueue<ScheduledFutureTask<?>> scheduledTaskQueue() {
         if (scheduledTaskQueue == null) {
             scheduledTaskQueue = new DefaultPriorityQueue<ScheduledFutureTask<?>>(
@@ -103,6 +109,7 @@ public abstract class AbstractScheduledEventExecutor extends AbstractEventExecut
     protected final Runnable pollScheduledTask(long nanoTime) {
         assert inEventLoop();
 
+        //
         Queue<ScheduledFutureTask<?>> scheduledTaskQueue = this.scheduledTaskQueue;
         ScheduledFutureTask<?> scheduledTask = scheduledTaskQueue == null ? null : scheduledTaskQueue.peek();
         if (scheduledTask == null) {

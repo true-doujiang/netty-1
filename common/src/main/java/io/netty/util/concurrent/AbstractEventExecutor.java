@@ -50,9 +50,14 @@ public abstract class AbstractEventExecutor extends AbstractExecutorService impl
         this(null);
     }
 
+    /**
+     * 构造器
+     */
     protected AbstractEventExecutor(EventExecutorGroup parent) {
         this.parent = parent;
     }
+
+
 
     @Override
     public EventExecutorGroup parent() {
