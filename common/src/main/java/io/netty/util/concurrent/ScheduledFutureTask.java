@@ -27,9 +27,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @SuppressWarnings("ComparableImplementedButEqualsNotOverridden")
 final class ScheduledFutureTask<V> extends PromiseTask<V> implements ScheduledFuture<V>, PriorityQueueNode {
+
     private static final AtomicLong nextTaskId = new AtomicLong();
     private static final long START_TIME = System.nanoTime();
 
+    /**
+     * 静态工具方法
+     */
     static long nanoTime() {
         return System.nanoTime() - START_TIME;
     }
@@ -46,6 +50,8 @@ final class ScheduledFutureTask<V> extends PromiseTask<V> implements ScheduledFu
     private final long periodNanos;
 
     private int queueIndex = INDEX_NOT_IN_QUEUE;
+
+
 
     ScheduledFutureTask(
             AbstractScheduledEventExecutor executor,

@@ -35,8 +35,9 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
     protected static final int DEFAULT_MAX_PENDING_TASKS = Math.max(16,
             SystemPropertyUtil.getInt("io.netty.eventLoop.maxPendingTasks", Integer.MAX_VALUE));
 
-    //
+    // 和父类中的 taskQueue有啥区别
     private final Queue<Runnable> tailTasks;
+
 
     protected SingleThreadEventLoop(EventLoopGroup parent, ThreadFactory threadFactory, boolean addTaskWakesUp) {
         this(parent, threadFactory, addTaskWakesUp, DEFAULT_MAX_PENDING_TASKS, RejectedExecutionHandlers.reject());
@@ -50,11 +51,17 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
                                     boolean addTaskWakesUp, int maxPendingTasks,
                                     RejectedExecutionHandler rejectedExecutionHandler) {
         super(parent, threadFactory, addTaskWakesUp, maxPendingTasks, rejectedExecutionHandler);
+        //
         tailTasks = newTaskQueue(maxPendingTasks);
     }
 
-    protected SingleThreadEventLoop(EventLoopGroup parent, Executor executor,
-                                    boolean addTaskWakesUp, int maxPendingTasks,
+    /**
+     *
+     */
+    protected SingleThreadEventLoop(EventLoopGroup parent,
+                                    Executor executor,
+                                    boolean addTaskWakesUp,
+                                    int maxPendingTasks,
                                     RejectedExecutionHandler rejectedExecutionHandler) {
 
         super(parent, executor, addTaskWakesUp, maxPendingTasks, rejectedExecutionHandler);
@@ -73,10 +80,14 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
         return (EventLoop) super.next();
     }
 
+    /**
+     *
+     */
     @Override
     public ChannelFuture register(Channel channel) {
         // this : NioEventLoop
         DefaultChannelPromise channelPromise = new DefaultChannelPromise(channel, this);
+        // 下一个方法
         return register(channelPromise);
     }
 
@@ -86,7 +97,9 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
     @Override
     public ChannelFuture register(final ChannelPromise promise) {
         ObjectUtil.checkNotNull(promise, "promise");
+
         Channel channel = promise.channel();
+        //
         Channel.Unsafe unsafe = channel.unsafe();
 
         // unsafe 是 AbstractChannel.AbstractUnsafe

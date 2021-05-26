@@ -46,13 +46,12 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
                              implements io.netty.channel.socket.ServerSocketChannel {
 
     private static final ChannelMetadata METADATA = new ChannelMetadata(false, 16);
+    //
     private static final SelectorProvider DEFAULT_SELECTOR_PROVIDER = SelectorProvider.provider();
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(NioServerSocketChannel.class);
 
-    /**
-     * 创建JDK nio ServerSocketChannel
-     */
+    // 创建JDK nio ServerSocketChannel
     private static ServerSocketChannel newSocket(SelectorProvider provider) {
         try {
             /**
@@ -88,7 +87,9 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
      * Create a new instance using the given {@link ServerSocketChannel}.
      */
     public NioServerSocketChannel(ServerSocketChannel channel) {
+        // 服务端channel的parent为null   直接将OP_ACCEPT事件传到父类AbstractNioMessageChannel
         super(null, channel, SelectionKey.OP_ACCEPT);
+        // 绑定配置类
         config = new NioServerSocketChannelConfig(this, javaChannel().socket());
     }
 
@@ -117,6 +118,9 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
         return null;
     }
 
+    /**
+     *
+     */
     @Override
     protected ServerSocketChannel javaChannel() {
         return (ServerSocketChannel) super.javaChannel();
@@ -206,7 +210,15 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
         throw new UnsupportedOperationException();
     }
 
+
+    /**
+     * 内部类
+     */
     private final class NioServerSocketChannelConfig extends DefaultServerSocketChannelConfig {
+
+        /**
+         * 构造器
+         */
         private NioServerSocketChannelConfig(NioServerSocketChannel channel, ServerSocket javaSocket) {
             super(channel, javaSocket);
         }

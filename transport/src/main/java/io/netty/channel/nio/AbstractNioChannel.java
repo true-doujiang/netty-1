@@ -59,6 +59,8 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     private final SelectableChannel ch;
     //将来要关心的事件
     protected final int readInterestOp;
+
+
     // 注册时返回的 SelectionKey
     volatile SelectionKey selectionKey;
 
@@ -81,12 +83,17 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     /**
      * Create a new instance
      *
+     * 构造器
+     *
      * @param parent            the parent {@link Channel} by which this instance was created. May be {@code null}
      * @param ch                the underlying {@link SelectableChannel} on which it operates
      * @param readInterestOp    the ops to set to receive data from the {@link SelectableChannel}
+     *
      */
     protected AbstractNioChannel(Channel parent, SelectableChannel ch, int readInterestOp) {
+
         super(parent);
+
         this.ch = ch;
         this.readInterestOp = readInterestOp;
         try {
@@ -203,7 +210,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
 
 
     /**
-     * NioUnsafe 接口
+     * NioUnsafe 内部接口
      *
      * Special {@link Unsafe} sub-type which allows to access the underlying {@link SelectableChannel}
      */
@@ -231,7 +238,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     }
 
     /**
-     * NioUnsafe 实现类
+     * NioUnsafe 内部实现类
      */
     protected abstract class AbstractNioUnsafe extends AbstractUnsafe implements NioUnsafe {
 

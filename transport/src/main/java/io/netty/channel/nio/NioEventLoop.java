@@ -55,8 +55,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     private static final int CLEANUP_INTERVAL = 256; // XXX Hard-coded value, but won't need customization.
 
-    private static final boolean DISABLE_KEY_SET_OPTIMIZATION =
-            SystemPropertyUtil.getBoolean("io.netty.noKeySetOptimization", false);
+    private static final boolean DISABLE_KEY_SET_OPTIMIZATION = SystemPropertyUtil.getBoolean("io.netty.noKeySetOptimization", false);
 
     private static final int MIN_PREMATURE_SELECTOR_RETURNS = 3;
     private static final int SELECTOR_AUTO_REBUILD_THRESHOLD;
@@ -102,6 +101,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             logger.debug("-Dio.netty.selectorAutoRebuildThreshold: {}", SELECTOR_AUTO_REBUILD_THRESHOLD);
         }
     }
+    // ------------ static end -----------
 
     /**
      * The NIO {@link Selector}.
@@ -110,9 +110,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     private Selector selector;
     // nio selector
     private Selector unwrappedSelector;
+
     /**
      * netty自定义的selectedKeySet 用于替换nio中的selectedKeySet  偷天换日
-     *
      * 里面有个SelectionKey[] keys 属性， 什么时候放进的SelectionKey TODO
      * SelectedSelectionKeySetSelector在做select() 操作时放进去的
      */
@@ -122,7 +122,6 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     /**
      * selector的唤醒状态
-     *
      * Boolean that controls determines if a blocked Selector.select should
      * break out of its selection process. In our case we use a timeout for
      * the select method and the select method will block for that time unless
@@ -130,6 +129,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
      */
     private final AtomicBoolean wakenUp = new AtomicBoolean();
 
+    //
     private final SelectStrategy selectStrategy;
 
     private volatile int ioRatio = 50;
@@ -137,12 +137,8 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     private boolean needsToSelectAgain;
 
     /**
-     *
-     * @param parent
-     * @param executor ThreadPerTaskExecutor(FastThreadLocalThread)
-     * @param selectorProvider
-     * @param strategy
-     * @param rejectedExecutionHandler
+     * 构造器
+     * 调用方: io.netty.channel.nio.NioEventLoopGroup#newChild()
      */
     NioEventLoop(NioEventLoopGroup parent, Executor executor, SelectorProvider selectorProvider,
                  SelectStrategy strategy, RejectedExecutionHandler rejectedExecutionHandler) {
@@ -449,32 +445,28 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     * SingleThreadEventExecutor中定义的run()方法
+     */
     @Override
     protected void run() {
-
         System.out.println(Thread.currentThread().getName() + " " + this + " NioEventLoop.run() 1 start 从此进入死循环 ");
-
         for (;;) {
-
             try {
                 try {
-                    int i = selectStrategy.calculateStrategy(selectNowSupplier, hasTasks());
-
+                    boolean b = hasTasks();
+                    int i = selectStrategy.calculateStrategy(selectNowSupplier, b);
                     System.out.println(Thread.currentThread().getName() + " NioEventLoop.run() 2  i = " + i);
-
                     switch (i) {
                         case SelectStrategy.CONTINUE:
                             continue;
-
                         case SelectStrategy.BUSY_WAIT:
                             // fall-through to SELECT since the busy-wait is not supported with NIO
-
                         case SelectStrategy.SELECT:
                             //nio select() 操作   wakenUp设置为false
-                            select(wakenUp.getAndSet(false));
-
+                            boolean andSet = wakenUp.getAndSet(false);
+                            select(andSet);
                             //这边一大段注释 删掉了
-
                             if (wakenUp.get()) {
                                 selector.wakeup();
                             }
@@ -781,6 +773,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         return unwrappedSelector;
     }
 
+    /**
+     *
+     */
     int selectNow() throws IOException {
         try {
             return selector.selectNow();
@@ -792,6 +787,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     *
+     */
     private void select(boolean oldWakenUp) throws IOException {
         Selector selector = this.selector;
         try {

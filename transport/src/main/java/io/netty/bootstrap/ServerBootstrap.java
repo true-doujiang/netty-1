@@ -178,8 +178,13 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             currentChildAttrs = childAttrs.entrySet().toArray(newAttrArray(0));
         }
 
-        // 再给服务端NioServerSocketChannel的pipeline添加一个HandlerContext(initializerHandler)
+        /**
+         * 匿名内部类 会被添加到pipeline的 pendingHandlerCallbackHead; 属性中
+         * 再给服务端NioServerSocketChannel的pipeline添加一个HandlerContext(initializerHandler)
+         */
         ChannelInitializer initializerHandler = new ChannelInitializer<Channel>() {
+
+            public String myName = "ServerBootstrap的ChannelInitializer匿名内部类";
 
             // ChannelInitializer 父类中有 handlerAdded(ctx) 它调用了initChannel(ch)
             @Override

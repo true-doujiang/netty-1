@@ -59,6 +59,39 @@ public class NioEventLoopTest extends AbstractEventLoopTest {
         EventLoopGroup group = new NioEventLoopGroup(1);
         final NioEventLoop loop = (NioEventLoop) group.next();
         try {
+
+            EventLoop next = loop.next();
+           // loop.run();
+            EventLoopGroup parent = loop.parent();
+
+            loop.execute(new Runnable() {
+                @Override
+                public void run() {
+                    for (int i = 0; i < 5; i++) {
+                        System.out.println(Thread.currentThread().getName() + " execute i = " + i);
+                    }
+                }
+            });
+            loop.execute(new Runnable() {
+                @Override
+                public void run() {
+                    for (int i = 0; i < 5; i++) {
+                        System.out.println(Thread.currentThread().getName() + " execute2 i = " + i);
+                    }
+                }
+            });
+
+            loop.submit(new Runnable() {
+                @Override
+                public void run() {
+                    for (int i = 0; i < 5; i++) {
+                        System.out.println(Thread.currentThread().getName() + " submit i = " + i);
+                    }
+                }
+            });
+
+
+
             Channel channel = new NioServerSocketChannel();
             loop.register(channel).syncUninterruptibly();
 

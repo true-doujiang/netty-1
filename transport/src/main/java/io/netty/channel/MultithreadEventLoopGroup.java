@@ -30,13 +30,17 @@ import java.util.concurrent.ThreadFactory;
  * Abstract base class for {@link EventLoopGroup} implementations that handles their tasks with multiple threads at
  * the same time.
  */
+//                    抽象类
 public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutorGroup implements EventLoopGroup {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(MultithreadEventLoopGroup.class);
 
+    // 2倍cpu核心数
     private static final int DEFAULT_EVENT_LOOP_THREADS;
 
+
     static {
+        // 2倍cpu核心数
         DEFAULT_EVENT_LOOP_THREADS = Math.max(1, SystemPropertyUtil.getInt(
                 "io.netty.eventLoopThreads", NettyRuntime.availableProcessors() * 2));
 
@@ -46,7 +50,8 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
     }
 
     /**
-     * @see MultithreadEventExecutorGroup#MultithreadEventExecutorGroup(int, Executor, Object...)
+     * 构造器
+     * 调用方 NioEventLoopGroup#NioEventLoopGroup()
      */
     protected MultithreadEventLoopGroup(int nThreads, Executor executor, Object... args) {
         //super(nThreads == 0 ? DEFAULT_EVENT_LOOP_THREADS : nThreads, executor, args);
@@ -70,9 +75,16 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
         super(nThreads == 0 ? DEFAULT_EVENT_LOOP_THREADS : nThreads, executor, chooserFactory, args);
     }
 
+
+
+    /**
+     * 获取默认的线程工厂并且传入当前类名
+     * MultithreadEventExecutorGroup中定义的，它的实现被这里覆盖了
+     */
     @Override
     protected ThreadFactory newDefaultThreadFactory() {
-        DefaultThreadFactory defaultThreadFactory = new DefaultThreadFactory(getClass(), Thread.MAX_PRIORITY);
+        Class<? extends MultithreadEventLoopGroup> clazz = getClass();
+        DefaultThreadFactory defaultThreadFactory = new DefaultThreadFactory(clazz, Thread.MAX_PRIORITY);
         return defaultThreadFactory;
     }
 
@@ -81,15 +93,20 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
      */
     @Override
     public EventLoop next() {
+        //  chooser.next();
         return (EventLoop) super.next();
     }
 
     /**
+     * 父类中定义的  我这里只是再重新声明一下， 注释掉也可以的
      * NioEventLoopGroup 具体实现
      */
     @Override
     protected abstract EventLoop newChild(Executor executor, Object... args) throws Exception;
 
+    /**
+     *
+     */
     @Override
     public ChannelFuture register(Channel channel) {
         EventLoop next = next();
@@ -98,12 +115,14 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
 
     @Override
     public ChannelFuture register(ChannelPromise promise) {
-        return next().register(promise);
+        EventLoop next = next();
+        return next.register(promise);
     }
 
     @Deprecated
     @Override
     public ChannelFuture register(Channel channel, ChannelPromise promise) {
-        return next().register(channel, promise);
+        EventLoop next = next();
+        return next.register(channel, promise);
     }
 }

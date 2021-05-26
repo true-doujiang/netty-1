@@ -47,7 +47,7 @@ public final class DefaultEventExecutorChooserFactory implements EventExecutorCh
     }
 
     /**
-     *
+     * 内部类1
      */
     private static final class PowerOfTwoEventExecutorChooser implements EventExecutorChooser {
         private final AtomicInteger idx = new AtomicInteger();
@@ -63,8 +63,9 @@ public final class DefaultEventExecutorChooserFactory implements EventExecutorCh
         }
     }
 
+
     /**
-     *
+     * 内部类2
      */
     private static final class GenericEventExecutorChooser implements EventExecutorChooser {
         private final AtomicInteger idx = new AtomicInteger();

@@ -43,7 +43,9 @@ public class DefaultSocketChannelConfig extends DefaultChannelConfig
      * Creates a new instance.
      */
     public DefaultSocketChannelConfig(SocketChannel channel, Socket javaSocket) {
+
         super(channel);
+
         if (javaSocket == null) {
             throw new NullPointerException("javaSocket");
         }

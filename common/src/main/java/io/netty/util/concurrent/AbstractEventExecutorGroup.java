@@ -34,17 +34,21 @@ public abstract class AbstractEventExecutorGroup implements EventExecutorGroup {
 
     @Override
     public Future<?> submit(Runnable task) {
-        return next().submit(task);
+        // EventExecutorGroup中定义 MultithreadEventExecutorGroup实现： return chooser.next();
+        EventExecutor next = next();
+        return next.submit(task);
     }
 
     @Override
     public <T> Future<T> submit(Runnable task, T result) {
-        return next().submit(task, result);
+        EventExecutor next = next();
+        return next.submit(task, result);
     }
 
     @Override
     public <T> Future<T> submit(Callable<T> task) {
-        return next().submit(task);
+        EventExecutor next = next();
+        return next.submit(task);
     }
 
     @Override

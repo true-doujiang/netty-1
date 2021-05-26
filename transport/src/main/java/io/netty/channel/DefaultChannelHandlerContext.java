@@ -25,8 +25,14 @@ final class DefaultChannelHandlerContext extends AbstractChannelHandlerContext {
 
     private final ChannelHandler handler;
 
-    DefaultChannelHandlerContext(DefaultChannelPipeline pipeline, EventExecutor executor, String name, ChannelHandler handler) {
+    /**
+     * default constructor
+     */
+    DefaultChannelHandlerContext(DefaultChannelPipeline pipeline, EventExecutor executor,
+                                 String name, ChannelHandler handler) {
+
         super(pipeline, executor, name, isInbound(handler), isOutbound(handler));
+
         if (handler == null) {
             throw new NullPointerException("handler");
         }
@@ -38,6 +44,7 @@ final class DefaultChannelHandlerContext extends AbstractChannelHandlerContext {
         return handler;
     }
 
+    // 判断是 in 还是 out
     private static boolean isInbound(ChannelHandler handler) {
         return handler instanceof ChannelInboundHandler;
     }

@@ -15,6 +15,7 @@
  */
 package io.netty.channel.local;
 
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.AbstractChannel;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelConfig;
@@ -49,12 +50,17 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
  * A {@link Channel} for the local transport.
  */
 public class LocalChannel extends AbstractChannel {
+
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(LocalChannel.class);
+
     @SuppressWarnings({ "rawtypes" })
     private static final AtomicReferenceFieldUpdater<LocalChannel, Future> FINISH_READ_FUTURE_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(LocalChannel.class, Future.class, "finishReadFuture");
+
     private static final ChannelMetadata METADATA = new ChannelMetadata(false);
     private static final int MAX_READER_STACK_DEPTH = 8;
+
+
     private static final ClosedChannelException DO_WRITE_CLOSED_CHANNEL_EXCEPTION = ThrowableUtil.unknownStackTrace(
             new ClosedChannelException(), LocalChannel.class, "doWrite(...)");
     private static final ClosedChannelException DO_CLOSE_CLOSED_CHANNEL_EXCEPTION = ThrowableUtil.unknownStackTrace(
@@ -62,9 +68,13 @@ public class LocalChannel extends AbstractChannel {
 
     private enum State { OPEN, BOUND, CONNECTED, CLOSED }
 
+    // 每个具体的channel 自己初始化 channelConfig
     private final ChannelConfig config = new DefaultChannelConfig(this);
+
     // To further optimize this we could write our own SPSC queue.
     final Queue<Object> inboundBuffer = PlatformDependent.newSpscQueue();
+
+
     private final Runnable readTask = new Runnable() {
         @Override
         public void run() {
@@ -93,7 +103,12 @@ public class LocalChannel extends AbstractChannel {
 
     public LocalChannel() {
         super(null);
-        config().setAllocator(new PreferHeapByteBufAllocator(config.getAllocator()));
+
+        ByteBufAllocator allocator = config.getAllocator();
+        PreferHeapByteBufAllocator bufAllocator = new PreferHeapByteBufAllocator(allocator);
+        ChannelConfig config = config();
+        config.setAllocator(bufAllocator);
+        //config().setAllocator(new PreferHeapByteBufAllocator(config.getAllocator()));
     }
 
     protected LocalChannel(LocalServerChannel parent, LocalChannel peer) {
@@ -447,7 +462,12 @@ public class LocalChannel extends AbstractChannel {
         }
     }
 
+    /**
+     * 内部类 可以访问外部类的变量
+     */
     private class LocalUnsafe extends AbstractUnsafe {
+
+        private String myName = "LocalUnsafe内部unsafe";
 
         @Override
         public void connect(final SocketAddress remoteAddress,

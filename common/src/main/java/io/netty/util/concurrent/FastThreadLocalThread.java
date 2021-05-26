@@ -31,6 +31,10 @@ public class FastThreadLocalThread extends Thread {
      */
     private InternalThreadLocalMap threadLocalMap;
 
+
+    /**
+     * 构造器
+     */
     public FastThreadLocalThread() {
         cleanupFastThreadLocals = false;
     }
@@ -60,6 +64,10 @@ public class FastThreadLocalThread extends Thread {
         cleanupFastThreadLocals = true;
     }
 
+
+    /**
+     * 构造器
+     */
     public FastThreadLocalThread(ThreadGroup group, Runnable target, String name) {
         super(group, FastThreadLocalRunnable.wrap(target), name);
         cleanupFastThreadLocals = true;

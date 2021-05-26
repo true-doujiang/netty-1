@@ -35,6 +35,9 @@ public class DefaultThreadFactory implements ThreadFactory {
     private final int priority;
     protected final ThreadGroup threadGroup;
 
+    /**
+     * 构造器
+     */
     public DefaultThreadFactory(Class<?> poolType) {
         this(poolType, false, Thread.NORM_PRIORITY);
     }
@@ -51,6 +54,9 @@ public class DefaultThreadFactory implements ThreadFactory {
         this(poolName, daemon, Thread.NORM_PRIORITY);
     }
 
+    /**
+     * 构造器
+     */
     public DefaultThreadFactory(Class<?> poolType, int priority) {
         this(poolType, false, priority);
     }
@@ -58,6 +64,7 @@ public class DefaultThreadFactory implements ThreadFactory {
     public DefaultThreadFactory(String poolName, int priority) {
         this(poolName, false, priority);
     }
+
 
     public DefaultThreadFactory(Class<?> poolType, boolean daemon, int priority) {
         this(toPoolName(poolType), daemon, priority);
@@ -116,7 +123,8 @@ public class DefaultThreadFactory implements ThreadFactory {
     @Override
     public Thread newThread(Runnable r) {
         // 这个线程会赋值配NioEventLoop 中的 thread
-        Thread t = newThread(FastThreadLocalRunnable.wrap(r), prefix + nextId.incrementAndGet());
+        Runnable wrap = FastThreadLocalRunnable.wrap(r);
+        Thread t = newThread(wrap, prefix + nextId.incrementAndGet());
 
         try {
             if (t.isDaemon() != daemon) {

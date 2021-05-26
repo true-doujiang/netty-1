@@ -25,6 +25,8 @@ import io.netty.util.concurrent.OrderedEventExecutor;
  *
  */
 public interface EventLoop extends OrderedEventExecutor, EventLoopGroup {
+
+    // EventExecutor中定义（OrderedEventExecutor的父接口）
     @Override
     EventLoopGroup parent();
 }

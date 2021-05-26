@@ -23,5 +23,5 @@ import io.netty.channel.socket.ServerSocketChannel;
  * a good example.
  */
 public interface ServerChannel extends Channel {
-    // This is a tag interface.
+    // This is a tag interface.   标记接口
 }

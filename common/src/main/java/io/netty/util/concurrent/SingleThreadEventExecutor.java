@@ -46,7 +46,9 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
  * Abstract base class for {@link OrderedEventExecutor}'s that execute all its submitted tasks in a single thread.
  *
  */
-public abstract class SingleThreadEventExecutor extends AbstractScheduledEventExecutor implements OrderedEventExecutor {
+public abstract class SingleThreadEventExecutor
+              extends AbstractScheduledEventExecutor
+           implements OrderedEventExecutor {
 
 
     static final int DEFAULT_MAX_PENDING_EXECUTOR_TASKS = Math.max(16,
@@ -81,7 +83,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             AtomicReferenceFieldUpdater.newUpdater(
                     SingleThreadEventExecutor.class, ThreadProperties.class, "threadProperties");
 
-    // 别的别的线程往这里丢任务,当前线程 也会丢任务
+    // 别的线程往这里丢任务,当前线程 也会丢任务
     private final Queue<Runnable> taskQueue;
 
     @SuppressWarnings("unused")
@@ -119,8 +121,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      * @param addTaskWakesUp    {@code true} if and only if invocation of {@link #addTask(Runnable)} will wake up the
      *                          executor thread
      */
-    protected SingleThreadEventExecutor(
-            EventExecutorGroup parent, ThreadFactory threadFactory, boolean addTaskWakesUp) {
+    protected SingleThreadEventExecutor(EventExecutorGroup parent, ThreadFactory threadFactory, boolean addTaskWakesUp) {
         this(parent, new ThreadPerTaskExecutor(threadFactory), addTaskWakesUp);
     }
 
@@ -134,8 +135,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      * @param maxPendingTasks   the maximum number of pending tasks before new tasks will be rejected.
      * @param rejectedHandler   the {@link RejectedExecutionHandler} to use.
      */
-    protected SingleThreadEventExecutor(
-            EventExecutorGroup parent, ThreadFactory threadFactory,
+    protected SingleThreadEventExecutor(EventExecutorGroup parent, ThreadFactory threadFactory,
             boolean addTaskWakesUp, int maxPendingTasks, RejectedExecutionHandler rejectedHandler) {
         this(parent, new ThreadPerTaskExecutor(threadFactory), addTaskWakesUp, maxPendingTasks, rejectedHandler);
     }
@@ -161,15 +161,22 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      *                          executor thread
      * @param maxPendingTasks   the maximum number of pending tasks before new tasks will be rejected.
      * @param rejectedHandler   the {@link RejectedExecutionHandler} to use.
+     *
+     *
      */
-    protected SingleThreadEventExecutor(EventExecutorGroup parent, Executor executor,
-                                        boolean addTaskWakesUp, int maxPendingTasks,
+    protected SingleThreadEventExecutor(EventExecutorGroup parent,
+                                        Executor executor,
+                                        boolean addTaskWakesUp,
+                                        int maxPendingTasks,
                                         RejectedExecutionHandler rejectedHandler) {
+        //
         super(parent);
+
         this.addTaskWakesUp = addTaskWakesUp;
         this.maxPendingTasks = Math.max(16, maxPendingTasks);
         // executor: ThreadPerTaskExecutor
         this.executor = ObjectUtil.checkNotNull(executor, "executor");
+
         // 干什么用的: 别的别的线程往这里丢任务   加入荣的是ServerBootstrap中 ServerBootstrapAcceptor
         taskQueue = newTaskQueue(this.maxPendingTasks);
         rejectedExecutionHandler = ObjectUtil.checkNotNull(rejectedHandler, "rejectedHandler");
@@ -177,6 +184,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
 
     /**
      * @deprecated Please use and override {@link #newTaskQueue(int)}.
+     * 废弃了
      */
     @Deprecated
     protected Queue<Runnable> newTaskQueue() {
@@ -281,15 +289,24 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         }
     }
 
+    /**
+     * 这个方法的意思是从定时任务队列中聚合任务, 也就是将定时任务中找到可以执行的任务添加到taskQueue中
+     * 参考：https://www.cnblogs.com/xiangnan6122/p/10203169.html
+     */
     private boolean fetchFromScheduledTaskQueue() {
         long nanoTime = AbstractScheduledEventExecutor.nanoTime();
+        // 从优先级队列中获取，似乎没用到这个队列 为null，场景不对
         Runnable scheduledTask  = pollScheduledTask(nanoTime);
         while (scheduledTask != null) {
+            //如果添加到普通任务队列过程中失败
             if (!taskQueue.offer(scheduledTask)) {
+                //则重新添加到定时任务队列中
                 // No space left in the task queue add it back to the scheduledTaskQueue so we pick it up again.
                 scheduledTaskQueue().add((ScheduledFutureTask<?>) scheduledTask);
                 return false;
             }
+            //继续从定时任务队列中拉取任务
+            //方法执行完成之后, 所有符合运行条件的定时任务队列, 都添加到了普通任务队列中
             scheduledTask  = pollScheduledTask(nanoTime);
         }
         return true;
@@ -304,10 +321,10 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     }
 
     /**
-     * @see Queue#isEmpty()
+     * @see Queue#isEmpty() 子类覆盖了
      */
     protected boolean hasTasks() {
-        assert inEventLoop();
+        //assert inEventLoop();
         return !taskQueue.isEmpty();
     }
 
@@ -410,7 +427,9 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      * the tasks in the task queue and returns if it ran longer than {@code timeoutNanos}.
      */
     protected boolean runAllTasks(long timeoutNanos) {
+        //定时任务队列中聚合任务
         fetchFromScheduledTaskQueue();
+
         Runnable task = pollTask();
 
         if (task == null) {
@@ -422,6 +441,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         long runTasks = 0;
         long lastExecutionTime;
 
+        // 一直for 从taskQueue中取任务执行，直到执行完毕或者超时
         for (;;) {
             System.out.println(Thread.currentThread().getName() + " NioEventLoop run() taskQueue -----取出任务执行2  task: " + task);
             // 执行任务  task.run()
@@ -782,12 +802,14 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         }
 
         boolean inEventLoop = inEventLoop();
+        System.out.println(Thread.currentThread().getName() + " inEventLoop = " + inEventLoop);
+
         // 添加到 taskQueue 这个队列中   还有一个tailQueue队列
         addTask(task);
 
         if (!inEventLoop) {
 
-            // 启动NioEventLoop 中Thread   执行 task
+            // 启动NioEventLoop中Thread   执行task 下一个方法
             startThread();
 
             if (isShutdown()) {
@@ -832,6 +854,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
     private void doStartThread() {
         assert thread == null;
 
+        // 创建一个任务 扔给NioEventLoop中的ThreadPerTaskExecutor（线程工程）
         Runnable r = new Thread("new thread runnable") {
             @Override
             public void run() {
@@ -846,6 +869,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                 }
 
                 boolean success = false;
+
                 updateLastExecutionTime();
                 try {
                     /**
