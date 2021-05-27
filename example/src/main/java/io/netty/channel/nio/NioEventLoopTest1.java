@@ -62,11 +62,6 @@ public class NioEventLoopTest1 {
                 }
             }).syncUninterruptibly();
 
-//            Selector newSelector = ((NioEventLoop) channel.eventLoop()).unwrappedSelector();
-//            assertTrue(newSelector.isOpen());
-//            assertNotSame(selector, newSelector);
-//            assertFalse(selector.isOpen());
-
             channel.close().syncUninterruptibly();
         } finally {
             group.shutdownGracefully();
