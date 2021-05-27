@@ -21,6 +21,7 @@ import io.netty.util.concurrent.AbstractEventExecutorGroup;
 /**
  * Skeletal implementation of {@link EventLoopGroup}.
  */
+@Deprecated  // 我给打上废弃标记 影响视线
 public abstract class AbstractEventLoopGroup extends AbstractEventExecutorGroup implements EventLoopGroup {
     @Override
     public abstract EventLoop next();

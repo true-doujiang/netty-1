@@ -20,11 +20,18 @@ import java.util.concurrent.RunnableFuture;
 
 class PromiseTask<V> extends DefaultPromise<V> implements RunnableFuture<V> {
 
+
+
     static <T> Callable<T> toCallable(Runnable runnable, T result) {
         return new RunnableAdapter<T>(runnable, result);
     }
 
+
+    /**
+     * 内部类
+     */
     private static final class RunnableAdapter<T> implements Callable<T> {
+
         final Runnable task;
         final T result;
 
@@ -46,6 +53,9 @@ class PromiseTask<V> extends DefaultPromise<V> implements RunnableFuture<V> {
     }
 
     protected final Callable<V> task;
+
+
+
 
     PromiseTask(EventExecutor executor, Runnable runnable, V result) {
         this(executor, toCallable(runnable, result));
@@ -130,8 +140,6 @@ class PromiseTask<V> extends DefaultPromise<V> implements RunnableFuture<V> {
         StringBuilder buf = super.toStringBuilder();
         buf.setCharAt(buf.length() - 1, ',');
 
-        return buf.append(" task: ")
-                  .append(task)
-                  .append(')');
+        return buf.append(" task: ").append(task).append(')');
     }
 }

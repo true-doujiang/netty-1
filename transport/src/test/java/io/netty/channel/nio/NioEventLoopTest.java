@@ -58,6 +58,10 @@ public class NioEventLoopTest extends AbstractEventLoopTest {
     public void testRebuildSelector() {
         EventLoopGroup group = new NioEventLoopGroup(1);
         final NioEventLoop loop = (NioEventLoop) group.next();
+        EventLoop next1 = group.next();
+//        loop.shutdownNow();
+//        loop.shutdown();
+//        boolean shutdown = loop.isShutdown();
         try {
 
             EventLoop next = loop.next();

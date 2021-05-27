@@ -21,6 +21,7 @@ import io.netty.util.concurrent.AbstractEventExecutor;
 /**
  * Skeletal implementation of {@link EventLoop}.
  */
+@Deprecated  // 我给打上废弃标记 影响视线
 public abstract class AbstractEventLoop extends AbstractEventExecutor implements EventLoop {
 
     protected AbstractEventLoop() { }
