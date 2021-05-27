@@ -36,6 +36,14 @@ public abstract class AbstractEventExecutor extends AbstractExecutorService impl
         return this;
     }
 
+    @Override
+    public boolean inEventLoop() {
+        return inEventLoop(Thread.currentThread());
+    }
+
+
+
+
 
     /**
      * 太麻烦了  还是用jdk的future吧

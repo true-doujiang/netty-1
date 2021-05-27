@@ -14,4 +14,9 @@ public interface EventExecutor extends EventExecutorGroup {
      */
     EventExecutorGroup parent();
 
+
+
+    boolean inEventLoop();
+    boolean inEventLoop(Thread thread);
+
 }
