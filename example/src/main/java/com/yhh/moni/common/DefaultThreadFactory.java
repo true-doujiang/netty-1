@@ -12,13 +12,15 @@ public class DefaultThreadFactory implements ThreadFactory {
 
     private final AtomicInteger nextId = new AtomicInteger();
     private final String prefix;
+    private final boolean daemon;
 
 
     /**
      * 构造器
      */
     public DefaultThreadFactory(Class<?> poolType, int priority) {
-        this(poolType, false, priority);
+        // true false 空时nio线程是否为守护线程
+        this(poolType, true, priority);
     }
 
     public DefaultThreadFactory(Class<?> poolType, boolean daemon, int priority) {
@@ -37,7 +39,7 @@ public class DefaultThreadFactory implements ThreadFactory {
             throw new IllegalArgumentException(
                     "priority: " + priority + " (expected: Thread.MIN_PRIORITY <= priority <= Thread.MAX_PRIORITY)");
         }
-
+        this.daemon = daemon;
         prefix = poolName + '-' + poolId.incrementAndGet() + '-';
     }
 
@@ -50,6 +52,13 @@ public class DefaultThreadFactory implements ThreadFactory {
         // 这个线程会赋值配NioEventLoop 中的 thread
         Runnable wrap = r;
         Thread t = newThread(wrap, prefix + nextId.incrementAndGet());
+        try {
+            if (t.isDaemon() != daemon) {
+                t.setDaemon(daemon);
+            }
+        } catch (Exception ignored) {
+            // Doesn't matter even if failed to set.
+        }
         return t;
     }
 

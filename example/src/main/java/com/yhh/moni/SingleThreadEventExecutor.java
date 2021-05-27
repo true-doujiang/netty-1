@@ -1,9 +1,9 @@
 package com.yhh.moni;
 
-import io.netty.util.concurrent.FastThreadLocal;
 import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.PlatformDependent;
-
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 import java.util.Queue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -13,6 +13,8 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
 
+
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(SingleThreadEventExecutor.class);
 
     // NioEventLoop中的Thread 状态
     private static final int ST_NOT_STARTED = 1;
@@ -24,6 +26,8 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
     private static final AtomicIntegerFieldUpdater<SingleThreadEventExecutor> STATE_UPDATER =
             AtomicIntegerFieldUpdater.newUpdater(SingleThreadEventExecutor.class, "state");
 
+
+    private long lastExecutionTime;
     private volatile int state = ST_NOT_STARTED;
 
     private final Queue<Runnable> taskQueue;
@@ -32,6 +36,8 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
     private volatile Thread thread;
     // ThreadPerTaskExecutor: 给我一个任务我就新创建一个FastThreadLocalThread线程去执行任务
     private final Executor executor;
+
+    private volatile boolean interrupted;
 
 
     private final int maxPendingTasks;
@@ -146,59 +152,55 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
                      *
                      *  执行 NioEventLoop.run()  调用外部类的run()
                      */
-                    io.netty.util.concurrent.SingleThreadEventExecutor.this.run();
+                    SingleThreadEventExecutor.this.run();
                     success = true;
                 } catch (Throwable t) {
                     logger.warn("Unexpected exception from an event executor: ", t);
                 } finally {
 
-                    System.out.println(Thread.currentThread().getName() + " " + this + " 的thread 成功赋值  从此有了生命力, " +
-                            "但是我永远不会执行到，因为上面的run() 是个死循环");
+//                    System.out.println(Thread.currentThread().getName() + " " +
+//                            this + " 的thread 成功赋值  从此有了生命力, " +
+//                            "但是我永远不会执行到，因为上面的run() 是个死循环");
 
                     for (;;) {
                         int oldState = state;
                         if (oldState >= ST_SHUTTING_DOWN || STATE_UPDATER.compareAndSet(
-                                io.netty.util.concurrent.SingleThreadEventExecutor.this, oldState, ST_SHUTTING_DOWN)) {
+                                SingleThreadEventExecutor.this, oldState, ST_SHUTTING_DOWN)) {
                             break;
                         }
+                        System.out.println("oldState = " + oldState);
                     }
 
                     // Check if confirmShutdown() was called at the end of the loop.
-                    if (success && gracefulShutdownStartTime == 0) {
-                        if (logger.isErrorEnabled()) {
-                            logger.error("Buggy " + EventExecutor.class.getSimpleName() + " implementation; " +
-                                    io.netty.util.concurrent.SingleThreadEventExecutor.class.getSimpleName() + ".confirmShutdown() must " +
-                                    "be called before run() implementation terminates.");
-                        }
-                    }
+
 
                     try {
                         // Run all remaining tasks and shutdown hooks.
-                        for (;;) {
-                            if (confirmShutdown()) {
-                                break;
-                            }
-                        }
+//                        for (;;) {
+//                            if (confirmShutdown()) {
+//                                break;
+//                            }
+//                        }
                     } finally {
-                        try {
-                            cleanup();
-                        } finally {
-                            // Lets remove all FastThreadLocals for the Thread as we are about to terminate and notify
-                            // the future. The user may block on the future and once it unblocks the JVM may terminate
-                            // and start unloading classes.
-                            // See https://github.com/netty/netty/issues/6596.
-                            FastThreadLocal.removeAll();
-
-                            STATE_UPDATER.set(io.netty.util.concurrent.SingleThreadEventExecutor.this, ST_TERMINATED);
-                            threadLock.release();
-                            if (!taskQueue.isEmpty()) {
-                                if (logger.isWarnEnabled()) {
-                                    logger.warn("An event executor terminated with " +
-                                            "non-empty task queue (" + taskQueue.size() + ')');
-                                }
-                            }
-                            terminationFuture.setSuccess(null);
-                        }
+//                        try {
+//                            cleanup();
+//                        } finally {
+//                            // Lets remove all FastThreadLocals for the Thread as we are about to terminate and notify
+//                            // the future. The user may block on the future and once it unblocks the JVM may terminate
+//                            // and start unloading classes.
+//                            // See https://github.com/netty/netty/issues/6596.
+//                            FastThreadLocal.removeAll();
+//
+//                            STATE_UPDATER.set(SingleThreadEventExecutor.this, ST_TERMINATED);
+//                            threadLock.release();
+//                            if (!taskQueue.isEmpty()) {
+//                                if (logger.isWarnEnabled()) {
+//                                    logger.warn("An event executor terminated with " +
+//                                            "non-empty task queue (" + taskQueue.size() + ')');
+//                                }
+//                            }
+//                            terminationFuture.setSuccess(null);
+//                        }
                     }
                 }
                 // ------ finally end ------
@@ -209,6 +211,19 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
         // 在执行任务的过程中 把当前线程 赋值给 NioEventLoop.thread  此时NioEventLoop才有活力
         executor.execute(r);
     }
+
+    protected void updateLastExecutionTime() {
+        //lastExecutionTime = ScheduledFutureTask.nanoTime();
+    }
+
+    /**
+     * NioEventLoop 的run
+     */
+    protected abstract void run();
+
+
+
+
 
     // --------------AbstractExecutorService jdk 方法实现-------------------------
 
@@ -232,26 +247,24 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
             // 启动NioEventLoop中Thread   执行task 下一个方法
             startThread();
 
-            if (isShutdown()) {
-                boolean reject = false;
-                try {
-                    if (removeTask(task)) {
-                        reject = true;
-                    }
-                } catch (UnsupportedOperationException e) {
-                    // The task queue does not support removal so the best thing we can do is to just move on and
-                    // hope we will be able to pick-up the task before its completely terminated.
-                    // In worst case we will log on termination.
-                }
-                if (reject) {
-                    reject();
-                }
-            }
+//            if (isShutdown()) {
+//                boolean reject = false;
+//                try {
+//                    if (removeTask(task)) {
+//                        reject = true;
+//                    }
+//                } catch (UnsupportedOperationException e) {
+//
+//                }
+//                if (reject) {
+//                    reject();
+//                }
+//            }
         }
 
-        if (!addTaskWakesUp && wakesUpForTask(task)) {
-            wakeup(inEventLoop);
-        }
+//        if (!addTaskWakesUp && wakesUpForTask(task)) {
+//            wakeup(inEventLoop);
+//        }
     }
 
 
