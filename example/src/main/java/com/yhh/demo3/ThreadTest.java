@@ -16,6 +16,7 @@ public class ThreadTest {
         Runnable task = new Runnable() {
             @Override
             public void run() {
+                // 调用外部类方法
                 ThreadTest.this.run();
             }
         };
