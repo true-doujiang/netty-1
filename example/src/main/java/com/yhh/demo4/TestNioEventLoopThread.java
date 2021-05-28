@@ -1,6 +1,5 @@
 package com.yhh.demo4;
 
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class TestNioEventLoopThread {
     public static void main(String[] args) {
@@ -22,11 +21,10 @@ class NioEventLoop {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                System.out.println("this = " + this);
-                synchronized (NioEventLoop.class) {
-                    thread = Thread.currentThread();
-                    NioEventLoop.this.run();
-                }
+                System.out.println("start  ================== " + Thread.currentThread().hashCode());
+                thread = Thread.currentThread();
+                NioEventLoop.this.run();
+                System.out.println("end  =================== " + Thread.currentThread().hashCode());
             }
         };
 
@@ -35,7 +33,7 @@ class NioEventLoop {
         Thread thread = new Thread(runnable, "George" + threadCounter++);
         thread.start();
         int hashCode = thread.hashCode();
-        System.out.println("hashCode = " + hashCode);
+        System.out.println("new thread.hashCode = " + hashCode);
     }
 
 
@@ -47,7 +45,10 @@ class NioEventLoop {
                 e.printStackTrace();
             }
 
-            System.out.println(thread.hashCode() + " i = " + i );
+            // 证明 thread 属性是线程不安全的
+            System.out.println("NioEventLoop.thread hashCode = " + thread.hashCode()
+                    + " current thread hashCode = " + Thread.currentThread().hashCode()
+                    + " i = " + i );
         }
     }
 }
