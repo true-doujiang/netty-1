@@ -1,7 +1,7 @@
 package com.yhh.moni;
 
 import io.netty.util.internal.ObjectUtil;
-import io.netty.util.internal.PlatformDependent;
+import io.netty.util.internal.UnstableApi;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 import java.util.Queue;
@@ -22,6 +22,13 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
     private static final int ST_SHUTTING_DOWN = 3;
     private static final int ST_SHUTDOWN = 4;
     private static final int ST_TERMINATED = 5;
+
+    private static final Runnable WAKEUP_TASK = new Runnable() {
+        @Override
+        public void run() {
+            // Do nothing.
+        }
+    };
 
     private static final AtomicIntegerFieldUpdater<SingleThreadEventExecutor> STATE_UPDATER =
             AtomicIntegerFieldUpdater.newUpdater(SingleThreadEventExecutor.class, "state");
@@ -79,6 +86,14 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
     }
 
     /**
+     * @see Queue#isEmpty() 子类覆盖了
+     */
+    protected boolean hasTasks() {
+        assert inEventLoop();
+        return !taskQueue.isEmpty();
+    }
+
+    /**
      *
      */
     protected void addTask(Runnable task) {
@@ -99,6 +114,124 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
         return offer;
     }
 
+    private boolean fetchFromScheduledTaskQueue() {
+//        long nanoTime = AbstractScheduledEventExecutor.nanoTime();
+        // 从优先级队列中获取，  模拟忽略
+//        Runnable scheduledTask  = pollScheduledTask(nanoTime);
+//        while (scheduledTask != null) {
+//            //如果添加到普通任务队列过程中失败
+//            if (!taskQueue.offer(scheduledTask)) {
+//                //则重新添加到定时任务队列中
+//                // No space left in the task queue add it back to the scheduledTaskQueue so we pick it up again.
+//                scheduledTaskQueue().add((ScheduledFutureTask<?>) scheduledTask);
+//                return false;
+//            }
+//            //继续从定时任务队列中拉取任务
+//            //方法执行完成之后, 所有符合运行条件的定时任务队列, 都添加到了普通任务队列中
+//            scheduledTask  = pollScheduledTask(nanoTime);
+//        }
+        return true;
+    }
+
+    /**
+     * 取出 NioEventLoop taskQueue 中的任务执行
+     */
+    protected boolean runAllTasks() {
+        assert inEventLoop();
+        boolean fetchedAll;
+        boolean ranAtLeastOne = false;
+
+        do {
+            fetchedAll = fetchFromScheduledTaskQueue();
+            if (runAllTasksFrom(taskQueue)) {
+                ranAtLeastOne = true;
+            }
+        } while (!fetchedAll); // keep on processing until we fetched all scheduled tasks.
+
+//        if (ranAtLeastOne) {
+//            lastExecutionTime = ScheduledFutureTask.nanoTime();
+//        }
+
+        // 绕到子类 把子类的tailTasks 传到 runAllTasksFrom()
+        afterRunningAllTasks();
+        return ranAtLeastOne;
+    }
+
+    protected final boolean runAllTasksFrom(Queue<Runnable> taskQueue) {
+        Runnable task = pollTaskFrom(taskQueue);
+
+        if (task == null) {
+            // 这里 null 返回false
+            return false;
+        }
+
+        for (;;) {
+            System.out.println(Thread.currentThread().getName() + "  NioEventLoop.run() runAllTasksFrom(taskQueue) 取出任务执行   task: " + task);
+            //  AbstractEventExecutor 中的静态方法
+            safeExecute(task);
+            task = pollTaskFrom(taskQueue);
+            if (task == null) {
+                // 这里 null 就返回true 了呢
+                return true;
+            }
+        }
+    }
+
+    protected Runnable pollTask() {
+        assert inEventLoop();
+        return pollTaskFrom(taskQueue);
+    }
+
+    protected static Runnable pollTaskFrom(Queue<Runnable> taskQueue) {
+        for (;;) {
+            Runnable task = taskQueue.poll();
+            if (task == WAKEUP_TASK) {
+                continue;
+            }
+            return task;
+        }
+    }
+
+    /**
+     * 取出 NioEventLoop taskQueue 中的任务执行
+     */
+    protected boolean runAllTasks(long timeoutNanos) {
+        //定时任务队列中聚合任务
+        fetchFromScheduledTaskQueue();
+
+        Runnable task = pollTask();
+
+        if (task == null) {
+            afterRunningAllTasks();
+            return false;
+        }
+
+//        final long deadline = ScheduledFutureTask.nanoTime() + timeoutNanos;
+        long runTasks = 0;
+        long lastExecutionTime;
+
+        // 一直for 从taskQueue中取任务执行，直到执行完毕或者超时
+        for (;;) {
+            System.out.println(Thread.currentThread().getName() + " NioEventLoop.run() runAllTasks(timeoutNanos) 取出任务执行 task: " + task);
+            // 执行任务  task.run() //  AbstractEventExecutor 中的静态方法
+            safeExecute(task);
+            runTasks ++;
+
+
+
+            task = pollTask();
+            if (task == null) {
+//                lastExecutionTime = ScheduledFutureTask.nanoTime();
+                break;
+            }
+        }
+
+        afterRunningAllTasks();
+//        this.lastExecutionTime = lastExecutionTime;
+        return true;
+    }
+
+
     protected final void reject(Runnable task) {
         rejectedExecutionHandler.rejected(task, this);
     }
@@ -117,7 +250,6 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
                     doStartThread();
                 } catch (Throwable cause) {
                     STATE_UPDATER.set(this, ST_NOT_STARTED);
-                    PlatformDependent.throwException(cause);
                 }
             }
         }
@@ -137,6 +269,7 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
                 System.out.println(Thread.currentThread().getName() + " 刚创建一个thread 就执行我，并把这个线程赋值给thread属性");
 
                 //把当前线程赋值给 NioEventLoop 从此NioEventLoop有了线程可以跑了
+                // 其实thread就是 执行r的线程
                 thread = Thread.currentThread();
 
                 if (interrupted) {
@@ -148,8 +281,6 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
                 updateLastExecutionTime();
                 try {
                     /**
-                     *  内部类调用外部类的方法 语法就是这样的
-                     *
                      *  执行 NioEventLoop.run()  调用外部类的run()
                      */
                     SingleThreadEventExecutor.this.run();
@@ -157,11 +288,9 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
                 } catch (Throwable t) {
                     logger.warn("Unexpected exception from an event executor: ", t);
                 } finally {
-
-//                    System.out.println(Thread.currentThread().getName() + " " +
-//                            this + " 的thread 成功赋值  从此有了生命力, " +
-//                            "但是我永远不会执行到，因为上面的run() 是个死循环");
-
+                    System.out.println(Thread.currentThread().getName() + " " +
+                            this + " 的thread 成功赋值  从此有了生命力, " +
+                            "但是我永远不会执行到，因为上面的run() 是个死循环");
                     for (;;) {
                         int oldState = state;
                         if (oldState >= ST_SHUTTING_DOWN || STATE_UPDATER.compareAndSet(
@@ -169,38 +298,6 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
                             break;
                         }
                         System.out.println("oldState = " + oldState);
-                    }
-
-                    // Check if confirmShutdown() was called at the end of the loop.
-
-
-                    try {
-                        // Run all remaining tasks and shutdown hooks.
-//                        for (;;) {
-//                            if (confirmShutdown()) {
-//                                break;
-//                            }
-//                        }
-                    } finally {
-//                        try {
-//                            cleanup();
-//                        } finally {
-//                            // Lets remove all FastThreadLocals for the Thread as we are about to terminate and notify
-//                            // the future. The user may block on the future and once it unblocks the JVM may terminate
-//                            // and start unloading classes.
-//                            // See https://github.com/netty/netty/issues/6596.
-//                            FastThreadLocal.removeAll();
-//
-//                            STATE_UPDATER.set(SingleThreadEventExecutor.this, ST_TERMINATED);
-//                            threadLock.release();
-//                            if (!taskQueue.isEmpty()) {
-//                                if (logger.isWarnEnabled()) {
-//                                    logger.warn("An event executor terminated with " +
-//                                            "non-empty task queue (" + taskQueue.size() + ')');
-//                                }
-//                            }
-//                            terminationFuture.setSuccess(null);
-//                        }
                     }
                 }
                 // ------ finally end ------
@@ -215,6 +312,11 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
     protected void updateLastExecutionTime() {
         //lastExecutionTime = ScheduledFutureTask.nanoTime();
     }
+
+
+    @UnstableApi
+    protected void afterRunningAllTasks() { }
+
 
     /**
      * NioEventLoop 的run
@@ -244,7 +346,7 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
 
         if (!inEventLoop) {
 
-            // 启动NioEventLoop中Thread   执行task 下一个方法
+            // 启动NioEventLoop中Thread   执行task 上一个方法
             startThread();
 
 //            if (isShutdown()) {

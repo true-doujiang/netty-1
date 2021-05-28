@@ -60,6 +60,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     private static final int MIN_PREMATURE_SELECTOR_RETURNS = 3;
     private static final int SELECTOR_AUTO_REBUILD_THRESHOLD;
 
+    // run() 中调用 为毛还要搞个匿名类， 直接selectNow()不就得了嘛 todo
     private final IntSupplier selectNowSupplier = new IntSupplier() {
         @Override
         public int get() throws Exception {
@@ -161,7 +162,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     }
 
     /**
-     * 把 nio Selector 又包装了一下
+     * 内部类  把 nio Selector 又包装了一下
      */
     private static final class SelectorTuple {
         final Selector unwrappedSelector;
@@ -457,6 +458,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     boolean b = hasTasks();
                     int i = selectStrategy.calculateStrategy(selectNowSupplier, b);
                     System.out.println(Thread.currentThread().getName() + " NioEventLoop.run() 2  i = " + i);
+
                     switch (i) {
                         case SelectStrategy.CONTINUE:
                             continue;
@@ -489,7 +491,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     try {
                         processSelectedKeys();
                     } finally {
-                        // Ensure we always run tasks.  父类.父类中
+                        // Ensure we always run tasks.  父类.父类中方法
                         runAllTasks();
                     }
                 } else {
@@ -500,7 +502,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     } finally {
                         // Ensure we always run tasks.
                         final long ioTime = System.nanoTime() - ioStartTime;
-                        // 这个新接入channel 任务处理  TODO ??
+                        // 这个新接入channel 任务处理  TODO ??    父类.父类中方法
                         runAllTasks(ioTime * (100 - ioRatio) / ioRatio);
                     }
                 }

@@ -324,7 +324,7 @@ public abstract class SingleThreadEventExecutor
      * @see Queue#isEmpty() 子类覆盖了
      */
     protected boolean hasTasks() {
-        //assert inEventLoop();
+        assert inEventLoop();
         return !taskQueue.isEmpty();
     }
 
@@ -392,6 +392,7 @@ public abstract class SingleThreadEventExecutor
         if (ranAtLeastOne) {
             lastExecutionTime = ScheduledFutureTask.nanoTime();
         }
+        // 绕到子类 把子类的tailTasks 传到 runAllTasksFrom()
         afterRunningAllTasks();
         return ranAtLeastOne;
     }
@@ -407,14 +408,17 @@ public abstract class SingleThreadEventExecutor
         Runnable task = pollTaskFrom(taskQueue);
 
         if (task == null) {
+            // 这里 null 返回false
             return false;
         }
 
         for (;;) {
-            System.out.println(Thread.currentThread().getName() + " NioEventLoop run() taskQueue -----取出任务执行1  task: " + task);
+            System.out.println(Thread.currentThread().getName() + "  NioEventLoop.run() runAllTasksFrom(taskQueue) 取出任务执行 taskQueue:" + taskQueue + "task: " + task);
+            //  AbstractEventExecutor 中的静态方法
             safeExecute(task);
             task = pollTaskFrom(taskQueue);
             if (task == null) {
+                // 这里 null 就返回true 了呢
                 return true;
             }
         }
@@ -433,6 +437,7 @@ public abstract class SingleThreadEventExecutor
         Runnable task = pollTask();
 
         if (task == null) {
+            // 绕到子类 把子类的tailTasks 传到 runAllTasksFrom()
             afterRunningAllTasks();
             return false;
         }
@@ -443,8 +448,8 @@ public abstract class SingleThreadEventExecutor
 
         // 一直for 从taskQueue中取任务执行，直到执行完毕或者超时
         for (;;) {
-            System.out.println(Thread.currentThread().getName() + " NioEventLoop run() taskQueue -----取出任务执行2  task: " + task);
-            // 执行任务  task.run()
+            System.out.println(Thread.currentThread().getName() + " NioEventLoop.run() runAllTasks(timeoutNanos) 取出任务执行 time:" + timeoutNanos + " task: " + task);
+            // 执行任务  task.run()     AbstractEventExecutor 中的静态方法
             safeExecute(task);
             runTasks ++;
 
@@ -464,6 +469,7 @@ public abstract class SingleThreadEventExecutor
             }
         }
 
+        // 绕到子类 把子类的tailTasks 传到 runAllTasksFrom()
         afterRunningAllTasks();
         this.lastExecutionTime = lastExecutionTime;
         return true;

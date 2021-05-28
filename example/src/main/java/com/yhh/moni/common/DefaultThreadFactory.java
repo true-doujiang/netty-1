@@ -20,7 +20,7 @@ public class DefaultThreadFactory implements ThreadFactory {
      */
     public DefaultThreadFactory(Class<?> poolType, int priority) {
         // true false 空时nio线程是否为守护线程
-        this(poolType, true, priority);
+        this(poolType, false, priority);
     }
 
     public DefaultThreadFactory(Class<?> poolType, boolean daemon, int priority) {

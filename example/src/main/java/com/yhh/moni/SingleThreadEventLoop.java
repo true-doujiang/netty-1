@@ -33,4 +33,15 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
     }
 
 
+    @Override
+    protected boolean hasTasks() {
+        return super.hasTasks() || !tailTasks.isEmpty();
+    }
+
+
+    @Override
+    protected void afterRunningAllTasks() {
+        runAllTasksFrom(tailTasks);
+    }
+
 }

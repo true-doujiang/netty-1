@@ -2,6 +2,9 @@ package com.yhh.moni;
 
 
 
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
@@ -11,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractEventExecutor extends AbstractExecutorService implements EventExecutor {
 
 
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractEventExecutor.class);
 
     private final EventExecutorGroup parent;
 
@@ -78,5 +82,13 @@ public abstract class AbstractEventExecutor extends AbstractExecutorService impl
         return Collections.emptyList();
     }
 
+
+    protected static void safeExecute(Runnable task) {
+        try {
+            task.run();
+        } catch (Throwable t) {
+            logger.warn("A task raised an exception. Task: {}", task, t);
+        }
+    }
 
 }
