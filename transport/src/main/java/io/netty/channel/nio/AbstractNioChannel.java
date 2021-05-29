@@ -402,6 +402,8 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     // -----------------------AbstractNioUnsafe over
     //private void aaaaaaaaaaaaaaaaaaaaaaaaaaa(){}
 
+
+
     @Override
     protected boolean isCompatible(EventLoop loop) {
         return loop instanceof NioEventLoop;

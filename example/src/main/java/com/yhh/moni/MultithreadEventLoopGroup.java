@@ -1,6 +1,9 @@
 package com.yhh.moni;
 
 import com.yhh.moni.common.DefaultThreadFactory;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelPromise;
 import io.netty.util.NettyRuntime;
 import io.netty.util.internal.SystemPropertyUtil;
 import java.util.concurrent.Executor;
@@ -47,5 +50,22 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
         //  chooser.next();
         return (EventLoop) super.next();
     }
+
+
+    @Override
+    public ChannelFuture register(Channel channel) {
+        EventLoop next = next();
+        return next.register(channel);
+    }
+
+
+    @Override
+    public ChannelFuture register(ChannelPromise promise) {
+        EventLoop next = next();
+        return next.register(promise);
+    }
+
+
+
 
 }

@@ -329,6 +329,7 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
 
     // --------------AbstractExecutorService jdk 方法实现-------------------------
 
+    // submit(task) 里面回调了execute()
     @Override
     public void execute(Runnable task) {
         // 这个方法很关键了  只要往这里放个任务 就开始给NioEventLoop绑定thread 并启动thread了
@@ -345,28 +346,11 @@ public abstract class SingleThreadEventExecutor extends AbstractEventExecutor {
         addTask(task);
 
         if (!inEventLoop) {
-
             // 启动NioEventLoop中Thread   执行task 上一个方法
             startThread();
 
-//            if (isShutdown()) {
-//                boolean reject = false;
-//                try {
-//                    if (removeTask(task)) {
-//                        reject = true;
-//                    }
-//                } catch (UnsupportedOperationException e) {
-//
-//                }
-//                if (reject) {
-//                    reject();
-//                }
-//            }
         }
 
-//        if (!addTaskWakesUp && wakesUpForTask(task)) {
-//            wakeup(inEventLoop);
-//        }
     }
 
 

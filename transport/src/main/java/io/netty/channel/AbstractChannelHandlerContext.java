@@ -96,8 +96,11 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
      * @param pipeline
      * @param executor new 的时候 set to null
      */
-    AbstractChannelHandlerContext(DefaultChannelPipeline pipeline, EventExecutor executor, String name,
-                                  boolean inbound, boolean outbound) {
+    AbstractChannelHandlerContext(DefaultChannelPipeline pipeline,
+                                  EventExecutor executor,
+                                  String name,
+                                  boolean inbound,
+                                  boolean outbound) {
 
         this.name = ObjectUtil.checkNotNull(name, "name");
 

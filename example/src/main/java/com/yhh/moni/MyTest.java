@@ -2,10 +2,31 @@ package com.yhh.moni;
 
 
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 public class MyTest {
 
+    private static final AtomicIntegerFieldUpdater<MyTest> STATE_UPDATER =
+            AtomicIntegerFieldUpdater.newUpdater(MyTest.class, "state");
+
+    // NioEventLoop中的Thread 状态
+    private static final int ST_NOT_STARTED = 1;
+    private static final int ST_STARTED = 2;
+    private volatile int state = ST_NOT_STARTED;
+
+    public void test() {
+        // 如果当前值==expect，则更新为update 并返回true
+        boolean b = STATE_UPDATER.compareAndSet(this, ST_NOT_STARTED, ST_STARTED);
+        System.out.println("b = " + b);
+    }
+
     public static void main(String[] args) throws ExecutionException, InterruptedException, TimeoutException {
+
+//        MyTest myTest = new MyTest();
+//        myTest.test();
+//        myTest.test();
+//        myTest.test();
+
         EventLoopGroup group = new NioEventLoopGroup(1);
         final NioEventLoop loop = (NioEventLoop) group.next();
 

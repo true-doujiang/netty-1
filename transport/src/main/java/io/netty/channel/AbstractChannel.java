@@ -1318,8 +1318,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         DefaultFileRegion.validate(region, position);
     }
 
+
+
+
     /**
-     *
+     * 内部类
      */
     static final class CloseFuture extends DefaultChannelPromise {
 
@@ -1353,7 +1356,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /**
-     *
+     * 内部类
      */
     private static final class AnnotatedConnectException extends ConnectException {
 
@@ -1372,7 +1375,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /**
-     *
+     * 内部类
      */
     private static final class AnnotatedNoRouteToHostException extends NoRouteToHostException {
 
@@ -1391,7 +1394,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /**
-     *
+     * 内部类
      */
     private static final class AnnotatedSocketException extends SocketException {
 

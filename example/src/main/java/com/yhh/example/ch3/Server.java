@@ -98,7 +98,7 @@ public final class Server {
             System.out.println(Thread.currentThread().getName() + " shutdownGracefully");
         }
 
-       // test();
+
     }
 
     private static AtomicBoolean wakenUp = new AtomicBoolean();
