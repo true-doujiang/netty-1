@@ -34,18 +34,18 @@ import static io.netty.channel.ChannelOption.*;
  * The default {@link SocketChannelConfig} implementation.
  */
 public class DefaultSocketChannelConfig extends DefaultChannelConfig
-                                        implements SocketChannelConfig {
-
+                                     implements SocketChannelConfig {
+    //客户端socket
     protected final Socket javaSocket;
     private volatile boolean allowHalfClosure;
 
     /**
+     * 构造器
+     *
      * Creates a new instance.
      */
     public DefaultSocketChannelConfig(SocketChannel channel, Socket javaSocket) {
-
         super(channel);
-
         if (javaSocket == null) {
             throw new NullPointerException("javaSocket");
         }

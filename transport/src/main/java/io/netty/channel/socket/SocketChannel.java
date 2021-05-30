@@ -23,9 +23,10 @@ import java.net.InetSocketAddress;
  * A TCP/IP socket {@link Channel}.
  */
 public interface SocketChannel extends DuplexChannel {
+
+    // 这里重申了父类中的接口，但是返回值换成了子接口
     @Override
     ServerSocketChannel parent();
-
     @Override
     SocketChannelConfig config();
     @Override

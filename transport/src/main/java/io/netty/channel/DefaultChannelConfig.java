@@ -41,6 +41,8 @@ import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 
 /**
  * The default {@link ChannelConfig} implementation.
+ *
+ * 客户端、服务端2个分支都继承了，所以公用的东西 都会放在我这一层
  */
 public class DefaultChannelConfig implements ChannelConfig {
 
@@ -54,11 +56,10 @@ public class DefaultChannelConfig implements ChannelConfig {
             AtomicReferenceFieldUpdater.newUpdater(
                     DefaultChannelConfig.class, WriteBufferWaterMark.class, "writeBufferWaterMark");
 
+    //config属于的channel
     protected final Channel channel;
 
-    /**
-     * 内存分配器
-     */
+    //内存分配器
     private volatile ByteBufAllocator allocator = ByteBufAllocator.DEFAULT;
     private volatile RecvByteBufAllocator rcvBufAllocator;
     private volatile MessageSizeEstimator msgSizeEstimator = DEFAULT_MSG_SIZE_ESTIMATOR;
@@ -66,15 +67,15 @@ public class DefaultChannelConfig implements ChannelConfig {
     private volatile int connectTimeoutMillis = DEFAULT_CONNECT_TIMEOUT;
     private volatile int writeSpinCount = 16;
 
-    /**
-     *
-     */
     @SuppressWarnings("FieldMayBeFinal")
     private volatile int autoRead = 1;
     private volatile boolean autoClose = true;
     private volatile WriteBufferWaterMark writeBufferWaterMark = WriteBufferWaterMark.DEFAULT;
     private volatile boolean pinEventExecutor = true;
 
+    /**
+     * 构造器
+     */
     public DefaultChannelConfig(Channel channel) {
         this(channel, new AdaptiveRecvByteBufAllocator());
     }

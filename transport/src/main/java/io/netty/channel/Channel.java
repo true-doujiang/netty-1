@@ -78,6 +78,17 @@ import java.net.SocketAddress;
  */
 public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparable<Channel> {
 
+/**                    Channel一共3个分支
+
+                               Channel
+        ServerChannel       AbstractChannel                    DuplexChannel
+     ServerSocketChannel    AbstractNioChannel                 SocketChannel
+         |                                                            |
+         |                     AbstractNioChannel                     |
+         |  AbstractNioMessageChannel     AbstractNioByteChannel      |
+     NioServerSocketChannel                                NioSocketChannel
+*/
+
     /**
      * Returns the globally unique identifier of this {@link Channel}.
      */
@@ -85,6 +96,8 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
 
     /**
      * Return the {@link EventLoop} this {@link Channel} was registered to.
+     * 最终实现方法在 AbstractNioChannel 中， 其实是在 AbstractChannel中
+     * 因为无论nio还是oio都有一个EventLoop
      */
     EventLoop eventLoop();
 
@@ -93,6 +106,7 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
      *
      * @return the parent channel.
      *         {@code null} if this channel does not have a parent channel.
+     * 最终实现在 NioSocketChannel
      */
     Channel parent();
 

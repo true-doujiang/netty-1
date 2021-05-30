@@ -35,14 +35,18 @@ import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
 
 /**
  * The default {@link ServerSocketChannelConfig} implementation.
+ *
+ * NioServerSocketChannel 中内部类 扩展了该类
  */
 public class DefaultServerSocketChannelConfig extends DefaultChannelConfig
-                                              implements ServerSocketChannelConfig {
-
+                                           implements ServerSocketChannelConfig {
+    //服务端socket
     protected final ServerSocket javaSocket;
     private volatile int backlog = NetUtil.SOMAXCONN;
 
     /**
+     * 构造器
+     *
      * Creates a new instance.
      */
     public DefaultServerSocketChannelConfig(ServerSocketChannel channel, ServerSocket javaSocket) {

@@ -16,7 +16,6 @@
 package io.netty.channel.socket;
 
 import io.netty.channel.ServerChannel;
-
 import java.net.InetSocketAddress;
 
 /**
@@ -24,7 +23,8 @@ import java.net.InetSocketAddress;
  */
 public interface ServerSocketChannel extends ServerChannel {
 
-    // 三个都是channel接口中定义的，这里重申一次有啥意思啊
+    // 这里重申了父类中的接口，但是返回值换成了子接口
+    // 三个都是channel接口中定义的
     @Override
     ServerSocketChannelConfig config();
 

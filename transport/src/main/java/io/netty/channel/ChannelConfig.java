@@ -64,6 +64,14 @@ import java.util.Map;
  */
 public interface ChannelConfig {
 
+/**
+                                     ChannelConfig
+
+     ServerSocketChannelConfig       DefaultChannelConfig         SocketChannelConfig
+         DefaultServerSocketChannelConfig            DefaultSocketChannelConfig
+         NioServerSocketChannelConfig                NioSocketChannelConfig
+*/
+
     /**
      * Return all set {@link ChannelOption}'s.
      */
