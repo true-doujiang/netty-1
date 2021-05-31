@@ -76,6 +76,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     private Map<EventExecutorGroup, EventExecutor> childExecutors;
 
     private volatile MessageSizeEstimator.Handle estimatorHandle;
+    // 默认 true
     private boolean firstRegistration = true;
 
     /**
@@ -85,7 +86,6 @@ public class DefaultChannelPipeline implements ChannelPipeline {
      * We only keep the head because it is expected that the list is used infrequently and its size is small.
      * Thus full iterations to do insertions is assumed to be a good compromised to saving memory and tail management
      * complexity.
-     * TODO
      */
     private PendingHandlerCallback pendingHandlerCallbackHead;
 
@@ -95,8 +95,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
      */
     private boolean registered;
 
+
     /**
-     * constructor
+     * 构造器
      *
      * Pipeline 链表数据结构，节点元素 xxx..HandlerContext
      */
@@ -115,9 +116,6 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         head.next = tail;
         tail.prev = head;
     }
-
-
-
 
 
 
@@ -233,6 +231,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     @Override
     public final ChannelPipeline addLast(EventExecutorGroup group, String name, ChannelHandler handler) {
         final AbstractChannelHandlerContext newCtx;
+
         synchronized (this) {
             checkMultiplicity(handler);
             // 把 ChannelHandler 包装成 ChannelHandlerContext
@@ -261,7 +260,6 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         //
         callHandlerAdded0(newCtx);
-
         return this;
     }
 
@@ -1176,19 +1174,19 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
+    /**
+     *
+     */
     private void callHandlerAddedForAllHandlers() {
         final PendingHandlerCallback pendingHandlerCallbackHead;
         synchronized (this) {
             assert !registered;
-
             // This Channel itself was registered.
             registered = true;
-
             pendingHandlerCallbackHead = this.pendingHandlerCallbackHead;
             // Null out so it can be GC'ed.
             this.pendingHandlerCallbackHead = null;
         }
-
         // This must happen outside of the synchronized(...) block as otherwise handlerAdded(...) may be called while
         // holding the lock and so produce a deadlock if handlerAdded(...) will try to add another handler from outside
         // the EventLoop.
@@ -1201,17 +1199,18 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     /**
      * 就是对 pipeline 的变量 pendingHandlerCallbackHead 做初始化
+     *
      */
     private void callHandlerCallbackLater(AbstractChannelHandlerContext ctx, boolean added) {
         assert !registered;
-
-        //                                             本类的2个内部类
+        //    本类的2个内部类
         PendingHandlerCallback task = added ? new PendingHandlerAddedTask(ctx) : new PendingHandlerRemovedTask(ctx);
         PendingHandlerCallback pending = pendingHandlerCallbackHead;
         if (pending == null) {
             //
             pendingHandlerCallbackHead = task;
         } else {
+            // 如果 pendingHandlerCallbackHead字段不为null就把新task加到链表的最后一个节点
             // Find the tail of the linked-list.
             while (pending.next != null) {
                 pending = pending.next;
@@ -1570,11 +1569,16 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
 
     /**
-     * 内部接口 下面俩个实现类
+     * 内部抽象类 下面俩个实现类
+     *
+     * 当我们在Channel注册到之前 添加或删除Handler时，此时没有EventExecutor可执行HandlerAdd或HandlerRemove事件，
+     * 所以Netty为此事件生成一个相应任务等注册完成后在调用执行任务。添加或删除任务可能有很多个，
+     * DefaultChannelPipeline使用一个链表存储，链表头部为先前的字段 pendingHandlerCallbackHead
      */
     private abstract static class PendingHandlerCallback implements Runnable {
         //
         final AbstractChannelHandlerContext ctx;
+
         PendingHandlerCallback next;
 
         PendingHandlerCallback(AbstractChannelHandlerContext ctx) {
@@ -1590,7 +1594,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
      */
     private final class PendingHandlerAddedTask extends PendingHandlerCallback {
 
-        // ctx = "ServerBootstrap的ChannelInitializer匿名内部类"
+        /**
+         * 构造器
+         * ctx = "ServerBootstrap的ChannelInitializer匿名内部类"
+         */
         PendingHandlerAddedTask(AbstractChannelHandlerContext ctx) {
             super(ctx);
         }
@@ -1604,7 +1611,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         @Override
         void execute() {
             EventExecutor executor = ctx.executor();
-            if (executor.inEventLoop()) {
+            boolean b = executor.inEventLoop();
+            System.out.println(Thread.currentThread().getName() + " PendingHandlerAddedTask execute b = " + b);
+
+            if (b) {
                 callHandlerAdded0(ctx);
             } else {
                 try {
@@ -1627,6 +1637,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
      */
     private final class PendingHandlerRemovedTask extends PendingHandlerCallback {
 
+        /**
+         * 构造器
+         */
         PendingHandlerRemovedTask(AbstractChannelHandlerContext ctx) {
             super(ctx);
         }

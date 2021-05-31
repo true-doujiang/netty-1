@@ -175,7 +175,7 @@ import java.lang.annotation.Target;
  */
 
 /**
- * 就定义2 个方法  handlerAdded   handlerRemoved
+ * 就定义2 个方法  handlerAdded   handlerRemoved   这个废弃了 exceptionCaught
  */
 public interface ChannelHandler {
 

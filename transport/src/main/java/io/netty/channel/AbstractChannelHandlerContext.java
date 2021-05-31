@@ -1099,6 +1099,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         handlerState = REMOVE_COMPLETE;
     }
 
+    /**
+     * HeadContext TailContext 构造器中调用了
+     */
     final boolean setAddComplete() {
         for (;;) {
             int oldState = handlerState;
@@ -1114,6 +1117,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    /**
+     *
+     */
     final void setAddPending() {
         boolean updated = HANDLER_STATE_UPDATER.compareAndSet(this, INIT, ADD_PENDING);
         // handlerState = 1
@@ -1203,7 +1209,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
 
     /**
-     *
+     * 内部类
      */
     abstract static class AbstractWriteTask implements Runnable {
 
@@ -1220,6 +1226,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         private ChannelPromise promise;
         private int size;
 
+        /**
+         * 构造器
+         */
         @SuppressWarnings("unchecked")
         private AbstractWriteTask(Recycler.Handle<? extends AbstractWriteTask> handle) {
             this.handle = (Recycler.Handle<AbstractWriteTask>) handle;
@@ -1275,9 +1284,10 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
             ctx.invokeWrite(msg, promise);
         }
     }
+    // -------- AbstractWriteTask over ---------
 
     /**
-     *
+     * 内部类
      */
     static final class WriteTask extends AbstractWriteTask implements SingleThreadEventLoop.NonWakeupRunnable {
 
@@ -1288,20 +1298,22 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
             }
         };
 
-        static WriteTask newInstance(
-                AbstractChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+        static WriteTask newInstance(AbstractChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
             WriteTask task = RECYCLER.get();
             init(task, ctx, msg, promise);
             return task;
         }
 
+        /**
+         * 构造器
+         */
         private WriteTask(Recycler.Handle<WriteTask> handle) {
             super(handle);
         }
     }
 
     /**
-     *
+     * 内部类
      */
     static final class WriteAndFlushTask extends AbstractWriteTask {
 
@@ -1318,6 +1330,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
             return task;
         }
 
+        /**
+         * 构造器
+         */
         private WriteAndFlushTask(Recycler.Handle<WriteAndFlushTask> handle) {
             super(handle);
         }
@@ -1330,7 +1345,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     }
 
     /**
-     *
+     * 内部类
      */
     private static final class Tasks {
 
@@ -1356,6 +1371,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
                 next.invokeChannelWritabilityChanged();
             }
         };
+
         private final Runnable invokeFlushTask = new Runnable() {
             @Override
             public void run() {
@@ -1363,6 +1379,9 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
             }
         };
 
+        /**
+         * 构造器
+         */
         Tasks(AbstractChannelHandlerContext next) {
             this.next = next;
         }

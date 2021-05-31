@@ -32,6 +32,7 @@ public class ChannelOutboundHandlerAdapter extends ChannelHandlerAdapter impleme
     @Override
     public void bind(ChannelHandlerContext ctx, SocketAddress localAddress,
             ChannelPromise promise) throws Exception {
+
         ctx.bind(localAddress, promise);
     }
 
@@ -44,6 +45,7 @@ public class ChannelOutboundHandlerAdapter extends ChannelHandlerAdapter impleme
     @Override
     public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress,
             SocketAddress localAddress, ChannelPromise promise) throws Exception {
+
         ctx.connect(remoteAddress, localAddress, promise);
     }
 
@@ -88,6 +90,7 @@ public class ChannelOutboundHandlerAdapter extends ChannelHandlerAdapter impleme
      */
     @Override
     public void read(ChannelHandlerContext ctx) throws Exception {
+        //
         ctx.read();
     }
 
@@ -99,6 +102,7 @@ public class ChannelOutboundHandlerAdapter extends ChannelHandlerAdapter impleme
      */
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        //
         ctx.write(msg, promise);
     }
 
