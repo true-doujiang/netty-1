@@ -186,10 +186,6 @@ public interface ChannelHandlerContext extends AttributeMap, ChannelInboundInvok
     ChannelHandlerContext fireChannelWritabilityChanged();
 
 
-
-
-
-
     @Override
     ChannelHandlerContext read();
 
@@ -205,6 +201,9 @@ public interface ChannelHandlerContext extends AttributeMap, ChannelInboundInvok
      * Return the assigned {@link ByteBufAllocator} which will be used to allocate {@link ByteBuf}s.
      */
     ByteBufAllocator alloc();
+
+
+
 
     /**
      * @deprecated Use {@link Channel#attr(AttributeKey)}

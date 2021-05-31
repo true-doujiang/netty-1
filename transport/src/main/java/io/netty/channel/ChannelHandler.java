@@ -15,8 +15,6 @@
  */
 package io.netty.channel;
 
-import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -180,6 +178,18 @@ import java.lang.annotation.Target;
  * 就定义2 个方法  handlerAdded   handlerRemoved
  */
 public interface ChannelHandler {
+
+/**
+                                      ChannelHandler
+                                            |
+        ChannelInboundHandler        ChannelHandlerAdapter           ChannelOutboundHandler
+                           |                 |                              |
+                     ChannelInboundHandlerAdapter    ChannelOutboundHandlerAdapter
+                            |
+                     ChannelInitializer
+ */
+
+
 
     /**
      * Gets called after the {@link ChannelHandler} was added to the actual context and it's ready to handle events.

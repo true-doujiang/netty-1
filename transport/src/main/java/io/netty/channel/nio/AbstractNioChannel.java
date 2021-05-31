@@ -121,6 +121,10 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         return (NioUnsafe) super.unsafe();
     }
 
+    /**
+     * 这里定义的 2个实现 NioServerSocketChannel, NioSocketChannel
+     * 都是直接调用父类的方法
+     */
     protected SelectableChannel javaChannel() {
         return ch;
     }

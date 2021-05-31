@@ -93,6 +93,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
         config = new NioServerSocketChannelConfig(this, javaChannel().socket());
     }
 
+    // ServerSocketChannel
     @Override
     public InetSocketAddress localAddress() {
         return (InetSocketAddress) super.localAddress();
@@ -103,6 +104,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
         return METADATA;
     }
 
+    // ServerSocketChannel
     @Override
     public ServerSocketChannelConfig config() {
         return config;
@@ -113,6 +115,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
         return javaChannel().socket().isBound();
     }
 
+    // ServerSocketChannel
     @Override
     public InetSocketAddress remoteAddress() {
         return null;
@@ -256,7 +259,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
         private ServerSocketChannel jdkChannel() {
             return ((NioServerSocketChannel) channel).javaChannel();
         }
-    }
+    }// --- NioServerSocketChannelConfig over ---------
 
     // Override just to to be able to call directly via unit tests.
     @Override

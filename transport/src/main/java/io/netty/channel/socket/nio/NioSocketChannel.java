@@ -113,11 +113,13 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         config = new NioSocketChannelConfig(this, socket.socket());
     }
 
+    // SocketChannel
     @Override
     public ServerSocketChannel parent() {
         return (ServerSocketChannel) super.parent();
     }
 
+    // SocketChannel
     @Override
     public SocketChannelConfig config() {
         return config;
@@ -153,11 +155,13 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         return socket.isInputShutdown() && socket.isOutputShutdown() || !isActive();
     }
 
+    // SocketChannel
     @Override
     public InetSocketAddress localAddress() {
         return (InetSocketAddress) super.localAddress();
     }
 
+    // SocketChannel
     @Override
     public InetSocketAddress remoteAddress() {
         return (InetSocketAddress) super.remoteAddress();

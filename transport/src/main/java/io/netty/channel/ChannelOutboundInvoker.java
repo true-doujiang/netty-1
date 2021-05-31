@@ -23,10 +23,12 @@ import java.net.SocketAddress;
 
 /**
  * 触发事件 bind、 connect 、 close、read、 write、 writeAndFlush
- *
  * 对应 ChannelOutboundHandler   用户触发他的事件
+ *
  */
 public interface ChannelOutboundInvoker {
+
+//    Channel 继承该接口
 
     /**
      * Request to bind to the given {@link SocketAddress} and notify the {@link ChannelFuture} once the operation
@@ -104,10 +106,7 @@ public interface ChannelOutboundInvoker {
      */
     ChannelFuture deregister();
 
-
-
     // --------bind、connect、deregister 同上只是加了一个 ChannelPromise参数 ------
-
 
     /**
      * Request to bind to the given {@link SocketAddress} and notify the {@link ChannelFuture} once the operation
