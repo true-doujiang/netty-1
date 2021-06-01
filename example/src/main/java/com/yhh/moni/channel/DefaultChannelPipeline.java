@@ -45,13 +45,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     protected DefaultChannelPipeline(Channel channel) {
         // 不可以为null
         this.channel = ObjectUtil.checkNotNull(channel, "channel");
-
-
         // 内部类 inbound
         tail = new TailContext(this);
         // 内部类 inbound outbound
         head = new HeadContext(this);
-
         head.next = tail;
         tail.prev = head;
     }

@@ -75,6 +75,7 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
         return (EventLoopGroup) super.parent();
     }
 
+    // EventExecutorGroup 中定义
     @Override
     public EventLoop next() {
         return (EventLoop) super.next();
@@ -93,6 +94,8 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
 
     /**
      * 开始要把JDK 的channel 注册到 Selector上了
+     * EventLoopGroup 中定义
+     * 调用方： MultithreadEventLoopGroup#register(io.netty.channel.ChannelPromise)
      */
     @Override
     public ChannelFuture register(final ChannelPromise promise) {
@@ -102,12 +105,14 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
         //
         Channel.Unsafe unsafe = channel.unsafe();
 
-        // unsafe 是 AbstractChannel.AbstractUnsafe
+        // 若是服务端 则unsafe 是 NioMessageUnsafe
+        // 若是客户端 则unsafe 是 NioByteUnsafe
         unsafe.register(this, promise);
         //promise.channel().unsafe().register(this, promise);
         return promise;
     }
 
+    // 废弃 用上面一个
     @Deprecated
     @Override
     public ChannelFuture register(final Channel channel, final ChannelPromise promise) {

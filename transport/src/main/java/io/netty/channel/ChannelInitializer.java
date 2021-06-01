@@ -50,7 +50,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @param <C>   A sub-type of {@link Channel}
  *
- * 特殊 ChannelHandler 每次添加到pipeline中后会执行 initChannel(ch) 配置ch的pipeline
+ * 特殊 ChannelHandler 每次添加到pipeline中后会执行 initChannel(ch) 配置ch的pipeline, 并且在finally中删除自己
  * abstract void initChannel(ch) 有具体的子类实现   有很多的匿名内部类
  */
 @Sharable
@@ -71,7 +71,8 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
 
-        System.out.println(Thread.currentThread().getName() + " ChannelInitializer = " + this + " handlerAdded(ctx) 执行 ctx = " + ctx);
+        System.out.println(Thread.currentThread().getName() + " ChannelInitializer = " + this
+                + " handlerAdded(ctx) 执行 ctx = " + ctx);
 
         if (ctx.channel().isRegistered()) {
             // This should always be true with our current DefaultChannelPipeline implementation.
@@ -124,8 +125,6 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
         ctx.close();
     }
 
-
-
     /**
      * channelRegistered  handlerAdded 后调用该方法对channel的pipeline操作
      */
@@ -143,6 +142,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
                 // We do so to prevent multiple calls to initChannel(...).
                 exceptionCaught(ctx, cause);
             } finally {
+                // todo 特殊之处就在此，删除自己
                 // 执行到这里 一定要把当前节点删掉
                 ChannelPipeline pipeline = ctx.pipeline();
                 if (pipeline.context(this) != null) {
@@ -159,6 +159,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
 
     /**
      * channel 一旦注册到selector后必须被调用
+     * ChannelInitializer的实现类必须要重写这个方法，这个方法在Channel被注册到EventLoop的时候会被调用
      *
      * This method will be called once the {@link Channel} was registered. After the method returns this instance
      * will be removed from the {@link ChannelPipeline} of the {@link Channel}.

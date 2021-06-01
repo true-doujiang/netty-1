@@ -69,7 +69,6 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     private static final int INIT = 0;
 
 
-
     private final boolean inbound;
     private final boolean outbound;
     // handler的名字 pipeline.addLast() 一路传过来的
@@ -79,8 +78,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     // 虽然 HandlerContext 上没有channel 但是可以通过pipeline 找到
     private final DefaultChannelPipeline pipeline;
 
-    // Will be set to null if no child executor should be used, otherwise it will be set to the
-    // child executor.
+    // Will be set to null if no child executor should be used, otherwise it will be set to the child executor.
     final EventExecutor executor;
 
     private ChannelFuture succeededFuture;
@@ -93,8 +91,6 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     /**
      * 构造器
-     * @param pipeline
-     * @param executor new 的时候 set to null
      */
     AbstractChannelHandlerContext(DefaultChannelPipeline pipeline,
                                   EventExecutor executor,
@@ -113,19 +109,19 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         ordered = executor == null || executor instanceof OrderedEventExecutor;
     }
 
+    // ChannelHandlerContext 定义
     @Override
     public Channel channel() {
         return pipeline.channel();
     }
 
+    // ChannelHandlerContext 定义
     @Override
     public ChannelPipeline pipeline() {
         return pipeline;
     }
 
-    /**
-     *
-     */
+    // ChannelHandlerContext 定义
     @Override
     public EventExecutor executor() {
         if (executor == null) {
@@ -136,11 +132,13 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         }
     }
 
+    // ChannelHandlerContext 定义
     @Override
     public String name() {
         return name;
     }
 
+    // ChannelHandlerContext 定义
     @Override
     public ByteBufAllocator alloc() {
         return channel().config().getAllocator();

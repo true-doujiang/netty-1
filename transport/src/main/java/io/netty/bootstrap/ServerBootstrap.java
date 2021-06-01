@@ -147,6 +147,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
      */
     @Override
     void init(Channel channel) throws Exception {
+
         // 服务端 配置 属性
         final Map<ChannelOption<?>, Object> options = options0();
         synchronized (options) {
@@ -164,12 +165,13 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
         ChannelPipeline p = channel.pipeline();
 
-
         // worker group
         final EventLoopGroup currentChildGroup = childGroup;
         final ChannelHandler currentChildHandler = childHandler;
+
         final Entry<ChannelOption<?>, Object>[] currentChildOptions;
         final Entry<AttributeKey<?>, Object>[] currentChildAttrs;
+
         // 客户端 配置 属性
         synchronized (childOptions) {
             currentChildOptions = childOptions.entrySet().toArray(newOptionArray(0));
@@ -180,8 +182,8 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
         /**
          * 匿名内部类 会被添加到pipeline的 pendingHandlerCallbackHead; 属性中
-         * 再给服务端NioServerSocketChannel的pipeline添加一个HandlerContext(initializerHandler)
          */
+        // 这是 pipeline 创建完成后第一个添加的 handler 所以会被放到 pipeline的pendingHandlerCallbackHead属性中
         ChannelInitializer initializerHandler = new ChannelInitializer<Channel>() {
 
             public String myName = "ServerBootstrap的ChannelInitializer匿名内部类";
@@ -201,18 +203,19 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                 }
 
                 // ch 是服务端 配置ServerBootstrapAcceptor 用于给新接入的客户端channel分配线程
-                Runnable r = new Thread("init-pipeline-task") {
+                Runnable r = new Thread("ServerBootstrapAcceptor task 一个特殊的Handler") {
                     @Override
                     public void run() {
-                        System.out.println(Thread.currentThread().getName() + " init-pipeline-task 被执行了");
+                        System.out.println(Thread.currentThread().getName() + " ServerBootstrapAcceptor task 一个特殊的Handler 被执行了");
                         // ServerBootstrapAcceptor 一个特殊的Handler
-                        ServerBootstrapAcceptor acceptorHandler = new ServerBootstrapAcceptor(ch, currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs);
+                        ServerBootstrapAcceptor acceptorHandler = new ServerBootstrapAcceptor(
+                                ch, currentChildGroup, currentChildHandler, currentChildOptions, currentChildAttrs);
                         //pipeline.addLast(acceptorHandler);
                         pipeline.addLast(null, "acceptorHandler", acceptorHandler);
                     }
                 };
 
-                System.out.println(Thread.currentThread().getName() + " 执行ChannelPipeline开始添加的initializerHandler.initChannel() ====添加==== init-pipeline-task  r = " + r);
+                System.out.println(Thread.currentThread().getName() + " 一个特殊的Handler 添加到任务队列,等待执行 task = " + r);
 
                 // r 会被添加到taskQueue中
                 ch.eventLoop().execute(r);
@@ -222,6 +225,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         System.out.println(Thread.currentThread().getName() + " ServerBootstrap initializerHandler = " + initializerHandler);
         // 添加一个特殊的 ChannelHandler 这个hander会被添加到 DefaultChannelPipeline 的 pendingHandlerCallbackHead
         //p.addLast(initializerHandler);
+        // 这应该是第一个 往pipeline中添加的 handler 所以会被放到 pipeline的pendingHandlerCallbackHead属性中
         p.addLast(null, "initializerHandler", initializerHandler);
     }
 
@@ -263,6 +267,9 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
         private final Runnable enableAutoReadTask;
 
+        /**
+         * 构造器
+         */
         ServerBootstrapAcceptor(
                 final Channel channel, EventLoopGroup childGroup, ChannelHandler childHandler,
                 Entry<ChannelOption<?>, Object>[] childOptions, Entry<AttributeKey<?>, Object>[] childAttrs) {
@@ -310,7 +317,6 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             // 我自己加点
             ctx.fireChannelRead(msg);
 
-
             final Channel childChannel = (Channel) msg;
 
             //childChannel.pipeline().addLast(childHandler);
@@ -325,7 +331,6 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             }
 
             try {
-
                 // 对客户单channel 做类似服务端channel同样操作流程
                 ChannelFuture register = childGroup.register(childChannel);
 

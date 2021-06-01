@@ -48,7 +48,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultChannelPipeline.class);
 
-
+    // 只是保存一下 头尾节点的名字而已
     private static final String HEAD_NAME = generateName0(HeadContext.class);
     private static final String TAIL_NAME = generateName0(TailContext.class);
 
@@ -98,8 +98,6 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     /**
      * 构造器
-     *
-     * Pipeline 链表数据结构，节点元素 xxx..HandlerContext
      */
     protected DefaultChannelPipeline(Channel channel) {
         // 不可以为null
@@ -234,8 +232,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         synchronized (this) {
             checkMultiplicity(handler);
+
             // 把 ChannelHandler 包装成 ChannelHandlerContext
-            newCtx = newContext(group, filterName(name, handler), handler);
+            String s = filterName(name, handler);
+            newCtx = newContext(group, s, handler);
 
             // 链表插入操作
             addLast0(newCtx);
@@ -245,6 +245,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             // In this case we add the context to the pipeline and add a task that will call
             // ChannelHandler.handlerAdded(...) once the channel is registered.
             if (!registered) {
+                // 修改 newCtx 的状态为pending状态
                 newCtx.setAddPending();
                 // 初始化 pendingHandlerCallbackHead 变量
                 callHandlerCallbackLater(newCtx, true);
@@ -253,6 +254,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
             EventExecutor executor = newCtx.executor();
             if (!executor.inEventLoop()) {
+                 //
                 callHandlerAddedInEventLoop(newCtx, executor);
                 return this;
             }
@@ -402,6 +404,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return this;
     }
 
+    /**
+     *  一般都是调用这个
+     */
     public final ChannelPipeline addLast(ChannelHandler handler) {
         return addLast(null, handler);
     }
@@ -1175,7 +1180,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     *
+     * 执行 channel注册之前的任务队列
      */
     private void callHandlerAddedForAllHandlers() {
         final PendingHandlerCallback pendingHandlerCallbackHead;
@@ -1187,6 +1192,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             // Null out so it can be GC'ed.
             this.pendingHandlerCallbackHead = null;
         }
+
         // This must happen outside of the synchronized(...) block as otherwise handlerAdded(...) may be called while
         // holding the lock and so produce a deadlock if handlerAdded(...) will try to add another handler from outside
         // the EventLoop.
@@ -1198,8 +1204,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     * 就是对 pipeline 的变量 pendingHandlerCallbackHead 做初始化
-     *
+     * channel还没注册到selector上 就开始往pipeline中添加handler就只执行这个方法
      */
     private void callHandlerCallbackLater(AbstractChannelHandlerContext ctx, boolean added) {
         assert !registered;
@@ -1219,14 +1224,19 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
     }
 
+    /**
+     *
+     */
     private void callHandlerAddedInEventLoop(final AbstractChannelHandlerContext newCtx, EventExecutor executor) {
         newCtx.setAddPending();
-        executor.execute(new Runnable() {
+
+        Runnable task = new Thread("callHandlerAddedInEventLoop-task") {
             @Override
             public void run() {
                 callHandlerAdded0(newCtx);
             }
-        });
+        };
+        executor.execute(task);
     }
 
     /**
@@ -1386,7 +1396,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
          */
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
-            System.out.println(Thread.currentThread().getName() + " 作为 InBound的最后一个 打个警告日志 TailContext = " + this + "  channelRead(ctx, msg) 执行");
+            System.out.println(Thread.currentThread().getName()
+                    + " 作为 InBound的最后一个 打个警告日志 TailContext = " + this + "  channelRead(ctx, msg) 执行");
+
             // 都到最后一个read()还没处理 所以打印一个警告日志，或者释放内存
             onUnhandledInboundMessage(msg);
         }

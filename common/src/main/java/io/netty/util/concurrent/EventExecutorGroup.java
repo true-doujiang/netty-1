@@ -80,6 +80,8 @@ public interface EventExecutorGroup extends ScheduledExecutorService, Iterable<E
 
     /**
      * Returns one of the {@link EventExecutor}s managed by this {@link EventExecutorGroup}.
+     *  对于........LoopGroup 就是 return 一个 NioEventLoop
+     *  对于NioEventLoop 就是 就是 return 一个 this
      */
     EventExecutor next();
 

@@ -484,6 +484,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         private RecvByteBufAllocator.Handle recvHandle;
         private boolean inFlush0;
+
         /** true if the channel has never been registered, false otherwise */
         private boolean neverRegistered = true;
 
@@ -520,6 +521,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
          * 把JDK 的ServerSocketChannel 或者 SocketChannel 注册到 Selector上
          * 实际上这里只是向taskQueue中添加一个要注册的任务，真正注册早着呢
          * AbstractBootstrap.initAndRegister() 一路跳过来的
+         * 调用方: SingleThreadEventLoop#register(io.netty.channel.ChannelPromise)
          */
         @Override
         public final void register(EventLoop eventLoop, final ChannelPromise promise) {
@@ -544,25 +546,28 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
              */
             AbstractChannel.this.eventLoop = eventLoop;
 
-            if (eventLoop.inEventLoop()) {
+            boolean b = eventLoop.inEventLoop();
+            System.out.println(Thread.currentThread().getName() + " AbstractUnsafe register inEventLoop = " + b);
+
+            if (b) {
                 register0(promise);
             } else {
 
                 try {
                     // 放到线程池中执行
-                    Runnable r = new Thread("register-task") {
+                    Runnable r = new Thread("我是channel注册任务") {
                         @Override
                         public void run() {
-                            System.out.println(Thread.currentThread().getName() + " register-task 被执行了");
+                            System.out.println(Thread.currentThread().getName() + " 我是channel注册任务 被执行了");
                             register0(promise);
                         }
                     };
 
-                    System.out.println(Thread.currentThread().getName() + " AbstractUnsafe.register() ====添加==== register-task r = " + r);
+                    System.out.println(Thread.currentThread().getName() + " AbstractUnsafe.register() ==添加==task = " + r);
 
                     /**
-                     *  把channel注册的任务 丢给 NioEventLoop的 taskQueue 并判断在不在NioEventLoop的线程 若不是则启动NioEventLoop线程
-                     *  并执行任务了
+                     *  把channel注册的任务 丢给 NioEventLoop的 taskQueue 并判断在不在NioEventLoop的线程
+                     *  若不是则启动NioEventLoop线程并执行任务了
                      */
                     eventLoop.execute(r);
 
@@ -578,8 +583,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         }
 
         /**
-         * 在 nioEventLoopGroup-2-1 线程中执行
-         * @param promise
+         * 我一定是在 nioEventLoopGroup-2-1 线程中执行的
          */
         private void register0(ChannelPromise promise) {
             try {
@@ -589,10 +593,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     return;
                 }
                 boolean firstRegistration = neverRegistered;
-                /**
+                /****************************************************************************
                  * 把JDK 的ServerSocketChannel 或者 SocketChannel 注册到 Selector上 默认不关心任何事件
                  * 调用AbstractChannel的抽象方法  AbstractNioChannel 重写了
-                 */
+                 *****************************************************************************/
                 doRegister();
 
                 neverRegistered = false;
@@ -606,19 +610,20 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                  */
                 // Ensure we call handlerAdded(...) before we actually notify the promise. This is needed as the
                 // user may already fire events through the pipeline in the ChannelFutureListener.
-                System.out.println(Thread.currentThread().getName() + " pipeline.invokeHandlerAddedIfNeeded() start");
+                //System.out.println(Thread.currentThread().getName() + " pipeline.invokeHandlerAddedIfNeeded() start");
                 // 调用用户代码
                 pipeline.invokeHandlerAddedIfNeeded();
-                System.out.println(Thread.currentThread().getName() + " pipeline.invokeHandlerAddedIfNeeded() end");
+                //System.out.println(Thread.currentThread().getName() + " pipeline.invokeHandlerAddedIfNeeded() end");
 
-                System.out.println(Thread.currentThread().getName() + " safeSetSuccess(promise) start");
+                //System.out.println(Thread.currentThread().getName() + " safeSetSuccess(promise) start");
+                // 只是打印日志
                 safeSetSuccess(promise);
-                System.out.println(Thread.currentThread().getName() + " safeSetSuccess(promise) end");
+                //System.out.println(Thread.currentThread().getName() + " safeSetSuccess(promise) end");
 
-                System.out.println(Thread.currentThread().getName() + " pipeline.fireChannelRegistered() start");
+                //System.out.println(Thread.currentThread().getName() + " pipeline.fireChannelRegistered() start");
                 // 一直传到 Tail 而 Tail.channelRegistered 是空实现
                 pipeline.fireChannelRegistered();
-                System.out.println(Thread.currentThread().getName() + " pipeline.fireChannelRegistered() end");
+                //System.out.println(Thread.currentThread().getName() + " pipeline.fireChannelRegistered() end");
 
                 // isActive() 对于 NioServerSocketChannel 是绑定端口  对于 NioSocketChannel 是客户端的channel注册到select上
                 // Only fire a channelActive if the channel has never been registered. This prevents firing

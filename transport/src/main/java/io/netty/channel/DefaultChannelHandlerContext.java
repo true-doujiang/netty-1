@@ -26,10 +26,12 @@ final class DefaultChannelHandlerContext extends AbstractChannelHandlerContext {
     private final ChannelHandler handler;
 
     /**
-     * default constructor
+     * 构造器
      */
-    DefaultChannelHandlerContext(DefaultChannelPipeline pipeline, EventExecutor executor,
-                                 String name, ChannelHandler handler) {
+    DefaultChannelHandlerContext(DefaultChannelPipeline pipeline,
+                                 EventExecutor executor,
+                                 String name,
+                                 ChannelHandler handler) {
 
         super(pipeline, executor, name, isInbound(handler), isOutbound(handler));
 
@@ -39,6 +41,7 @@ final class DefaultChannelHandlerContext extends AbstractChannelHandlerContext {
         this.handler = handler;
     }
 
+    // ChannelHandlerContext 定义，其它方法都是在 AbstractChannelHandlerContext中实现了
     @Override
     public ChannelHandler handler() {
         return handler;

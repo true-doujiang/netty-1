@@ -90,6 +90,7 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
 
     /**
      * 直接调用父类的 next() 选择一个 NioEventLoop
+     * EventExecutorGroup 中定义
      */
     @Override
     public EventLoop next() {
@@ -105,7 +106,8 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
     protected abstract EventLoop newChild(Executor executor, Object... args) throws Exception;
 
     /**
-     *
+     *  EventLoopGroup 定义
+     *  EventLoop的实现类也实现了register()
      */
     @Override
     public ChannelFuture register(Channel channel) {
@@ -113,6 +115,8 @@ public abstract class MultithreadEventLoopGroup extends MultithreadEventExecutor
         return next.register(channel);
     }
 
+    // EventLoopGroup 定义
+    // EventLoop的实现类也实现了register()
     @Override
     public ChannelFuture register(ChannelPromise promise) {
         EventLoop next = next();

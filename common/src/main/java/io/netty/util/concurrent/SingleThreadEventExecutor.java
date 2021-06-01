@@ -798,7 +798,6 @@ public abstract class SingleThreadEventExecutor
     /**
      * 给NioEventLoop 添加任务   AbstractChannel.register() 调用  注册任务
      *                           AbstractBootstrap.doBind0() 调用 绑定端口任务
-     * @param task
      */
     @Override
     public void execute(Runnable task) {

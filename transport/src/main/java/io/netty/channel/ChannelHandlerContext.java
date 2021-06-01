@@ -155,6 +155,16 @@ public interface ChannelHandlerContext extends AttributeMap, ChannelInboundInvok
      */
     boolean isRemoved();
 
+    /**
+     * Return the assigned {@link ChannelPipeline}
+     */
+    ChannelPipeline pipeline();
+
+    /**
+     * Return the assigned {@link ByteBufAllocator} which will be used to allocate {@link ByteBuf}s.
+     */
+    ByteBufAllocator alloc();
+
 
     //-------ChannelInboundInvoker 中定义---------------
 
@@ -192,15 +202,6 @@ public interface ChannelHandlerContext extends AttributeMap, ChannelInboundInvok
     @Override
     ChannelHandlerContext flush();
 
-    /**
-     * Return the assigned {@link ChannelPipeline}
-     */
-    ChannelPipeline pipeline();
-
-    /**
-     * Return the assigned {@link ByteBufAllocator} which will be used to allocate {@link ByteBuf}s.
-     */
-    ByteBufAllocator alloc();
 
 
 
