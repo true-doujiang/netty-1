@@ -1239,12 +1239,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
 
 
-    // -------------------1----------------------
+    // ---------todo do开头都是外部类抽象方法 unsafe中调用--------------
 
     /********************************************************
-     * 具体子类实现 被 AbstractUnsafe 调用
+     * todo 具体子类实现，AbstractNioChannel实现   被 AbstractUnsafe 调用
      * *******************************************************
-     *
      * Is called after the {@link Channel} is registered with its {@link EventLoop} as part of the register process.
      *
      * Sub-classes may override this method
@@ -1254,11 +1253,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /************************************************
-     * 具体子类实现 NioServerSocketChannel  NioSocketChannel
-     *
-     * 被 AbstractUnsafe 调用
+     * todo 具体子类实现  NioServerSocketChannel，NioSocketChannel 实现   被 AbstractUnsafe 调用
      * ************************************************
-     *
      * Bind the {@link Channel} to the {@link SocketAddress}
      */
     protected abstract void doBind(SocketAddress localAddress) throws Exception;
