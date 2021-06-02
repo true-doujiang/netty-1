@@ -48,6 +48,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
     private final Map<ChannelOption<?>, Object> childOptions = new LinkedHashMap<ChannelOption<?>, Object>();
     private final Map<AttributeKey<?>, Object> childAttrs = new LinkedHashMap<AttributeKey<?>, Object>();
 
+    // 客户端相同
     private final ServerBootstrapConfig config = new ServerBootstrapConfig(this);
 
     // workerGroup 负责IO 读写
@@ -55,6 +56,10 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
     // 用户代码中 childHandler(xx) 设置的
     private volatile ChannelHandler childHandler;
 
+
+    /**
+     * 构造器
+     */
     public ServerBootstrap() { }
 
     private ServerBootstrap(ServerBootstrap bootstrap) {

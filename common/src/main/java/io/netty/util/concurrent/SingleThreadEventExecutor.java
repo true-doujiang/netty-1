@@ -64,12 +64,14 @@ public abstract class SingleThreadEventExecutor
     private static final int ST_SHUTDOWN = 4;
     private static final int ST_TERMINATED = 5;
 
+    //
     private static final Runnable WAKEUP_TASK = new Runnable() {
         @Override
         public void run() {
             // Do nothing.
         }
     };
+    //
     private static final Runnable NOOP_TASK = new Runnable() {
         @Override
         public void run() {
@@ -161,8 +163,6 @@ public abstract class SingleThreadEventExecutor
      *                          executor thread
      * @param maxPendingTasks   the maximum number of pending tasks before new tasks will be rejected.
      * @param rejectedHandler   the {@link RejectedExecutionHandler} to use.
-     *
-     *
      */
     protected SingleThreadEventExecutor(EventExecutorGroup parent,
                                         Executor executor,

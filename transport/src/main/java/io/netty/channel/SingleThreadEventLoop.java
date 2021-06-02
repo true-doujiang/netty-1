@@ -100,7 +100,6 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
     @Override
     public ChannelFuture register(final ChannelPromise promise) {
         ObjectUtil.checkNotNull(promise, "promise");
-
         Channel channel = promise.channel();
         //
         Channel.Unsafe unsafe = channel.unsafe();

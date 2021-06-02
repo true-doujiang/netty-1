@@ -53,13 +53,11 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     private static final ClosedChannelException DO_CLOSE_CLOSED_CHANNEL_EXCEPTION = ThrowableUtil.unknownStackTrace(
             new ClosedChannelException(), AbstractNioChannel.class, "doClose()");
 
-    /**
-     * JDK ServerSocketChannel 或者 SocketChannel
-     */
-    private final SelectableChannel ch;
+    // JDK ServerSocketChannel 或者 SocketChannel
+    private final SelectableChannel ch
+            ;
     //将来要关心的事件
     protected final int readInterestOp;
-
 
     // 注册时返回的 SelectionKey
     volatile SelectionKey selectionKey;
@@ -91,11 +89,10 @@ public abstract class AbstractNioChannel extends AbstractChannel {
      *
      */
     protected AbstractNioChannel(Channel parent, SelectableChannel ch, int readInterestOp) {
-
         super(parent);
-
         this.ch = ch;
         this.readInterestOp = readInterestOp;
+
         try {
             ch.configureBlocking(false);
         } catch (IOException e) {
@@ -111,6 +108,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         }
     }
 
+    // channel 中定义
     @Override
     public boolean isOpen() {
         return ch.isOpen();
@@ -129,9 +127,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         return ch;
     }
 
-    /**
-     *
-     */
+    //
     @Override
     public NioEventLoop eventLoop() {
         return (NioEventLoop) super.eventLoop();

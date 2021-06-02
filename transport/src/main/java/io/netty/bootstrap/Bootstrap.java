@@ -15,14 +15,7 @@
  */
 package io.netty.bootstrap;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.ChannelPromise;
-import io.netty.channel.EventLoop;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.resolver.AddressResolver;
 import io.netty.resolver.DefaultAddressResolverGroup;
 import io.netty.resolver.NameResolver;
@@ -52,13 +45,19 @@ public class Bootstrap extends AbstractBootstrap<Bootstrap, Channel> {
 
     private static final AddressResolverGroup<?> DEFAULT_RESOLVER = DefaultAddressResolverGroup.INSTANCE;
 
+
     private final BootstrapConfig config = new BootstrapConfig(this);
 
     @SuppressWarnings("unchecked")
     private volatile AddressResolverGroup<SocketAddress> resolver =
             (AddressResolverGroup<SocketAddress>) DEFAULT_RESOLVER;
+
     private volatile SocketAddress remoteAddress;
 
+
+    /**
+     * 构造器
+     */
     public Bootstrap() { }
 
     private Bootstrap(Bootstrap bootstrap) {
@@ -160,16 +159,21 @@ public class Bootstrap extends AbstractBootstrap<Bootstrap, Channel> {
      * @see #connect()
      */
     private ChannelFuture doResolveAndConnect(final SocketAddress remoteAddress, final SocketAddress localAddress) {
-        //
+        // 调用父类方法
         final ChannelFuture regFuture = initAndRegister();
         final Channel channel = regFuture.channel();
 
         if (regFuture.isDone()) {
+            System.out.println(Thread.currentThread().getName() + " regFuture.isDone");
             if (!regFuture.isSuccess()) {
+                System.out.println(Thread.currentThread().getName() + " regFuture.isSuccess ");
                 return regFuture;
             }
-            return doResolveAndConnect0(channel, remoteAddress, localAddress, channel.newPromise());
+
+            ChannelFuture future = doResolveAndConnect0(channel, remoteAddress, localAddress, channel.newPromise());
+            return future;
         } else {
+
             // Registration future is almost always fulfilled already, but just in case it's not.
             final PendingRegistrationPromise promise = new PendingRegistrationPromise(channel);
             regFuture.addListener(new ChannelFutureListener() {
@@ -194,8 +198,13 @@ public class Bootstrap extends AbstractBootstrap<Bootstrap, Channel> {
         }
     }
 
-    private ChannelFuture doResolveAndConnect0(final Channel channel, SocketAddress remoteAddress,
-                                               final SocketAddress localAddress, final ChannelPromise promise) {
+    /**
+     *
+     */
+    private ChannelFuture doResolveAndConnect0(final Channel channel,
+                                               SocketAddress remoteAddress,
+                                               final SocketAddress localAddress,
+                                               final ChannelPromise promise) {
         try {
             final EventLoop eventLoop = channel.eventLoop();
             final AddressResolver<SocketAddress> resolver = this.resolver.getResolver(eventLoop);
@@ -241,7 +250,9 @@ public class Bootstrap extends AbstractBootstrap<Bootstrap, Channel> {
     }
 
     private static void doConnect(
-            final SocketAddress remoteAddress, final SocketAddress localAddress, final ChannelPromise connectPromise) {
+            final SocketAddress remoteAddress,
+            final SocketAddress localAddress,
+            final ChannelPromise connectPromise) {
 
         // This method is invoked before channelRegistered() is triggered.  Give user handlers a chance to set up
         // the pipeline in its channelRegistered() implementation.
@@ -264,7 +275,8 @@ public class Bootstrap extends AbstractBootstrap<Bootstrap, Channel> {
     void init(Channel channel) throws Exception {
 
         ChannelPipeline p = channel.pipeline();
-        p.addLast(config.handler());
+        ChannelHandler handler = config.handler();
+        p.addLast(handler);
 
         final Map<ChannelOption<?>, Object> options = options0();
         synchronized (options) {

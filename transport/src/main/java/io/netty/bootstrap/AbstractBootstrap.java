@@ -63,6 +63,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     // 用户代码设置的服务端 handler
     private volatile ChannelHandler handler;
 
+
     AbstractBootstrap() {
         // Disallow extending from a different package.
     }
@@ -423,7 +424,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         channel.eventLoop().execute(r);
     }
 
-
+    // 抽象方法 ServerBootstrap 和 Bootstrap 实现
     abstract void init(Channel channel) throws Exception;
 
 

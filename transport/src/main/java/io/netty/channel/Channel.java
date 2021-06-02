@@ -117,8 +117,10 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
 
     /**
      * Returns {@code true} if the {@link Channel} is open and may get active later
+     * AbstractNioChannel中实现，就是调用一下jdk api
      */
     boolean isOpen();
+
 
     /**
      * AbstractChannel 中定义的 registered

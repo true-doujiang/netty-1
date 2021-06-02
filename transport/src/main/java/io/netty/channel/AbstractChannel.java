@@ -76,7 +76,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     private volatile SocketAddress localAddress;
     private volatile SocketAddress remoteAddress;
 
-    /**
+    /*
      * 注册 selector 的时候 初始化了
      * 每个channel上都会有个NioEventLoop 只有这样 channel才能有生命力啊，引擎
      * 要把观念转过来 不是 channel 依赖于NioEventLoop 而是 NioEventLoop依赖于channel
@@ -111,12 +111,6 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         pipeline = newChannelPipeline();
     }
 
-    /**
-     * Creates a new instance.
-     *
-     * @param parent
-     *        the parent of this channel. {@code null} if there's no parent.
-     */
     protected AbstractChannel(Channel parent, ChannelId id) {
         this.parent = parent;
         this.id = id;
@@ -170,6 +164,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         return buf != null ? buf.bytesBeforeWritable() : Long.MAX_VALUE;
     }
 
+    /**
+     * channel中定义、子类：NioSocketChannel中super了它
+     */
     @Override
     public Channel parent() {
         return parent;
@@ -378,6 +375,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         return this;
     }
 
+    // channel中定义 子类AbstractNioChannel中super它
     @Override
     public Unsafe unsafe() {
         return unsafe;
