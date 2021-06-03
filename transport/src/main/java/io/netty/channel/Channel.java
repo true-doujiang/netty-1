@@ -258,6 +258,7 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
 
         /**
          * 服务端channel注册到selector、客户端channel注册到selector
+         * AbstractUnsafe 实现
          *
          * Register the {@link Channel} of the {@link ChannelPromise} and notify
          * the {@link ChannelFuture} once the registration was complete.
@@ -267,6 +268,7 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
         /**
          * Bind the {@link SocketAddress} to the {@link Channel} of the {@link ChannelPromise} and notify
          * it once its done.
+         * AbstractUnsafe 实现
          */
         void bind(SocketAddress localAddress, ChannelPromise promise);
 

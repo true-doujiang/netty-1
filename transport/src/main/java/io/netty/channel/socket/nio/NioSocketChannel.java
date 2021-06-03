@@ -119,20 +119,19 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         return (ServerSocketChannel) super.parent();
     }
 
-    // SocketChannel
+    // SocketChannel 定义
     @Override
     public SocketChannelConfig config() {
         return config;
     }
 
-    /**
-     *
-     */
+    // AbstractNioChannel 定义
     @Override
     protected SocketChannel javaChannel() {
         return (SocketChannel) super.javaChannel();
     }
 
+    // Channel 定义
     @Override
     public boolean isActive() {
         SocketChannel ch = javaChannel();
@@ -303,6 +302,8 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         return javaChannel().socket().getRemoteSocketAddress();
     }
 
+    // AbstractChannel 定义
+    // 调用方: io.netty.channel.AbstractChannel.AbstractUnsafe.bind()
     @Override
     protected void doBind(SocketAddress localAddress) throws Exception {
         doBind0(localAddress);
@@ -316,13 +317,7 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         }
     }
 
-    /**
-     *
-     * @param remoteAddress
-     * @param localAddress
-     * @return
-     * @throws Exception
-     */
+    // AbstractChannel 定义
     @Override
     protected boolean doConnect(SocketAddress remoteAddress, SocketAddress localAddress) throws Exception {
         if (localAddress != null) {
@@ -362,12 +357,7 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         javaChannel().close();
     }
 
-    /**
-     *
-     * @param byteBuf
-     * @return
-     * @throws Exception
-     */
+    // AbstractNioByteChannel 定义
     @Override
     protected int doReadBytes(ByteBuf byteBuf) throws Exception {
         final RecvByteBufAllocator.Handle allocHandle = unsafe().recvBufAllocHandle();
@@ -375,12 +365,7 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         return byteBuf.writeBytes(javaChannel(), allocHandle.attemptedBytesRead());
     }
 
-    /**
-     *
-     * @param buf           the {@link ByteBuf} from which the bytes should be written
-     * @return
-     * @throws Exception
-     */
+    // AbstractNioByteChannel 定义
     @Override
     protected int doWriteBytes(ByteBuf buf) throws Exception {
         final int expectedWrittenBytes = buf.readableBytes();
@@ -407,11 +392,7 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         }
     }
 
-    /**
-     *
-     * @param in
-     * @throws Exception
-     */
+    // AbstractChannel 定义
     @Override
     protected void doWrite(ChannelOutboundBuffer in) throws Exception {
         SocketChannel ch = javaChannel();
@@ -475,15 +456,17 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         incompleteWrite(writeSpinCount < 0);
     }
 
+    // AbstractChannel 定义
     @Override
     protected AbstractNioUnsafe newUnsafe() {
         return new NioSocketChannelUnsafe();
     }
 
     /**
-     *
+     * 内部类
      */
     private final class NioSocketChannelUnsafe extends NioByteUnsafe {
+
         @Override
         protected Executor prepareToClose() {
             try {

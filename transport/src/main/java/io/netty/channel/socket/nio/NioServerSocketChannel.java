@@ -70,6 +70,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
     private final ServerSocketChannelConfig config;
 
     /**
+     * 构造器   反射工厂调用这个构造器
      * Create a new instance
      */
     public NioServerSocketChannel() {
@@ -93,6 +94,8 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
         config = new NioServerSocketChannelConfig(this, javaChannel().socket());
     }
 
+
+
     // ServerSocketChannel
     @Override
     public InetSocketAddress localAddress() {
@@ -110,20 +113,19 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
         return config;
     }
 
+    // Channel 定义。
     @Override
     public boolean isActive() {
         return javaChannel().socket().isBound();
     }
 
-    // ServerSocketChannel
+    // ServerSocketChannel 定义
     @Override
     public InetSocketAddress remoteAddress() {
         return null;
     }
 
-    /**
-     *
-     */
+    // AbstractNioChannel 定义
     @Override
     protected ServerSocketChannel javaChannel() {
         return (ServerSocketChannel) super.javaChannel();
@@ -134,10 +136,8 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
         return SocketUtils.localSocketAddress(javaChannel().socket());
     }
 
-    /**
-     * AbstractChannel 中定义的抽象方法
-     * 绑定端口号
-     */
+
+    // AbstractChannel 定义
     @Override
     protected void doBind(SocketAddress localAddress) throws Exception {
         if (PlatformDependent.javaVersion() >= 7) {
@@ -153,15 +153,11 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
     }
 
     /**
-     * 把客户端链接 连接进来 并放入List
-     * @param buf
-     * @return
-     * @throws Exception
+     * 把客户端链接 连接进来 并放入List  AbstractNioMessageChannel定义
      */
     @Override
     protected int doReadMessages(List<Object> buf) throws Exception {
         SocketChannel ch = SocketUtils.accept(javaChannel());
-
         try {
             if (ch != null) {
                 // this: NioServerSocketChannel
@@ -170,21 +166,19 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
             }
         } catch (Throwable t) {
             logger.warn("Failed to create a new channel from an accepted socket.", t);
-
             try {
                 ch.close();
             } catch (Throwable t2) {
                 logger.warn("Failed to close a socket.", t2);
             }
         }
-
         return 0;
     }
 
+    // AbstractChannel 定义
     // Unnecessary stuff
     @Override
-    protected boolean doConnect(
-            SocketAddress remoteAddress, SocketAddress localAddress) throws Exception {
+    protected boolean doConnect(SocketAddress remoteAddress, SocketAddress localAddress) throws Exception {
         throw new UnsupportedOperationException();
     }
 

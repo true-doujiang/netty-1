@@ -82,6 +82,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         return false;
     }
 
+    // AbstractChannel 定义
     @Override
     protected AbstractNioUnsafe newUnsafe() {
         return new NioByteUnsafe();
@@ -147,12 +148,13 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
          */
         @Override
         public final void read() {
-
             final ChannelConfig config = config();
+
             if (shouldBreakReadReady(config)) {
                 clearReadPending();
                 return;
             }
+
             // 内部类调用外部类方法
             final ChannelPipeline pipeline = pipeline();
             final ByteBufAllocator allocator = config.getAllocator();
@@ -163,9 +165,14 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             boolean close = false;
             try {
                 do {
-                    // byteBuf: PooledUnsafeDirectByteBuf   这里 进去 分配内存的逻辑   allocator: PooledByteBufAllocator(directByDefault: true)  allocHandle: DefaultMaxMessagesRecvByteBufAllocator
+                    // byteBuf: PooledUnsafeDirectByteBuf   这里 进去 分配内存的逻辑
+                    // allocator: PooledByteBufAllocator(directByDefault: true)
+                    // allocHandle: DefaultMaxMessagesRecvByteBufAllocator
                     byteBuf = allocHandle.allocate(allocator);
-                    //
+                    /*
+                     * NioByteUnsafe的read()
+                     * 外部类抽象方法、
+                     */
                     int i = doReadBytes(byteBuf);
                     allocHandle.lastBytesRead(i);
 
@@ -243,10 +250,6 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
     /**
      *
-     * @param in
-     * @param msg
-     * @return
-     * @throws Exception
      */
     private int doWriteInternal(ChannelOutboundBuffer in, Object msg) throws Exception {
 
@@ -257,7 +260,6 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                 in.remove();
                 return 0;
             }
-
 
             // 通常是 NioSocketChannel   闪电侠：自旋锁写入  我这里没有了
             final int localFlushedAmount = doWriteBytes(buf);
@@ -297,11 +299,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         return WRITE_STATUS_SNDBUF_FULL;
     }
 
-    /**
-     *
-     * @param in
-     * @throws Exception
-     */
+    // AbstractChannel 定义
     @Override
     protected void doWrite(ChannelOutboundBuffer in) throws Exception {
         int writeSpinCount = config().getWriteSpinCount();
@@ -324,8 +322,6 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
     /**
      * HeapBuf 转换为 DirectBuf
-     * @param msg
-     * @return
      */
     @Override
     protected final Object filterOutboundMessage(Object msg) {
@@ -371,18 +367,19 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
     protected abstract long doWriteFileRegion(FileRegion region) throws Exception;
 
     /**
-     * NioSocketChannel 实现  客户端读取数据
-     *
+     * TODO NioSocketChannel 实现
      * Read bytes into the given {@link ByteBuf} and return the amount.
      */
     protected abstract int doReadBytes(ByteBuf buf) throws Exception;
 
     /**
+     * TODO NioSocketChannel 实现
      * Write bytes form the given {@link ByteBuf} to the underlying {@link java.nio.channels.Channel}.
      * @param buf           the {@link ByteBuf} from which the bytes should be written
      * @return amount       the amount of written bytes
      */
     protected abstract int doWriteBytes(ByteBuf buf) throws Exception;
+
 
     protected final void setOpWrite() {
         final SelectionKey key = selectionKey();

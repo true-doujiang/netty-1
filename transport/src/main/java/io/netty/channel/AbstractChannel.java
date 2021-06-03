@@ -315,8 +315,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /**
+     * Channel 定义
      *
-     * @return
      */
     @Override
     public Channel read() {
@@ -382,8 +382,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /**
-     * 创建 Pipeline 具体子类创建
-     *
+     * TODO AbstractNioMessageChannel、NioSocketChannel 中实现
+     * 构造器中调用，初始化channel的的时候就要初始化三大件
      * Create a new {@link AbstractUnsafe} instance which will be used for the life-time of the {@link Channel}
      */
     protected abstract AbstractUnsafe newUnsafe();
@@ -534,7 +534,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             }
 
             if (!isCompatible(eventLoop)) {
-                promise.setFailure(new IllegalStateException("incompatible event loop type: " + eventLoop.getClass().getName()));
+                promise.setFailure(new IllegalStateException(
+                        "incompatible event loop type: " + eventLoop.getClass().getName()));
                 return;
             }
 
@@ -612,12 +613,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 // 调用用户代码
                 pipeline.invokeHandlerAddedIfNeeded();
                 //System.out.println(Thread.currentThread().getName() + " pipeline.invokeHandlerAddedIfNeeded() end");
-
-                //System.out.println(Thread.currentThread().getName() + " safeSetSuccess(promise) start");
                 // 只是打印日志
                 safeSetSuccess(promise);
-                //System.out.println(Thread.currentThread().getName() + " safeSetSuccess(promise) end");
-
                 //System.out.println(Thread.currentThread().getName() + " pipeline.fireChannelRegistered() start");
                 // 一直传到 Tail 而 Tail.channelRegistered 是空实现
                 pipeline.fireChannelRegistered();
@@ -627,9 +624,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 // Only fire a channelActive if the channel has never been registered. This prevents firing
                 // multiple channel actives if the channel is deregistered and re-registered.
                 if (isActive()) {
+
                     if (firstRegistration) {
                         pipeline.fireChannelActive();
                     } else if (config().isAutoRead()) {
+
                         // This channel was registered before and autoRead() is set. This means we need to begin read
                         // again so that we process inbound data.
                         // See https://github.com/netty/netty/issues/4805
@@ -647,17 +646,14 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         /**
          * AbstractUnsafe
-         *
          * 绑定端口号 上面是注册
          */
         @Override
         public final void bind(final SocketAddress localAddress, final ChannelPromise promise) {
             assertEventLoop();
-
             if (!promise.setUncancellable() || !ensureOpen(promise)) {
                 return;
             }
-
             // See: https://github.com/netty/netty/issues/576
             if (Boolean.TRUE.equals(config().getOption(ChannelOption.SO_BROADCAST)) &&
                 localAddress instanceof InetSocketAddress &&
@@ -671,9 +667,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                         "address (" + localAddress + ") anyway as requested.");
             }
 
+            // 有没有绑定端口号， 肯定是没绑定呀
             boolean wasActive = isActive();
             try {
-                // 调用AbstractChannel的抽象方法
+                // 调用AbstractChannel的抽象方法: NioServerSocketChannel，NioSocketChannel 实现
                 doBind(localAddress);
             } catch (Throwable t) {
                 safeSetFailure(promise, t);
@@ -684,15 +681,16 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             // 传播ChannelActive事件
             if (!wasActive && isActive()) {
 
-                Runnable r = new Thread("bind-port-success-task") {
+                Runnable r = new Thread("绑定port完成触发任务") {
                     @Override
                     public void run() {
-                        System.out.println(Thread.currentThread().getName() + " bind-port-success-task 被执行了");
+                        System.out.println(Thread.currentThread().getName() + " 绑定port完成触发任务----被执行了");
                         pipeline.fireChannelActive();
                     }
                 };
 
-                System.out.println(Thread.currentThread().getName() + " 端口真正绑定完成了 ====添加==== bind-port-success-task  r = " + r);
+                System.out.println(Thread.currentThread().getName() + " 端口真正绑定完成了，所以添加触发 task = " + r);
+                // 下一个方法 把task添加到 NioEventLoo 任务队列中
                 invokeLater(r);
             }
 
@@ -701,7 +699,6 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         /**
          *
-         * @param task
          */
         private void invokeLater(Runnable task) {
             try {
@@ -716,7 +713,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 //         -> handlerA.channelInactive() - (2) another inbound handler method called while in (1) yet
                 //
                 // which means the execution of two inbound handler methods of the same handler overlap undesirably.
-                eventLoop().execute(task);
+                //eventLoop().execute(task);
+                EventLoop eventLoop = eventLoop();
+                eventLoop.execute(task);
             } catch (RejectedExecutionException e) {
                 logger.warn("Can't invoke task later as EventLoop rejected it", e);
             }
@@ -732,9 +731,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             boolean wasActive = isActive();
             try {
-
                 doDisconnect();
-
             } catch (Throwable t) {
                 safeSetFailure(promise, t);
                 closeIfClosed();
@@ -986,9 +983,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             });
         }
 
-        /**
-         *
-         */
+        // Unsafe 定义
         @Override
         public final void beginRead() {
             assertEventLoop();
@@ -1013,9 +1008,6 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
         /**
          * 把数据写入 缓冲区 entity链表结构 ,flush() 后会把entity链表的数据写入socket
-         *
-         * @param msg
-         * @param promise
          */
         @Override
         public final void write(Object msg, ChannelPromise promise) {
@@ -1191,7 +1183,6 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         }
 
 
-
         /**
          * Appends the remote address to the message of the exceptions caused by connection attempt failure.
          */
@@ -1242,13 +1233,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
 
 
-    // ---------todo do开头都是外部类抽象方法 unsafe中调用--------------
+    // ---------todo do开头都是外部类抽象方法 unsafe中调用这些方法--------------
 
     /********************************************************
-     * todo 具体子类实现，AbstractNioChannel实现   被 AbstractUnsafe 调用
-     * *******************************************************
+     * todo AbstractNioChannel实现: 注册到jdk的selector上   被 AbstractUnsafe 调用
      * Is called after the {@link Channel} is registered with its {@link EventLoop} as part of the register process.
-     *
      * Sub-classes may override this method
      */
     protected void doRegister() throws Exception {
@@ -1256,7 +1245,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /************************************************
-     * todo 具体子类实现  NioServerSocketChannel，NioSocketChannel 实现   被 AbstractUnsafe 调用
+     * todo  NioServerSocketChannel，NioSocketChannel 实现   被 AbstractUnsafe 调用
      * ************************************************
      * Bind the {@link Channel} to the {@link SocketAddress}
      */
@@ -1294,7 +1283,6 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     /************************************************
      * 具体子类实现  被 AbstractUnsafe 调用
-     * ************************************************
      *
      * Schedule a read operation.
      */

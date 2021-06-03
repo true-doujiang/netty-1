@@ -47,6 +47,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     volatile AbstractChannelHandlerContext next;
     volatile AbstractChannelHandlerContext prev;
 
+    // 节点状态 cas 操作
     private static final AtomicIntegerFieldUpdater<AbstractChannelHandlerContext> HANDLER_STATE_UPDATER =
             AtomicIntegerFieldUpdater.newUpdater(AbstractChannelHandlerContext.class, "handlerState");
 
@@ -87,6 +88,7 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     // There is no need to make this volatile as at worse it will just create a few more instances then needed.
     private Tasks invokeTasks;
 
+    // 节点状态
     private volatile int handlerState = INIT;
 
     /**
@@ -158,7 +160,6 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
 
     /**
      * 静态方法先调用的
-     * @param next header or tail
      */
     static void invokeChannelRegistered(final AbstractChannelHandlerContext next) {
         EventExecutor executor = next.executor();
@@ -549,7 +550,8 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
         final AbstractChannelHandlerContext next = findContextOutbound();
         EventExecutor executor = next.executor();
 
-        System.out.println(Thread.currentThread().getName() + " AbstractChannelHandlerContext.bind() thread: " + executor.inEventLoop());
+        System.out.println(Thread.currentThread().getName()
+                + " AbstractChannelHandlerContext.bind() thread: " + executor.inEventLoop());
 
         if (executor.inEventLoop()) {
             next.invokeBind(localAddress, promise);

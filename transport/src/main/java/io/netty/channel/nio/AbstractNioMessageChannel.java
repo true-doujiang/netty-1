@@ -31,8 +31,6 @@ import java.util.List;
 
 /**
  * {@link AbstractNioChannel} base class for {@link Channel}s that operate on messages.
- *
- * 服务端channel父类
  */
 public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
 
@@ -40,15 +38,14 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
     boolean inputShutdown;
 
     /**
+     * 构造器
      * @see AbstractNioChannel#AbstractNioChannel(Channel, SelectableChannel, int)
      */
     protected AbstractNioMessageChannel(Channel parent, SelectableChannel ch, int readInterestOp) {
         super(parent, ch, readInterestOp);
     }
 
-    /**
-     *
-     */
+    // AbstractChannel 定义
     @Override
     protected AbstractNioUnsafe newUnsafe() {
         return new NioMessageUnsafe();
@@ -67,11 +64,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
         super.doBeginRead();
     }
 
-    /**
-     * 重写了 AbstractChannel 的 doWrite   中间没有经过
-     *
-     * @throws Exception
-     */
+    // AbstractChannel 定义   中间没有经过
     @Override
     protected void doWrite(ChannelOutboundBuffer in) throws Exception {
         final SelectionKey key = selectionKey();
@@ -86,6 +79,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                 }
                 break;
             }
+
             try {
                 boolean done = false;
                 for (int i = config().getWriteSpinCount() - 1; i >= 0; i--) {
@@ -127,7 +121,6 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
 
         @Override
         public void read() {
-
             assert eventLoop().inEventLoop();
 
             final ChannelConfig config = config();
@@ -142,7 +135,10 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
 
                 try {
                     do {
-                        //服务端read() 负责读入新的客户端链接
+                        /*
+                         * NioMessageUnsafe的read() 负责读入新的客户端链接
+                         * 外部类抽象方法、
+                         */
                         int localRead = doReadMessages(readBuf);
 
                         if (localRead == 0) {
@@ -180,7 +176,6 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
 
                 if (exception != null) {
                     closed = closeOnReadError(exception);
-
                     pipeline.fireExceptionCaught(exception);
                 }
 

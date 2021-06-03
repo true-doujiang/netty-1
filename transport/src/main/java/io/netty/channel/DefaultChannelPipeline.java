@@ -916,7 +916,6 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     /**
      * @param msg 若是服务端读msg为NioSocketChannel 若是客户端读msg为ByteBuf
-     * @return
      */
     @Override
     public final ChannelPipeline fireChannelRead(Object msg) {
@@ -1417,6 +1416,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         private final Unsafe unsafe;
 
+        /**
+         * 构造器
+         */
         HeadContext(DefaultChannelPipeline pipeline) {
             super(pipeline, null, HEAD_NAME, true, true);
             unsafe = pipeline.channel().unsafe();
@@ -1457,8 +1459,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void connect(ChannelHandlerContext ctx,
-                SocketAddress remoteAddress, SocketAddress localAddress,
-                ChannelPromise promise) {
+                            SocketAddress remoteAddress,
+                            SocketAddress localAddress,
+                             ChannelPromise promise) {
+
             unsafe.connect(remoteAddress, localAddress, promise);
         }
 
@@ -1478,9 +1482,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
 
         /**
-         * 本 HeadContext.channelActive(ctx) 里的 readIfIsAutoRead(); 从tail一路传到head
+         * 本 HeadContext.channelActive(ctx) 里的 readIfIsAutoRead();
          * 注册channel真正感兴趣的事件
-         * @param ctx
          */
         @Override
         public void read(ChannelHandlerContext ctx) {
@@ -1514,7 +1517,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelRegistered(ChannelHandlerContext ctx) {
-            System.out.println(Thread.currentThread().getName() + " HeadContext = " + this + " channelRegistered(ctx) 执行");
+            System.out.println(Thread.currentThread().getName() + " HeadContext.channelRegistered = " + this + " ctx = " + ctx);
 
             invokeHandlerAddedIfNeeded();
 
@@ -1533,8 +1536,8 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) {
-            System.out.println(Thread.currentThread().getName() + " HeadContext = " + this + " channelActive(ctx)");
-            // 这个一直传到tail的channelActive()
+            System.out.println(Thread.currentThread().getName() + " HeadContext.channelActive = " + this + " ctx = " + ctx);
+            // 这个一直传到tail的channelActive()   pipeline中的inbound都会被执行一遍，只要链条不断了的话，然后在执行下面一行代码
             ctx.fireChannelActive();
             //
             readIfIsAutoRead();

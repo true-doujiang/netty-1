@@ -35,11 +35,7 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.nio.channels.CancelledKeyException;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.ConnectionPendingException;
-import java.nio.channels.SelectableChannel;
-import java.nio.channels.SelectionKey;
+import java.nio.channels.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -61,7 +57,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
 
     // 注册时返回的 SelectionKey
     volatile SelectionKey selectionKey;
-
+    // 标记channel是否准备读就绪，对于服务端channel就是接入客户端连接
     boolean readPending;
     private final Runnable clearReadPendingRunnable = new Runnable() {
         @Override
@@ -410,7 +406,8 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     }
 
     /**
-     * 实现AbstractChannel的 doRegister() 注册，无论是客户端 or 服务端 都需要注册，所以放在Nio共同的抽象类中注册
+     * AbstractChannel 定义
+     * 无论是客户端 or 服务端 都需要注册，所以放在Nio共同的抽象类中注册
      * 把JDK 的ServerSocketChannel 或者 SocketChannel 注册到 Selector上 默认不关心任何事件
      */
     @Override
@@ -420,8 +417,13 @@ public abstract class AbstractNioChannel extends AbstractChannel {
             try {
 
                 NioEventLoop nioEventLoop = eventLoop();
+                SelectableChannel selectableChannel = javaChannel();
+                Selector selector = nioEventLoop.unwrappedSelector();
+
+                selectionKey = selectableChannel.register(selector, 0, this);
+
                 // attachment this : NioServerSocketChannel 或者 NioSocketChannel
-                selectionKey = javaChannel().register(nioEventLoop.unwrappedSelector(), 0, this);
+                //selectionKey = javaChannel().register(nioEventLoop.unwrappedSelector(), 0, this);
                 return;
             } catch (CancelledKeyException e) {
                 if (!selected) {
@@ -447,9 +449,12 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     }
 
     /**
-     * 实现 AbstractChannel的doBeginRead()   给channel事先保存的事件 真正注册事件到selector
+     *  AbstractChannel 定义
+     *  给channel事先保存的事件 真正注册事件到selector
      * 但是对于AbstractNioMessageChannel(服务端) 又重写了一下，但基本没有，还是调用回来了
-     * 对于客户单AbstractNioByteChannel 没有重写
+     * 对于客户端 就用我了
+     * 调用方：AbstractUnsafe#beginRead() <--  HeadContext#read() <-- AbstractBootstrap#doBind0()
+     *  卧槽反正很长的调用链才能到这里
      */
     @Override
     protected void doBeginRead() throws Exception {
@@ -459,10 +464,14 @@ public abstract class AbstractNioChannel extends AbstractChannel {
             return;
         }
 
+        // 置为事件准备已就绪状态
         readPending = true;
 
         final int interestOps = selectionKey.interestOps();
         if ((interestOps & readInterestOp) == 0) {
+            // 注册正真感兴趣的事件，对于服务端是：客户端的接入事件
+            System.out.println(Thread.currentThread().getName() + " interestOps = " + interestOps
+                    + " readInterestOp = " + readInterestOp);
             selectionKey.interestOps(interestOps | readInterestOp);
         }
     }

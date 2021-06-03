@@ -64,6 +64,9 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     private volatile ChannelHandler handler;
 
 
+    /**
+     * 构造器
+     */
     AbstractBootstrap() {
         // Disallow extending from a different package.
     }
@@ -394,9 +397,10 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     /**
      *  绑定端口
      */
-    private static void doBind0(
-            final ChannelFuture regFuture, final Channel channel,
-            final SocketAddress localAddress, final ChannelPromise promise) {
+    private static void doBind0(final ChannelFuture regFuture,
+                                final Channel channel,
+                                 final SocketAddress localAddress,
+                                final ChannelPromise promise) {
 
         //不断点：true   断点：false
         // This method is invoked before channelRegistered() is triggered.  Give user handlers a chance to set up
@@ -406,9 +410,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         Runnable r = new Thread("bind-port-task") {
             @Override
             public void run() {
-
                 System.out.println(Thread.currentThread().getName() + " bind-port-task 被执行了");
-
                 if (regFuture.isSuccess()) {
                     // channel.bind(...) 是通过pipeline的bind() 从tail开始传播 一直到head的bind()
                     ChannelFuture bind = channel.bind(localAddress, promise);
