@@ -49,7 +49,7 @@ import java.util.Map;
  */
 public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C extends Channel> implements Cloneable {
 
-    // bossGroup
+    // bossGroup or workerGroup
     volatile EventLoopGroup group;
 
     // 创建 NioServerSocketChannel的 ReflectiveChannelFactory
@@ -261,7 +261,9 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      * Create a new {@link Channel} and bind it.
      */
     public ChannelFuture bind(int inetPort) {
-        return bind(new InetSocketAddress(inetPort));
+        // java.net jdk API
+        InetSocketAddress socketAddress = new InetSocketAddress(inetPort);
+        return bind(socketAddress);
     }
 
     /**
@@ -296,6 +298,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     private ChannelFuture doBind(final SocketAddress localAddress) {
         // 1. 创建 & 初始化 & 注册 服务端channel
         final ChannelFuture regFuture = initAndRegister();
+
         final Channel channel = regFuture.channel();
 
         if (regFuture.cause() != null) {
@@ -349,7 +352,8 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         try {
             // 1. 反射创建 NioServerSocketChannel 或者  NioSocketChannel
             channel = channelFactory.newChannel();
-            System.out.println(Thread.currentThread().getName() + " initAndRegister() 反射工厂创建了Channel channel = " + channel);
+            System.out.println(Thread.currentThread().getName() +
+                    " initAndRegister() 反射工厂创建了Channel channel = " + channel);
 
             // 2. 抽象方法  在 ServerBootstrap 或者 Bootstrap 中初始化
             init(channel);
@@ -454,6 +458,8 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     /**
      * Returns the {@link AbstractBootstrapConfig} object that can be used to obtain the current config
      * of the bootstrap.
+     *
+     * 抽象方法
      */
     public abstract AbstractBootstrapConfig<B, C> config();
 
@@ -530,7 +536,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     }
 
     /**
-     *
+     * 内部类
      */
     static final class PendingRegistrationPromise extends DefaultChannelPromise {
 
@@ -538,6 +544,9 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         // stay null and so the GlobalEventExecutor.INSTANCE will be used for notifications.
         private volatile boolean registered;
 
+        /**
+         *  构造器
+         */
         PendingRegistrationPromise(Channel channel) {
             super(channel);
         }

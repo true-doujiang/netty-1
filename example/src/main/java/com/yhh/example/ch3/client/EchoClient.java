@@ -18,19 +18,22 @@ public class EchoClient {
         String host = "127.0.0.1";
         int port = 8082;
 
+        ChannelInitializer<SocketChannel> initializer = new ChannelInitializer<SocketChannel>() {
+            private String name = "EchoClient-ChannelInitializer";
+
+            @Override
+            public void initChannel(SocketChannel ch) throws Exception {
+                ch.pipeline().addLast(new EchoClientHandler());
+            }
+        };
+
         EventLoopGroup group = new NioEventLoopGroup();
         try {
             Bootstrap b = new Bootstrap();
             b.group(group)
-                    .channel(NioSocketChannel.class)
-                    .remoteAddress(new InetSocketAddress(host, port))
-                    .handler(new ChannelInitializer<SocketChannel>() {
-                        private String name = "EchoClient-ChannelInitializer";
-                        @Override
-                        public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new EchoClientHandler());
-                        }
-                    });
+             .channel(NioSocketChannel.class)
+             .remoteAddress(new InetSocketAddress(host, port))
+             .handler(initializer);
 
             ChannelFuture f = b.connect().sync();
             f.channel().closeFuture().sync();

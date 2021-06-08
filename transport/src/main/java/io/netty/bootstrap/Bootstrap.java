@@ -45,12 +45,11 @@ public class Bootstrap extends AbstractBootstrap<Bootstrap, Channel> {
 
     private static final AddressResolverGroup<?> DEFAULT_RESOLVER = DefaultAddressResolverGroup.INSTANCE;
 
-
+    // 服务端相同,有个配置类
     private final BootstrapConfig config = new BootstrapConfig(this);
 
     @SuppressWarnings("unchecked")
-    private volatile AddressResolverGroup<SocketAddress> resolver =
-            (AddressResolverGroup<SocketAddress>) DEFAULT_RESOLVER;
+    private volatile AddressResolverGroup<SocketAddress> resolver = (AddressResolverGroup<SocketAddress>) DEFAULT_RESOLVER;
 
     private volatile SocketAddress remoteAddress;
 

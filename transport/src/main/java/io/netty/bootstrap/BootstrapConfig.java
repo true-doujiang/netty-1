@@ -25,6 +25,10 @@ import java.net.SocketAddress;
  */
 public final class BootstrapConfig extends AbstractBootstrapConfig<Bootstrap, Channel> {
 
+
+    /**
+     * 构造器
+     */
     BootstrapConfig(Bootstrap bootstrap) {
         super(bootstrap);
     }

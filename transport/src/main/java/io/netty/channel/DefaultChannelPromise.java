@@ -33,10 +33,8 @@ public class DefaultChannelPromise extends DefaultPromise<Void> implements Chann
     private long checkpoint;
 
     /**
-     * Creates a new instance.
-     *
-     * @param channel
-     *        the {@link Channel} associated with this future
+     * 构造器 Creates a new instance.
+     * @param channel  the {@link Channel} associated with this future
      */
     public DefaultChannelPromise(Channel channel) {
         this.channel = checkNotNull(channel, "channel");
@@ -45,8 +43,7 @@ public class DefaultChannelPromise extends DefaultPromise<Void> implements Chann
     /**
      * Creates a new instance.
      *
-     * @param channel
-     *        the {@link Channel} associated with this future
+     * @param channel  the {@link Channel} associated with this future
      */
     public DefaultChannelPromise(Channel channel, EventExecutor executor) {
         super(executor);

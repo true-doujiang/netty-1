@@ -28,6 +28,8 @@ import java.util.Map;
 
 /**
  * Exposes the configuration of an {@link AbstractBootstrap}.
+ *
+ * 抽象类： 2个子类：BootstrapConfig、ServerBootstrapConfig
  */
 public abstract class AbstractBootstrapConfig<B extends AbstractBootstrap<B, C>, C extends Channel> {
 
@@ -36,6 +38,10 @@ public abstract class AbstractBootstrapConfig<B extends AbstractBootstrap<B, C>,
      */
     protected final B bootstrap;
 
+
+    /**
+     * 构造器
+     */
     protected AbstractBootstrapConfig(B bootstrap) {
         this.bootstrap = ObjectUtil.checkNotNull(bootstrap, "bootstrap");
     }

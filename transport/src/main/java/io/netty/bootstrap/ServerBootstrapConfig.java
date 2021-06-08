@@ -29,6 +29,9 @@ import java.util.Map;
  */
 public final class ServerBootstrapConfig extends AbstractBootstrapConfig<ServerBootstrap, ServerChannel> {
 
+    /**
+     * 构造器
+     */
     ServerBootstrapConfig(ServerBootstrap bootstrap) {
         super(bootstrap);
     }

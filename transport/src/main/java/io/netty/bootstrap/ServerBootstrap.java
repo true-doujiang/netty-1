@@ -48,12 +48,13 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
     private final Map<ChannelOption<?>, Object> childOptions = new LinkedHashMap<ChannelOption<?>, Object>();
     private final Map<AttributeKey<?>, Object> childAttrs = new LinkedHashMap<AttributeKey<?>, Object>();
 
-    // 客户端相同
+    // 客户端相同,有个配置类
     private final ServerBootstrapConfig config = new ServerBootstrapConfig(this);
 
     // workerGroup 负责IO 读写
     private volatile EventLoopGroup childGroup;
-    // 用户代码中 childHandler(xx) 设置的
+
+    // 用户代码中 childHandler(xx) 设置的,  只有服务端才有这个handler
     private volatile ChannelHandler childHandler;
 
 
@@ -138,6 +139,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
 
     /**
      * Set the {@link ChannelHandler} which is used to serve the request for the {@link Channel}'s.
+     *
      */
     public ServerBootstrap childHandler(ChannelHandler childHandler) {
         if (childHandler == null) {
