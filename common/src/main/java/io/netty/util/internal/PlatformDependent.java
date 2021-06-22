@@ -84,7 +84,9 @@ public final class PlatformDependent {
 
     //null
     private static final Throwable UNSAFE_UNAVAILABILITY_CAUSE = unsafeUnavailabilityCause0();
+    // true
     private static final boolean DIRECT_BUFFER_PREFERRED;
+    //
     private static final long MAX_DIRECT_MEMORY = maxDirectMemory0();
 
     private static final int MPSC_CHUNK_SIZE =  1024;

@@ -16,9 +16,10 @@ import java.util.Random;
 public class TestByteBuf {
 
 
+    //
+    private static final ByteBuf BYTE_BUF_FROM_SOMEWHERE = Unpooled.buffer(1024);
 
     private final static Random random = new Random();
-    private static final ByteBuf BYTE_BUF_FROM_SOMEWHERE = Unpooled.buffer(1024);
     private static final Channel CHANNEL_FROM_SOMEWHERE = new NioSocketChannel();
 //    private static final ChannelHandlerContext CHANNEL_HANDLER_CONTEXT_FROM_SOMEWHERE = DUMMY_INSTANCE;
 

@@ -152,6 +152,8 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
         metric.heapCounter.add(-amount);
     }
 
+
+
     /**
      * 以下都为内部实现类
      */
@@ -289,6 +291,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
     }
 
     /**
+     * 构造器
      * 6.
      */
     private static final class UnpooledByteBufAllocatorMetric implements ByteBufAllocatorMetric {

@@ -55,6 +55,7 @@ final class PlatformDependent0 {
     private static final boolean IS_ANDROID = isAndroid0();
 
     private static final Throwable UNSAFE_UNAVAILABILITY_CAUSE;
+    //
     private static final Object INTERNAL_UNSAFE;
     private static final boolean IS_EXPLICIT_TRY_REFLECTION_SET_ACCESSIBLE = explicitTryReflectionSetAccessible0();
 
@@ -510,6 +511,7 @@ final class PlatformDependent0 {
     static boolean hasAllocateArrayMethod() {
         return ALLOCATE_ARRAY_METHOD != null;
     }
+
 
     static byte[] allocateUninitializedArray(int size) {
         try {

@@ -27,9 +27,14 @@ public final class PooledByteBufAllocatorMetric implements ByteBufAllocatorMetri
 
     private final PooledByteBufAllocator allocator;
 
+    /**
+     * 构造器
+     */
     PooledByteBufAllocatorMetric(PooledByteBufAllocator allocator) {
         this.allocator = allocator;
     }
+
+
 
     /**
      * Return the number of heap arenas.

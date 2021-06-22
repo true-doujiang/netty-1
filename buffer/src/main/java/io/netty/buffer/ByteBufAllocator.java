@@ -23,6 +23,7 @@ package io.netty.buffer;
  */
 public interface ByteBufAllocator {
 
+    //
     ByteBufAllocator DEFAULT = ByteBufUtil.DEFAULT_ALLOCATOR;
 
     /**

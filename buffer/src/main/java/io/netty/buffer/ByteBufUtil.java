@@ -55,24 +55,35 @@ public final class ByteBufUtil {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ByteBufUtil.class);
 
+    //
     private static final FastThreadLocal<byte[]> BYTE_ARRAYS = new FastThreadLocal<byte[]>() {
         @Override
         protected byte[] initialValue() throws Exception {
-            return PlatformDependent.allocateUninitializedArray(MAX_TL_ARRAY_LEN);
+            byte[] bytes = PlatformDependent.allocateUninitializedArray(MAX_TL_ARRAY_LEN);
+            logger.info("FastThreadLocal 初始化 BYTE_ARRAYS: {}", bytes);
+            return bytes;
         }
     };
 
+    // 63
     private static final byte WRITE_UTF_UNKNOWN = (byte) '?';
+    // 16384
     private static final int MAX_CHAR_BUFFER_SIZE;
+    // 0
     private static final int THREAD_LOCAL_BUFFER_SIZE;
+    // 3
     private static final int MAX_BYTES_PER_CHAR_UTF8 = (int) CharsetUtil.encoder(CharsetUtil.UTF_8).maxBytesPerChar();
 
+    //
     static final int WRITE_CHUNK_SIZE = 8192;
-    // 静态static 根据实际情况初始化
+
+    // 静态static 根据实际情况初始化 ByteBufAllocator接口中引用改属性
     static final ByteBufAllocator DEFAULT_ALLOCATOR;
+
 
     static {
 
+        // android默认用unpooled
         String allocType = SystemPropertyUtil.get(
                 "io.netty.allocator.type", PlatformDependent.isAndroid() ? "unpooled" : "pooled");
         allocType = allocType.toLowerCase(Locale.US).trim();
@@ -92,12 +103,15 @@ public final class ByteBufUtil {
         System.out.println(Thread.currentThread().getName() + " ByteBufUtil 根据实际情况初始化: " + alloc);
         DEFAULT_ALLOCATOR = alloc;
 
+        // 0
         THREAD_LOCAL_BUFFER_SIZE = SystemPropertyUtil.getInt("io.netty.threadLocalDirectBufferSize", 0);
         logger.debug("-Dio.netty.threadLocalDirectBufferSize: {}", THREAD_LOCAL_BUFFER_SIZE);
 
+        // 16384
         MAX_CHAR_BUFFER_SIZE = SystemPropertyUtil.getInt("io.netty.maxThreadLocalCharBufferSize", 16 * 1024);
         logger.debug("-Dio.netty.maxThreadLocalCharBufferSize: {}", MAX_CHAR_BUFFER_SIZE);
     }
+
 
     static final int MAX_TL_ARRAY_LEN = 1024;
 

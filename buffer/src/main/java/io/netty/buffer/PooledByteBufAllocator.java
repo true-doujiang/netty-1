@@ -39,6 +39,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PooledByteBufAllocator.class);
 
+
     // 在static{} 代码块中初始化的   8  nHeapArena  cup核心数2倍，每个线程取一个 heapArena
     private static final int DEFAULT_NUM_HEAP_ARENA;
     // 在static{} 代码块中初始化的   8   nDirectArena  cup核心数2倍，每个线程取一个 directArena
@@ -68,6 +69,9 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     private static final int MIN_PAGE_SIZE = 4096;
     private static final int MAX_CHUNK_SIZE = (int) (((long) Integer.MAX_VALUE + 1) / 2);
 
+    /**
+     * 静态代码块 开始
+     */
     static {
         int defaultPageSize = SystemPropertyUtil.getInt("io.netty.allocator.pageSize", 8192);
         Throwable pageSizeFallbackCause = null;
@@ -152,8 +156,11 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             logger.debug("-Dio.netty.allocator.maxCachedByteBuffersPerChunk: {}", DEFAULT_MAX_CACHED_BYTEBUFFERS_PER_CHUNK);
         }
     }
+    //------ 静态代码块 结束 -----
 
-    //
+
+
+    //true
     public static final PooledByteBufAllocator DEFAULT = new PooledByteBufAllocator(PlatformDependent.directBufferPreferred());
 
     /**
@@ -183,10 +190,18 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
 
 
+
+    /**
+     * 默认构造器
+     */
     public PooledByteBufAllocator() {
         this(false);
     }
 
+
+    /**
+     * 构造器  上面静态常量引用
+     */
     @SuppressWarnings("deprecation")
     public PooledByteBufAllocator(boolean preferDirect) {
         this(preferDirect, DEFAULT_NUM_HEAP_ARENA, DEFAULT_NUM_DIRECT_ARENA, DEFAULT_PAGE_SIZE, DEFAULT_MAX_ORDER);
@@ -290,6 +305,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         // metric 只是简单的包装一层this
         metric = new PooledByteBufAllocatorMetric(this);
     }
+
 
     @SuppressWarnings("unchecked")
     private static <T> PoolArena<T>[] newArenaArray(int size) {
