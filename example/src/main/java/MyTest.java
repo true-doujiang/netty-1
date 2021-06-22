@@ -20,15 +20,25 @@ public class MyTest {
 
         ByteBuffer newInstanceBuffer = (ByteBuffer) constructor.newInstance(address, 10);
         System.out.println("newInstanceBuffer = " + newInstanceBuffer);
-        newInstanceBuffer.put((byte) 100);
+        newInstanceBuffer.put((byte) 90);
         System.out.println("newInstanceBuffer = " + newInstanceBuffer);
+
+        newInstanceBuffer.put((byte) 55);
+        System.out.println("newInstanceBuffer = " + newInstanceBuffer);
+
+        newInstanceBuffer.put((byte) 66);
+        System.out.println("newInstanceBuffer = " + newInstanceBuffer);
+
 
         byte aByte = UNSAFE.getByte(address);
         System.out.println("aByte = " + aByte);
-
-
-
-        byte aByte2 = UNSAFE.getByte(address + 11);
+        byte aByte2 = UNSAFE.getByte(address + 1);
         System.out.println("aByte2 = " + aByte2);
+        byte aByte3 = UNSAFE.getByte(address + 2);
+        System.out.println("aByte3 = " + aByte3);
+
+
+        byte aByte4 = UNSAFE.getByte(address + 3);
+        System.out.println("aByte4 = " + aByte4);
     }
 }
