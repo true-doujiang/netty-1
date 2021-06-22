@@ -22,7 +22,7 @@ public class MyTest {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException, TimeoutException {
 
-//        MyTest myTest = new MyTest();
+//        ZMyTest myTest = new ZMyTest();
 //        myTest.test();
 //        myTest.test();
 //        myTest.test();
