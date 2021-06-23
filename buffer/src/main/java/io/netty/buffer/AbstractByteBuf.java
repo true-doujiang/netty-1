@@ -53,8 +53,6 @@ public abstract class AbstractByteBuf extends ByteBuf {
     public String myName;
 
 
-
-
     private static final String LEGACY_PROP_CHECK_ACCESSIBLE = "io.netty.buffer.bytebuf.checkAccessible";
     private static final String PROP_CHECK_ACCESSIBLE = "io.netty.buffer.checkAccessible";
     static final boolean checkAccessible; // accessed from CompositeByteBuf
@@ -83,7 +81,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
     private int markedReaderIndex;
     private int markedWriterIndex;
 
-    // 最大容量
+    // 最大容量放在我这一层
     private int maxCapacity;
 
 
@@ -94,6 +92,9 @@ public abstract class AbstractByteBuf extends ByteBuf {
         checkPositiveOrZero(maxCapacity, "maxCapacity");
         this.maxCapacity = maxCapacity;
     }
+
+
+
 
     @Override
     public boolean isReadOnly() {
@@ -365,9 +366,8 @@ public abstract class AbstractByteBuf extends ByteBuf {
     }
 
     /**
-     *
-     * @param index
-     * @return
+     * 下划线 开头抽象方法，有具体子类实现
+     *       例如 UnpooledUnsafeDirectByteBuf、UnpooledHeapByteBuf.....
      */
     protected abstract byte _getByte(int index);
 
@@ -387,10 +387,10 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return _getShort(index);
     }
 
+
     /**
-     *
-     * @param index
-     * @return
+     * 下划线 开头抽象方法，有具体子类实现
+     *       例如 UnpooledUnsafeDirectByteBuf、UnpooledHeapByteBuf.....
      */
     protected abstract short _getShort(int index);
 
@@ -400,10 +400,10 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return _getShortLE(index);
     }
 
+
     /**
-     *
-     * @param index
-     * @return
+     * 下划线 开头抽象方法，有具体子类实现
+     *       例如 UnpooledUnsafeDirectByteBuf、UnpooledHeapByteBuf.....
      */
     protected abstract short _getShortLE(int index);
 
@@ -467,10 +467,10 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return _getInt(index);
     }
 
+
     /**
-     *
-     * @param index
-     * @return
+     * 下划线 开头抽象方法，有具体子类实现
+     *       例如 UnpooledUnsafeDirectByteBuf、UnpooledHeapByteBuf.....
      */
     protected abstract int _getInt(int index);
 
@@ -503,10 +503,10 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return _getLong(index);
     }
 
+
     /**
-     *
-     * @param index
-     * @return
+     * 下划线 开头抽象方法，有具体子类实现
+     *       例如 UnpooledUnsafeDirectByteBuf、UnpooledHeapByteBuf.....
      */
     protected abstract long _getLong(int index);
 
@@ -580,10 +580,10 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return this;
     }
 
+
     /**
-     *
-     * @param index
-     * @param value
+     * 下划线 开头抽象方法，有具体子类实现
+     *       例如 UnpooledUnsafeDirectByteBuf、UnpooledHeapByteBuf.....
      */
     protected abstract void _setByte(int index, int value);
 
@@ -614,10 +614,10 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return this;
     }
 
+
     /**
-     *
-     * @param index
-     * @param value
+     * 下划线 开头抽象方法，有具体子类实现
+     *       例如 UnpooledUnsafeDirectByteBuf、UnpooledHeapByteBuf.....
      */
     protected abstract void _setShortLE(int index, int value);
 
@@ -634,10 +634,10 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return this;
     }
 
+
     /**
-     *
-     * @param index
-     * @param value
+     * 下划线 开头抽象方法，有具体子类实现
+     *       例如 UnpooledUnsafeDirectByteBuf、UnpooledHeapByteBuf.....
      */
     protected abstract void _setMedium(int index, int value);
 
@@ -648,10 +648,10 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return this;
     }
 
+
     /**
-     *
-     * @param index
-     * @param value
+     * 下划线 开头抽象方法，有具体子类实现
+     *       例如 UnpooledUnsafeDirectByteBuf、UnpooledHeapByteBuf.....
      */
     protected abstract void _setMediumLE(int index, int value);
 
@@ -662,10 +662,10 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return this;
     }
 
+
     /**
-     *
-     * @param index
-     * @param value
+     * 下划线 开头抽象方法，有具体子类实现
+     *       例如 UnpooledUnsafeDirectByteBuf、UnpooledHeapByteBuf.....
      */
     protected abstract void _setInt(int index, int value);
 
@@ -676,10 +676,10 @@ public abstract class AbstractByteBuf extends ByteBuf {
         return this;
     }
 
+
     /**
-     *
-     * @param index
-     * @param value
+     * 下划线 开头抽象方法，有具体子类实现
+     *       例如 UnpooledUnsafeDirectByteBuf、UnpooledHeapByteBuf.....
      */
     protected abstract void _setIntLE(int index, int value);
 

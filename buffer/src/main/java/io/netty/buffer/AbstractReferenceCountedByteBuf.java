@@ -63,6 +63,8 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
         super(maxCapacity);
     }
 
+
+
     private int nonVolatileRawCnt() {
         // TODO: Once we compile against later versions of Java we can replace the Unsafe usage here by varhandles.
         return REFCNT_FIELD_OFFSET != -1 ? PlatformDependent.getInt(this, REFCNT_FIELD_OFFSET) : refCntUpdater.get(this);

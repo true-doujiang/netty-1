@@ -70,6 +70,10 @@ import java.util.Arrays;
  */
 public final class Unpooled {
 
+    //可以理解为一个工具类 ，  直接用 UnpooledByteBufAllocator.DEFAULT 也可以
+
+
+
     //
     private static final ByteBufAllocator ALLOC = UnpooledByteBufAllocator.DEFAULT;
 
@@ -88,6 +92,7 @@ public final class Unpooled {
      */
     public static final ByteBuf EMPTY_BUFFER = ALLOC.buffer(0, 0);
 
+    // 静态代码块
     static {
         assert EMPTY_BUFFER instanceof EmptyByteBuf: "EMPTY_BUFFER must be an EmptyByteBuf.";
     }

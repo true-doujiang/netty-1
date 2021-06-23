@@ -32,8 +32,12 @@ import static io.netty.util.internal.PlatformDependent.BIG_ENDIAN_NATIVE_ORDER;
  * All operations get and set as {@link ByteOrder#BIG_ENDIAN}.
  */
 final class UnsafeByteBufUtil {
+
+
     private static final boolean UNALIGNED = PlatformDependent.isUnaligned();
     private static final byte ZERO = 0;
+
+
 
     static byte getByte(long address) {
         return PlatformDependent.getByte(address);
@@ -324,6 +328,12 @@ final class UnsafeByteBufUtil {
                ((long) PlatformDependent.getByte(array,  index + 7)) << 56;
     }
 
+    /**
+     *
+     * @param array 内存数组
+     * @param index 内存数组的索引
+     * @param value 要放的数据
+     */
     static void setByte(byte[] array, int index, int value) {
         PlatformDependent.putByte(array, index, (byte) value);
     }

@@ -31,6 +31,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
     // 最下面内部类
     private final UnpooledByteBufAllocatorMetric metric = new UnpooledByteBufAllocatorMetric();
     private final boolean disableLeakDetector;
+    // true
     private final boolean noCleaner;
 
     // Default instance which uses leak-detection for direct buffers.

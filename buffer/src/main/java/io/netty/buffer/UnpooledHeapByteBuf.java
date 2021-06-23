@@ -39,10 +39,12 @@ import static io.netty.util.internal.ObjectUtil.checkNotNull;
  */
 public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
 
-    //
+    // 保存内存分配器的引用
     private final ByteBufAllocator alloc;
+
     // 内存是 byte数组
     byte[] array;
+    // jdk buffer
     private ByteBuffer tmpNioBuf;
 
 
@@ -64,6 +66,7 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
         }
 
         this.alloc = alloc;
+        // 调用protected 方法初始化内存块
         byte[] bytes = allocateArray(initialCapacity);
         setArray(bytes);
         setIndex(0, 0);

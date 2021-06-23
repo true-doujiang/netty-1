@@ -56,6 +56,8 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
      *
      * @param initialCapacity the initial capacity of the underlying direct buffer
      * @param maxCapacity     the maximum capacity of the underlying direct buffer
+     *
+     * 构造器
      */
     public UnpooledUnsafeDirectByteBuf(ByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
         super(maxCapacity);
@@ -69,6 +71,7 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
         }
 
         this.alloc = alloc;
+        // 调用protected 方法初始化内存块
         ByteBuffer byteBuffer = allocateDirect(initialCapacity);
         setByteBuffer(byteBuffer, false);
     }
@@ -122,6 +125,7 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
 
     /**
      * Allocate a new direct {@link ByteBuffer} with the given initialCapacity.
+     * 构造器中调用  子类重写
      */
     protected ByteBuffer allocateDirect(int initialCapacity) {
         return ByteBuffer.allocateDirect(initialCapacity);
@@ -135,7 +139,7 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
     }
 
     /**
-     *
+     * 算出buffer内存地址
      */
     final void setByteBuffer(ByteBuffer buffer, boolean tryFree) {
         if (tryFree) {
@@ -241,12 +245,14 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
      */
     @Override
     protected byte _getByte(int index) {
-        return UnsafeByteBufUtil.getByte(addr(index));
+        long addr = addr(index);
+        return UnsafeByteBufUtil.getByte(addr);
     }
 
     @Override
     protected short _getShort(int index) {
-        return UnsafeByteBufUtil.getShort(addr(index));
+        long addr = addr(index);
+        return UnsafeByteBufUtil.getShort(addr);
     }
 
     @Override
@@ -266,7 +272,8 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
 
     @Override
     protected int _getInt(int index) {
-        return UnsafeByteBufUtil.getInt(addr(index));
+        long addr = addr(index);
+        return UnsafeByteBufUtil.getInt(addr);
     }
 
     @Override
@@ -276,7 +283,8 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
 
     @Override
     protected long _getLong(int index) {
-        return UnsafeByteBufUtil.getLong(addr(index));
+        long addr = addr(index);
+        return UnsafeByteBufUtil.getLong(addr);
     }
 
     @Override
@@ -313,17 +321,20 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
 
     @Override
     protected void _setByte(int index, int value) {
-        UnsafeByteBufUtil.setByte(addr(index), value);
+        long addr = addr(index);
+        UnsafeByteBufUtil.setByte(addr, value);
     }
 
     @Override
     protected void _setShort(int index, int value) {
-        UnsafeByteBufUtil.setShort(addr(index), value);
+        long addr = addr(index);
+        UnsafeByteBufUtil.setShort(addr, value);
     }
 
     @Override
     protected void _setShortLE(int index, int value) {
-        UnsafeByteBufUtil.setShortLE(addr(index), value);
+        long addr = addr(index);
+        UnsafeByteBufUtil.setShortLE(addr, value);
     }
 
     @Override
@@ -338,7 +349,8 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
 
     @Override
     protected void _setInt(int index, int value) {
-        UnsafeByteBufUtil.setInt(addr(index), value);
+        long addr = addr(index);
+        UnsafeByteBufUtil.setInt(addr, value);
     }
 
     @Override
@@ -348,7 +360,8 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
 
     @Override
     protected void _setLong(int index, long value) {
-        UnsafeByteBufUtil.setLong(addr(index), value);
+        long addr = addr(index);
+        UnsafeByteBufUtil.setLong(addr, value);
     }
 
     @Override
@@ -516,6 +529,9 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
         return null;
     }
 
+    /**
+     * 内存地址 + 索引位置
+     */
     long addr(int index) {
         return memoryAddress + index;
     }

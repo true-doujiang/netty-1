@@ -566,6 +566,9 @@ final class PlatformDependent0 {
         return UNSAFE.objectFieldOffset(field);
     }
 
+
+
+    // ------------------directBuffer get start  基于directBuffer的内存地址 ---------------
     static byte getByte(long address) {
         return UNSAFE.getByte(address);
     }
@@ -581,7 +584,11 @@ final class PlatformDependent0 {
     static long getLong(long address) {
         return UNSAFE.getLong(address);
     }
+    // ------------------directBuffer get end-------------------------
 
+
+
+    // ------------------byte[] get start  基于数组的偏移地址 ---------------
     static byte getByte(byte[] data, int index) {
         return UNSAFE.getByte(data, BYTE_ARRAY_BASE_OFFSET + index);
     }
@@ -597,7 +604,11 @@ final class PlatformDependent0 {
     static long getLong(byte[] data, int index) {
         return UNSAFE.getLong(data, BYTE_ARRAY_BASE_OFFSET + index);
     }
+    // ------------------byte[] get end-------------------------
 
+
+
+    // ------------------directBuffer put start  基于directBuffer的内存地址 ---------------
     static void putByte(long address, byte value) {
         UNSAFE.putByte(address, value);
     }
@@ -613,7 +624,11 @@ final class PlatformDependent0 {
     static void putLong(long address, long value) {
         UNSAFE.putLong(address, value);
     }
+    // ------------------directBuffer put end-------------------------
 
+
+
+    // -------------------byte[] put start   基于数组的偏移地址 ------------------------
     static void putByte(byte[] data, int index, byte value) {
         UNSAFE.putByte(data, BYTE_ARRAY_BASE_OFFSET + index, value);
     }
@@ -629,6 +644,8 @@ final class PlatformDependent0 {
     static void putLong(byte[] data, int index, long value) {
         UNSAFE.putLong(data, BYTE_ARRAY_BASE_OFFSET + index, value);
     }
+    // -------------------byte[] put end------------------------
+
 
     static void putObject(Object o, long offset, Object x) {
         UNSAFE.putObject(o, offset, x);

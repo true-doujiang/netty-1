@@ -102,11 +102,13 @@ public final class PlatformDependent {
     private static final String NORMALIZED_OS = normalizeOs(SystemPropertyUtil.get("os.name", ""));
 
     private static final int ADDRESS_SIZE = addressSize0();
+    // true
     private static final boolean USE_DIRECT_BUFFER_NO_CLEANER;
     private static final AtomicLong DIRECT_MEMORY_COUNTER;
     private static final long DIRECT_MEMORY_LIMIT;
     private static final ThreadLocalRandomProvider RANDOM_PROVIDER;
     private static final Cleaner CLEANER;
+    //
     private static final int UNINITIALIZED_ARRAY_ALLOCATION_THRESHOLD;
 
     public static final boolean BIG_ENDIAN_NATIVE_ORDER = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN;
@@ -121,6 +123,7 @@ public final class PlatformDependent {
     // -----------static start-----------
     static {
         if (javaVersion() >= 7) {
+            // 内部接口
             RANDOM_PROVIDER = new ThreadLocalRandomProvider() {
                 @Override
                 public Random current() {
@@ -128,6 +131,7 @@ public final class PlatformDependent {
                 }
             };
         } else {
+            // 内部接口
             RANDOM_PROVIDER = new ThreadLocalRandomProvider() {
                 @Override
                 public Random current() {
@@ -212,6 +216,9 @@ public final class PlatformDependent {
         return PlatformDependent0.hasDirectBufferNoCleanerConstructor();
     }
 
+    /**
+     *
+     */
     public static byte[] allocateUninitializedArray(int size) {
         return UNINITIALIZED_ARRAY_ALLOCATION_THRESHOLD < 0 || UNINITIALIZED_ARRAY_ALLOCATION_THRESHOLD > size ?
                 new byte[size] : PlatformDependent0.allocateUninitializedArray(size);
@@ -804,12 +811,13 @@ public final class PlatformDependent {
     }
 
     /**
-     *
+     * 内部类
      */
     private static final class Mpsc {
 
         private static final boolean USE_MPSC_CHUNKED_ARRAY_QUEUE;
 
+        // 构造器
         private Mpsc() {
         }
 
@@ -851,6 +859,8 @@ public final class PlatformDependent {
                                                 : new MpscUnboundedAtomicArrayQueue<T>(MPSC_CHUNK_SIZE);
         }
     }
+    // ---------------内部类 结束------------------------
+
 
     /**
      * Create a new {@link Queue} which is safe to use for multiple producers (different threads) and a single
@@ -1345,7 +1355,7 @@ public final class PlatformDependent {
     }
 
     /**
-     *
+     * 内部类
      */
     private static final class AtomicLongCounter extends AtomicLong implements LongCounter {
 
@@ -1372,10 +1382,12 @@ public final class PlatformDependent {
         }
     }
 
+    // 内部接口
     private interface ThreadLocalRandomProvider {
         Random current();
     }
 
+    // 私有化构造器
     private PlatformDependent() {
         // only static method supported
     }

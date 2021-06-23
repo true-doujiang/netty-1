@@ -5,6 +5,7 @@ import io.netty.buffer.UnpooledByteBufAllocator;
 
 public class TestUnPooledByteBufAllocator {
 
+    static UnpooledByteBufAllocator alloc = UnpooledByteBufAllocator.DEFAULT;
 
     public static void main(String[] args) {
         //f1();
@@ -12,7 +13,6 @@ public class TestUnPooledByteBufAllocator {
     }
 
     public static void f1() {
-        UnpooledByteBufAllocator alloc = UnpooledByteBufAllocator.DEFAULT;
         ByteBuf byteBuf = alloc.heapBuffer(254);
         byteBuf.writeByte(100);
 
@@ -23,11 +23,12 @@ public class TestUnPooledByteBufAllocator {
     }
 
     public static void f2() {
-        UnpooledByteBufAllocator alloc = UnpooledByteBufAllocator.DEFAULT;
 //        ByteBuf byteBuf1 = alloc.heapBuffer(0, 0);
 //        ByteBuf directBuffer = alloc.directBuffer(0, 0);
+//        // 都是 EmptyByteBuf
 //        System.out.println(byteBuf1 == directBuffer); //true
 
+        // InstrumentedUnpooledUnsafeNoCleanerDirectByteBuf
         ByteBuf byteBuf = alloc.directBuffer(254);
 
         /**byte 范围   -128  -   127

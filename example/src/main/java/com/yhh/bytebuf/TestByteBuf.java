@@ -20,12 +20,12 @@ public class TestByteBuf {
     private static final ByteBuf BYTE_BUF_FROM_SOMEWHERE = Unpooled.buffer(1024);
 
     private final static Random random = new Random();
-    private static final Channel CHANNEL_FROM_SOMEWHERE = new NioSocketChannel();
+//    private static final Channel CHANNEL_FROM_SOMEWHERE = new NioSocketChannel();
 //    private static final ChannelHandlerContext CHANNEL_HANDLER_CONTEXT_FROM_SOMEWHERE = DUMMY_INSTANCE;
 
     public static void main(String[] args) {
         heapBuffer();
-//        directBuffer();
+        directBuffer();
 
 //        byte[] b1 = {1, 2, 3};
 //        byte[] b2 = {9, 8, 7, 6};
@@ -283,31 +283,31 @@ public class TestByteBuf {
     /**
      * 代码清单 5-14 获取一个到 ByteBufAllocator 的引用
      */
-    public static void obtainingByteBufAllocatorReference(){
-        Channel channel = CHANNEL_FROM_SOMEWHERE; //get reference form somewhere
-        //从 Channel 获取一个到ByteBufAllocator 的引用
-        ByteBufAllocator allocator = channel.alloc();
-        //...
-//        ChannelHandlerContext ctx = CHANNEL_HANDLER_CONTEXT_FROM_SOMEWHERE; //get reference form somewhere
-        //从 ChannelHandlerContext 获取一个到 ByteBufAllocator 的引用
-//        ByteBufAllocator allocator2 = ctx.alloc();
-        //...
-    }
+//    public static void obtainingByteBufAllocatorReference(){
+//        Channel channel = CHANNEL_FROM_SOMEWHERE; //get reference form somewhere
+//        //从 Channel 获取一个到ByteBufAllocator 的引用
+//        ByteBufAllocator allocator = channel.alloc();
+//        //...
+////        ChannelHandlerContext ctx = CHANNEL_HANDLER_CONTEXT_FROM_SOMEWHERE; //get reference form somewhere
+//        //从 ChannelHandlerContext 获取一个到 ByteBufAllocator 的引用
+////        ByteBufAllocator allocator2 = ctx.alloc();
+//        //...
+//    }
 
     /**
      * 代码清单 5-15 引用计数
      * */
-    public static void referenceCounting(){
-        Channel channel = CHANNEL_FROM_SOMEWHERE; //get reference form somewhere
-        //从 Channel 获取ByteBufAllocator
-        ByteBufAllocator allocator = channel.alloc();
-        //...
-        //从 ByteBufAllocator分配一个 ByteBuf
-        ByteBuf buffer = allocator.directBuffer();
-        //检查引用计数是否为预期的 1
-        assert buffer.refCnt() == 1;
-        //...
-    }
+//    public static void referenceCounting(){
+//        Channel channel = CHANNEL_FROM_SOMEWHERE; //get reference form somewhere
+//        //从 Channel 获取ByteBufAllocator
+//        ByteBufAllocator allocator = channel.alloc();
+//        //...
+//        //从 ByteBufAllocator分配一个 ByteBuf
+//        ByteBuf buffer = allocator.directBuffer();
+//        //检查引用计数是否为预期的 1
+//        assert buffer.refCnt() == 1;
+//        //...
+//    }
 
     /**
      * 代码清单 5-16 释放引用计数的对象
