@@ -50,6 +50,7 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
     // buffer的内存地址
     long memoryAddress;
 
+
     /**
      * Creates a new direct buffer.
      *
@@ -117,6 +118,8 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
         writerIndex(initialCapacity);
     }
 
+
+
     /**
      * Allocate a new direct {@link ByteBuffer} with the given initialCapacity.
      */
@@ -133,8 +136,6 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
 
     /**
      *
-     * @param buffer
-     * @param tryFree
      */
     final void setByteBuffer(ByteBuffer buffer, boolean tryFree) {
         if (tryFree) {
@@ -237,8 +238,6 @@ public class UnpooledUnsafeDirectByteBuf extends AbstractReferenceCountedByteBuf
 
     /**
      *
-     * @param index
-     * @return
      */
     @Override
     protected byte _getByte(int index) {

@@ -24,7 +24,7 @@ public class TestByteBuf {
 //    private static final ChannelHandlerContext CHANNEL_HANDLER_CONTEXT_FROM_SOMEWHERE = DUMMY_INSTANCE;
 
     public static void main(String[] args) {
-//        heapBuffer();
+        heapBuffer();
 //        directBuffer();
 
 //        byte[] b1 = {1, 2, 3};

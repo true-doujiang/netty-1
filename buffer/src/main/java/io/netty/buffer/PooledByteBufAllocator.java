@@ -73,6 +73,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
      * 静态代码块 开始
      */
     static {
+        // 8192
         int defaultPageSize = SystemPropertyUtil.getInt("io.netty.allocator.pageSize", 8192);
         Throwable pageSizeFallbackCause = null;
         try {
@@ -81,6 +82,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             pageSizeFallbackCause = t;
             defaultPageSize = 8192;
         }
+        // 8192
         DEFAULT_PAGE_SIZE = defaultPageSize;
 
         int defaultMaxOrder = SystemPropertyUtil.getInt("io.netty.allocator.maxOrder", 11);
@@ -91,6 +93,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             maxOrderFallbackCause = t;
             defaultMaxOrder = 11;
         }
+        // 11
         DEFAULT_MAX_ORDER = defaultMaxOrder;
 
         // Determine reasonable default for nHeapArena and nDirectArena.

@@ -41,16 +41,18 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
 
     //
     private final ByteBufAllocator alloc;
-
     // 内存是 byte数组
     byte[] array;
     private ByteBuffer tmpNioBuf;
+
 
     /**
      * Creates a new heap buffer with a newly allocated byte array.
      *
      * @param initialCapacity the initial capacity of the underlying byte array
      * @param maxCapacity the max capacity of the underlying byte array
+     *
+     *  构造器
      */
     public UnpooledHeapByteBuf(ByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
         super(maxCapacity);
@@ -72,6 +74,8 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
      *
      * @param initialArray the initial underlying byte array
      * @param maxCapacity the max capacity of the underlying byte array
+     *
+     *  构造器
      */
     protected UnpooledHeapByteBuf(ByteBufAllocator alloc, byte[] initialArray, int maxCapacity) {
         super(maxCapacity);
@@ -88,6 +92,9 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
         setIndex(0, initialArray.length);
     }
 
+
+
+    //
     protected byte[] allocateArray(int initialCapacity) {
         return new byte[initialCapacity];
     }

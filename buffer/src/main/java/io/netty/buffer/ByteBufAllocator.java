@@ -25,6 +25,7 @@ public interface ByteBufAllocator {
 
     // 一个父接口并不会因为他的子接口或者实现类的初始化而初始化。
     // 只有当程序首次使用特定接口的静态变量时，才会导致该接口的初始化。
+    // 在哪里使用的  子类用到了吗
     ByteBufAllocator DEFAULT = ByteBufUtil.DEFAULT_ALLOCATOR;
 
     /**

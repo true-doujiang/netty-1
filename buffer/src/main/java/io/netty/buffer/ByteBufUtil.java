@@ -78,6 +78,7 @@ public final class ByteBufUtil {
     static final int WRITE_CHUNK_SIZE = 8192;
 
     // 静态static 根据实际情况初始化 ByteBufAllocator接口中引用改属性
+    // PooledByteBufAllocator.DEFAULT
     static final ByteBufAllocator DEFAULT_ALLOCATOR;
 
 

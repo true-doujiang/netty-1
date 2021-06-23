@@ -28,6 +28,8 @@ class UnpooledUnsafeHeapByteBuf extends UnpooledHeapByteBuf {
      *
      * @param initialCapacity the initial capacity of the underlying byte array
      * @param maxCapacity the max capacity of the underlying byte array
+     *
+     *  构造器
      */
     UnpooledUnsafeHeapByteBuf(ByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
         super(alloc, initialCapacity, maxCapacity);
@@ -44,8 +46,6 @@ class UnpooledUnsafeHeapByteBuf extends UnpooledHeapByteBuf {
 
     /**
      *
-     * @param index
-     * @return
      */
     @Override
     public byte getByte(int index) {
@@ -55,8 +55,6 @@ class UnpooledUnsafeHeapByteBuf extends UnpooledHeapByteBuf {
 
     /**
      * 数组肯定是在堆上分配的  但是是用Unsafe读写
-     * @param index
-     * @return
      */
     @Override
     protected byte _getByte(int index) {

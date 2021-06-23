@@ -28,7 +28,7 @@ import java.nio.ByteBuffer;
  */
 public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator implements ByteBufAllocatorMetricProvider {
 
-    //
+    // 最下面内部类
     private final UnpooledByteBufAllocatorMetric metric = new UnpooledByteBufAllocatorMetric();
     private final boolean disableLeakDetector;
     private final boolean noCleaner;
@@ -77,18 +77,19 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
     }
 
     /**
-     *
-     * @param initialCapacity
-     * @param maxCapacity
-     * @return
+     * 创建Unpooled 数组内存，里面再分safe 和 Unsafe
      */
     @Override
     protected ByteBuf newHeapBuffer(int initialCapacity, int maxCapacity) {
         boolean b = PlatformDependent.hasUnsafe();
         if (b) {
-            return new InstrumentedUnpooledUnsafeHeapByteBuf(this, initialCapacity, maxCapacity);
+            // 内部类
+            InstrumentedUnpooledUnsafeHeapByteBuf heapByteBuf = new InstrumentedUnpooledUnsafeHeapByteBuf(this, initialCapacity, maxCapacity);
+            return heapByteBuf;
         } else {
-            return new InstrumentedUnpooledHeapByteBuf(this, initialCapacity, maxCapacity);
+            // 内部类
+            InstrumentedUnpooledHeapByteBuf heapByteBuf = new InstrumentedUnpooledHeapByteBuf(this, initialCapacity, maxCapacity);
+            return heapByteBuf;
         }
 //        return PlatformDependent.hasUnsafe() ?
 //                new InstrumentedUnpooledUnsafeHeapByteBuf(this, initialCapacity, maxCapacity) :
@@ -96,23 +97,23 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
     }
 
     /**
-     *
-     * @param initialCapacity
-     * @param maxCapacity
-     * @return
+     * 创建Unpooled 堆外内存，里面再分safe 和 Unsafe
      */
     @Override
     protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity) {
         final ByteBuf buf;
         if (PlatformDependent.hasUnsafe()) {
+            // 内部类
             buf = noCleaner ? new InstrumentedUnpooledUnsafeNoCleanerDirectByteBuf(this, initialCapacity, maxCapacity) :
                     new InstrumentedUnpooledUnsafeDirectByteBuf(this, initialCapacity, maxCapacity);
         } else {
-            // safe
+            // 内部类  safe
             buf = new InstrumentedUnpooledDirectByteBuf(this, initialCapacity, maxCapacity);
         }
         return disableLeakDetector ? buf : toLeakAwareBuffer(buf);
     }
+
+
 
     @Override
     public CompositeByteBuf compositeHeapBuffer(int maxNumComponents) {
@@ -154,19 +155,23 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
 
 
 
-    /**
-     * 以下都为内部实现类
-     */
+
+
+
+    // ------------ 以下都为内部实现类-----------------
 
     /**
      * 1. Unsafe
+     * instrumented  感知化; 物联化; 透彻的感知; 仪器化; 工具性;
      */
     private static final class InstrumentedUnpooledUnsafeHeapByteBuf extends UnpooledUnsafeHeapByteBuf {
 
+        // 构造器
         InstrumentedUnpooledUnsafeHeapByteBuf(UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
             super(alloc, initialCapacity, maxCapacity);
         }
 
+        // UnpooledHeapByteBuf 中定义
         @Override
         protected byte[] allocateArray(int initialCapacity) {
             byte[] bytes = super.allocateArray(initialCapacity);
@@ -174,6 +179,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
             return bytes;
         }
 
+        // UnpooledHeapByteBuf 中定义
         @Override
         protected void freeArray(byte[] array) {
             int length = array.length;
@@ -183,14 +189,16 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
     }
 
     /**
-     * 2.
+     * 2. safe
      */
     private static final class InstrumentedUnpooledHeapByteBuf extends UnpooledHeapByteBuf {
 
+        // 构造器
         InstrumentedUnpooledHeapByteBuf(UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
             super(alloc, initialCapacity, maxCapacity);
         }
 
+        // UnpooledHeapByteBuf 中定义
         @Override
         protected byte[] allocateArray(int initialCapacity) {
             byte[] bytes = super.allocateArray(initialCapacity);
@@ -198,6 +206,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
             return bytes;
         }
 
+        // UnpooledHeapByteBuf 中定义
         @Override
         protected void freeArray(byte[] array) {
             int length = array.length;
@@ -213,6 +222,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
     private static final class InstrumentedUnpooledUnsafeNoCleanerDirectByteBuf
             extends UnpooledUnsafeNoCleanerDirectByteBuf {
 
+        // 构造器
         InstrumentedUnpooledUnsafeNoCleanerDirectByteBuf(
                 UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
             super(alloc, initialCapacity, maxCapacity);
@@ -246,6 +256,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
      */
     private static final class InstrumentedUnpooledUnsafeDirectByteBuf extends UnpooledUnsafeDirectByteBuf {
 
+        // 构造器
         InstrumentedUnpooledUnsafeDirectByteBuf(UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
             super(alloc, initialCapacity, maxCapacity);
         }
@@ -270,6 +281,7 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
      */
     private static final class InstrumentedUnpooledDirectByteBuf extends UnpooledDirectByteBuf {
 
+        // 构造器
         InstrumentedUnpooledDirectByteBuf(
                 UnpooledByteBufAllocator alloc, int initialCapacity, int maxCapacity) {
             super(alloc, initialCapacity, maxCapacity);
@@ -315,4 +327,6 @@ public final class UnpooledByteBufAllocator extends AbstractByteBufAllocator imp
                     "(usedHeapMemory: " + usedHeapMemory() + "; usedDirectMemory: " + usedDirectMemory() + ')';
         }
     }
+
+
 }

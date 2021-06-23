@@ -92,7 +92,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         return buf;
     }
 
-    //
+    // 是否支持 直接内存
     private final boolean directByDefault;
     // 如果要是要个 初始容量,最大容量都为0的buffer直接返回我就可以了
     private final ByteBuf emptyBuf;
@@ -116,11 +116,7 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         emptyBuf = new EmptyByteBuf(this);
     }
 
-    /**
-     * 最终会调用到 下面的俩个抽象方法上
-     *
-     * @return
-     */
+    // ----------------堆内存 3个buffer-----------
     @Override
     public ByteBuf buffer() {
         if (directByDefault) {
@@ -145,6 +141,8 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         return heapBuffer(initialCapacity, maxCapacity);
     }
 
+
+    // ----------------堆内存 3个ioBuffer-----------
     @Override
     public ByteBuf ioBuffer() {
         if (PlatformDependent.hasUnsafe()) {
@@ -169,14 +167,13 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
         return heapBuffer(initialCapacity, maxCapacity);
     }
 
+    // ----------------堆内存 3个--------------
     @Override
     public ByteBuf heapBuffer() {
         return heapBuffer(DEFAULT_INITIAL_CAPACITY, DEFAULT_MAX_CAPACITY);
     }
 
-    /**
-     *
-     */
+
     @Override
     public ByteBuf heapBuffer(int initialCapacity) {
         return heapBuffer(initialCapacity, DEFAULT_MAX_CAPACITY);
@@ -188,17 +185,17 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
             return emptyBuf;
         }
         validate(initialCapacity, maxCapacity);
+        // 调用抽象方法
         return newHeapBuffer(initialCapacity, maxCapacity);
     }
 
+    // ----------------直接内存 3个--------------
     @Override
     public ByteBuf directBuffer() {
         return directBuffer(DEFAULT_INITIAL_CAPACITY, DEFAULT_MAX_CAPACITY);
     }
 
-    /**
-     *
-     */
+
     @Override
     public ByteBuf directBuffer(int initialCapacity) {
         return directBuffer(initialCapacity, DEFAULT_MAX_CAPACITY);
@@ -210,8 +207,12 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
             return emptyBuf;
         }
         validate(initialCapacity, maxCapacity);
+        // 调用抽象方法
         return newDirectBuffer(initialCapacity, maxCapacity);
     }
+
+
+
 
     @Override
     public CompositeByteBuf compositeBuffer() {

@@ -48,6 +48,9 @@ final class PooledDirectByteBuf extends PooledByteBuf<ByteBuffer> {
         return buf;
     }
 
+    /**
+     * 构造器
+     */
     private PooledDirectByteBuf(Recycler.Handle<PooledDirectByteBuf> recyclerHandle, int maxCapacity) {
         super(recyclerHandle, maxCapacity);
     }

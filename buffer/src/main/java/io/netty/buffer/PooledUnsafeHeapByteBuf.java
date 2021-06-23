@@ -24,6 +24,7 @@ import io.netty.util.internal.PlatformDependent;
  */
 final class PooledUnsafeHeapByteBuf extends PooledHeapByteBuf {
 
+
     private static final Recycler<PooledUnsafeHeapByteBuf> RECYCLER = new Recycler<PooledUnsafeHeapByteBuf>() {
         @Override
         protected PooledUnsafeHeapByteBuf newObject(Handle<PooledUnsafeHeapByteBuf> handle) {
@@ -37,9 +38,15 @@ final class PooledUnsafeHeapByteBuf extends PooledHeapByteBuf {
         return buf;
     }
 
+
+    /**
+     * 构造器
+     */
     private PooledUnsafeHeapByteBuf(Handle<PooledUnsafeHeapByteBuf> recyclerHandle, int maxCapacity) {
         super(recyclerHandle, maxCapacity);
     }
+
+
 
     @Override
     protected byte _getByte(int index) {
