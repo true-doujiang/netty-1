@@ -47,7 +47,11 @@ public abstract class AbstractByteBufAllocator implements ByteBufAllocator {
     }
 
 
-
+    /**
+     *
+     * @param buf
+     * @return
+     */
     protected static ByteBuf toLeakAwareBuffer(ByteBuf buf) {
         ResourceLeakTracker<ByteBuf> leak;
         switch (ResourceLeakDetector.getLevel()) {

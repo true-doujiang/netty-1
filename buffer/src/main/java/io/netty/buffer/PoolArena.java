@@ -802,8 +802,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
 
     /**
-     *
-     *
+     * 内部类
      *
      * T: byte[]
      */
@@ -872,9 +871,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
 
     /**
-     *
-     *
-     *
+     * 内部类
      *
      * T: ByteBuffer
      */

@@ -272,13 +272,16 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         if ((directMemoryCacheAlignment & -directMemoryCacheAlignment) != directMemoryCacheAlignment) {
             throw new IllegalArgumentException("directMemoryCacheAlignment: " + directMemoryCacheAlignment + " (expected: power of two)");
         }
+
         // 2^13 = 8192
         int pageShifts = validateAndCalculatePageShifts(pageSize);
+
 
         if (nHeapArena > 0) {
             heapArenas = newArenaArray(nHeapArena);
             List<PoolArenaMetric> metrics = new ArrayList<PoolArenaMetric>(heapArenas.length);
             for (int i = 0; i < heapArenas.length; i ++) {
+                // 每个io线程一个 内部类
                 PoolArena.HeapArena arena = new PoolArena.HeapArena(this, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
                 heapArenas[i] = arena;
                 //System.out.println(Thread.currentThread().getName() + " 分配器创建PoolArena.HeapArena " + i + " = " + arena);
@@ -294,6 +297,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             directArenas = newArenaArray(nDirectArena);
             List<PoolArenaMetric> metrics = new ArrayList<PoolArenaMetric>(directArenas.length);
             for (int i = 0; i < directArenas.length; i ++) {
+                // 每个io线程一个 内部类
                 PoolArena.DirectArena arena = new PoolArena.DirectArena(this, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
                 directArenas[i] = arena;
                 //System.out.println(Thread.currentThread().getName() + " 分配器创建PoolArena.DirectArena " + i + " = " + arena);
@@ -346,10 +350,6 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
     /**
      * 堆内存
-     *
-     * @param initialCapacity
-     * @param maxCapacity
-     * @return
      */
     @Override
     protected ByteBuf newHeapBuffer(int initialCapacity, int maxCapacity) {
@@ -372,10 +372,6 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
     /**
      * 直接内存
-     *
-     * @param initialCapacity
-     * @param maxCapacity
-     * @return
      */
     @Override
     protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity) {
@@ -494,7 +490,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
 
     /**
-     * FastThreadLocal
+     * 内部类  FastThreadLocal
      */
     final class PoolThreadLocalCache extends FastThreadLocal<PoolThreadCache> {
 
@@ -508,8 +504,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         }
 
         /**
-         * 初始化
-         * @return PoolThreadCache
+         * 初始化 value
          */
         @Override
         protected synchronized PoolThreadCache initialValue() {
@@ -556,12 +551,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             return minArena;
         }
 
-    } // ---------- PoolThreadLocalCache end ---------------
-
-
-
-
-
+    } // ---------- 内部类 PoolThreadLocalCache end ---------------
 
 
 

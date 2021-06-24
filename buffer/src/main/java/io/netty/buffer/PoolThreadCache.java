@@ -78,6 +78,9 @@ final class PoolThreadCache {
     private int allocations;
 
 
+
+
+
     // TODO: Test if adding padding helps under contention
     //private long pad0, pad1, pad2, pad3, pad4, pad5, pad6, pad7;
     /**
@@ -420,6 +423,9 @@ final class PoolThreadCache {
         return cache[idx];
     }
 
+
+
+
     /**
      * Cache used for buffers which are backed by TINY or SMALL size.
      *
@@ -428,9 +434,7 @@ final class PoolThreadCache {
      */
     private static final class SubPageMemoryRegionCache<T> extends MemoryRegionCache<T> {
 
-        /**
-         * 构造器
-         */
+        // 构造器
         SubPageMemoryRegionCache(int size, SizeClass sizeClass) {
             super(size, sizeClass);
         }
@@ -448,9 +452,7 @@ final class PoolThreadCache {
      */
     private static final class NormalMemoryRegionCache<T> extends MemoryRegionCache<T> {
 
-        /**
-         * 构造器
-         */
+        // 构造器
         NormalMemoryRegionCache(int size) {
             super(size, SizeClass.Normal);
         }
@@ -462,7 +464,7 @@ final class PoolThreadCache {
     }
 
     /**
-     * 上面 2 个实现类：
+     * 抽象内部类       上面 2 个实现类：
      *                @link {io.netty.buffer.PoolThreadCache.SubPageMemoryRegionCache}
      *                @link {io.netty.buffer.PoolThreadCache.NormalMemoryRegionCache}
      * @param <T>
@@ -604,6 +606,7 @@ final class PoolThreadCache {
 
 
     /**
+     * 内部类
      * @param <T>
      */
     static final class Entry<T> {
