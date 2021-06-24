@@ -174,8 +174,11 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     private final PoolArena<ByteBuffer>[] directArenas;
 
     // 上面的静态常量会初始化这些常量, 这3个变量是在内存分配器中维护
+    // 512
     private final int tinyCacheSize;
+    // 256
     private final int smallCacheSize;
+    // 64
     private final int normalCacheSize;
 
     /**
@@ -253,7 +256,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
                                   boolean useCacheForAllThreads, int directMemoryCacheAlignment) {
         super(preferDirect);
 
-        // PoolThreadLocalCache 内部类  为了能获取本类 heapArenas, heapArenas
+        //  内部类  为了能获取本类 heapArenas, heapArenas
         threadCache = new PoolThreadLocalCache(useCacheForAllThreads);
 
         this.tinyCacheSize = tinyCacheSize;// 512

@@ -122,9 +122,7 @@ public abstract class Recycler<T> {
      */
     private final FastThreadLocal<Stack<T>> threadLocal = new FastThreadLocal<Stack<T>>() {
 
-        /**
-         * 初始化一个value
-         */
+        // 初始化一个value
         @Override
         protected Stack<T> initialValue() {
             // 这个this 是谁
@@ -145,7 +143,6 @@ public abstract class Recycler<T> {
 
     /**
      * 构造器
-     *
      */
     protected Recycler() {
         this(DEFAULT_MAX_CAPACITY_PER_THREAD);
@@ -177,7 +174,6 @@ public abstract class Recycler<T> {
 
     /**
      *
-     * @return
      */
     @SuppressWarnings("unchecked")
     public final T get() {

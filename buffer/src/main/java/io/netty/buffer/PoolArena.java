@@ -129,7 +129,6 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         this.maxOrder = maxOrder;
         this.pageShifts = pageShifts;
         this.chunkSize = chunkSize;
-
         //
         directMemoryCacheAlignment = cacheAlignment;
         directMemoryCacheAlignmentMask = cacheAlignment - 1;
@@ -303,7 +302,8 @@ abstract class PoolArena<T> implements PoolArenaMetric {
                     assert s.doNotDestroy && s.elemSize == normCapacity;
 
                     // 这里为什么一定可以找到可用的内存块（handle>=0）呢？
-                    // 因为在io.netty.buffer.PoolSubpage#allocate的时候，如果可用内存块为0了会将该page从链表中remove，所以保证了head.next一定有可用的内存
+                    // 因为在io.netty.buffer.PoolSubpage#allocate的时候，
+                    // 如果可用内存块为0了会将该page从链表中remove，所以保证了head.next一定有可用的内存
                     long handle = s.allocate();
                     assert handle >= 0;
                     s.chunk.initBufWithSubpage(buf, null, handle, reqCapacity);
@@ -447,9 +447,6 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
     /**
      * 内存规格化
-     *
-     * @param reqCapacity
-     * @return
      */
     int normalizeCapacity(int reqCapacity) {
 
@@ -701,10 +698,11 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     }
 
     /**
-     * 抽象方法
+     * 抽象方法 也就是下面2个内部类实现一下
      */
     protected abstract PoolChunk<T> newChunk(int pageSize, int maxOrder, int pageShifts, int chunkSize);
     protected abstract PoolChunk<T> newUnpooledChunk(int capacity);
+    //
     protected abstract PooledByteBuf<T> newByteBuf(int maxCapacity);
     protected abstract void memoryCopy(T src, int srcOffset, T dst, int dstOffset, int length);
     protected abstract void destroyChunk(PoolChunk<T> chunk);
@@ -794,13 +792,6 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     }
 
 
-
-
-
-
-
-
-
     /**
      * 内部类
      *
@@ -808,13 +799,11 @@ abstract class PoolArena<T> implements PoolArenaMetric {
      */
     static final class HeapArena extends PoolArena<byte[]> {
 
-        /**
-         *
-         * 调用方 PooledByteBufAllocator构造器
-         */
+        // 构造器   调用方io.netty.buffer.PooledByteBufAllocator.PooledByteBufAllocator
         HeapArena(PooledByteBufAllocator parent, int pageSize, int maxOrder, int pageShifts, int chunkSize, int directMemoryCacheAlignment) {
             super(parent, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
         }
+
 
         private static byte[] newByteArray(int size) {
             return PlatformDependent.allocateUninitializedArray(size);
@@ -825,9 +814,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             return false;
         }
 
-        /**
-         *
-         */
+        //
         @Override
         protected PoolChunk<byte[]> newChunk(int pageSize, int maxOrder, int pageShifts, int chunkSize) {
             return new PoolChunk<byte[]>(this, newByteArray(chunkSize), pageSize, maxOrder, pageShifts, chunkSize, 0);
@@ -843,14 +830,14 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             // Rely on GC.
         }
 
-        /**
-         *
-         * @param maxCapacity
-         * @return
-         */
+        //
         @Override
         protected PooledByteBuf<byte[]> newByteBuf(int maxCapacity) {
-            return HAS_UNSAFE ? PooledUnsafeHeapByteBuf.newUnsafeInstance(maxCapacity) : PooledHeapByteBuf.newInstance(maxCapacity);
+            // 源码是一行 三目元算符搞定的
+            if(HAS_UNSAFE) {
+                return  PooledUnsafeHeapByteBuf.newUnsafeInstance(maxCapacity);
+            }
+            return  PooledHeapByteBuf.newInstance(maxCapacity);
         }
 
         @Override
@@ -858,16 +845,10 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             if (length == 0) {
                 return;
             }
-
             System.arraycopy(src, srcOffset, dst, dstOffset, length);
         }
 
     } // HeapArena end
-
-
-
-
-
 
 
     /**
@@ -877,10 +858,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
      */
     static final class DirectArena extends PoolArena<ByteBuffer> {
 
-        /**
-         *
-         * 调用方 PooledByteBufAllocator构造器
-         */
+        // 构造器   调用方io.netty.buffer.PooledByteBufAllocator.PooledByteBufAllocator
         DirectArena(PooledByteBufAllocator parent, int pageSize, int maxOrder, int pageShifts, int chunkSize, int directMemoryCacheAlignment) {
             super(parent, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
         }
@@ -900,9 +878,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             return directMemoryCacheAlignment - remainder;
         }
 
-        /**
-         *
-         */
+        //
         @Override
         protected PoolChunk<ByteBuffer> newChunk(int pageSize, int maxOrder, int pageShifts, int chunkSize) {
             if (directMemoryCacheAlignment == 0) {
@@ -944,11 +920,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             }
         }
 
-        /**
-         *
-         * @param maxCapacity
-         * @return
-         */
+        //
         @Override
         protected PooledByteBuf<ByteBuffer> newByteBuf(int maxCapacity) {
             if (HAS_UNSAFE) {

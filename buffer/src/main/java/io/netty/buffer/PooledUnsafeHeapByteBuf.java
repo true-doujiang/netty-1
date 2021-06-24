@@ -28,6 +28,7 @@ final class PooledUnsafeHeapByteBuf extends PooledHeapByteBuf {
     private static final Recycler<PooledUnsafeHeapByteBuf> RECYCLER = new Recycler<PooledUnsafeHeapByteBuf>() {
         @Override
         protected PooledUnsafeHeapByteBuf newObject(Handle<PooledUnsafeHeapByteBuf> handle) {
+            // 对象池中没有可用的  所以新创建一个对象
             return new PooledUnsafeHeapByteBuf(handle, 0);
         }
     };
