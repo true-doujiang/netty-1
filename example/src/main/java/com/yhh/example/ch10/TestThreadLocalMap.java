@@ -8,6 +8,9 @@ package com.yhh.example.ch10;
  **/
 public class TestThreadLocalMap {
 
+    static class User {
+        public String name;
+    }
 
     public static void main(String[] args) {
         User u1 = new User();
@@ -60,6 +63,4 @@ public class TestThreadLocalMap {
 
 }
 
-class User {
-    public String name;
-}
+
