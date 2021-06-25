@@ -201,11 +201,6 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
     /**
      * 内存规格化入口
-     *
-     * @param cache
-     * @param reqCapacity
-     * @param maxCapacity
-     * @return
      */
     PooledByteBuf<T> allocate(PoolThreadCache cache, int reqCapacity, int maxCapacity) {
         // 创建一个空的byteBuffer 创建buffer的流程要分析

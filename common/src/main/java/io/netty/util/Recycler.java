@@ -54,12 +54,19 @@ public abstract class Recycler<T> {
 
     private static final AtomicInteger ID_GENERATOR = new AtomicInteger(Integer.MIN_VALUE);
     private static final int OWN_THREAD_ID = ID_GENERATOR.getAndIncrement();
+    // 4096
     private static final int DEFAULT_INITIAL_MAX_CAPACITY_PER_THREAD = 4 * 1024; // Use 4k instances as default.
+    // 4096
     private static final int DEFAULT_MAX_CAPACITY_PER_THREAD;
+    // 256
     private static final int INITIAL_CAPACITY;
+    // 2
     private static final int MAX_SHARED_CAPACITY_FACTOR;
+    // 8
     private static final int MAX_DELAYED_QUEUES_PER_THREAD;
+    // 16
     private static final int LINK_CAPACITY;
+    // 8
     private static final int RATIO;
 
     static {
@@ -125,7 +132,7 @@ public abstract class Recycler<T> {
         // 初始化一个value
         @Override
         protected Stack<T> initialValue() {
-            // 这个this 是谁
+            // 这个this 是谁 Recycler的具体实现类
             return new Stack<T>(Recycler.this, Thread.currentThread(),
                     maxCapacityPerThread, maxSharedCapacityFactor, ratioMask, maxDelayedQueuesPerThread);
         }
@@ -158,7 +165,7 @@ public abstract class Recycler<T> {
 
     protected Recycler(int maxCapacityPerThread, int maxSharedCapacityFactor,
                        int ratio, int maxDelayedQueuesPerThread) {
-
+        // 7
         ratioMask = safeFindNextPositivePowerOfTwo(ratio) - 1;
 
         if (maxCapacityPerThread <= 0) {
@@ -220,7 +227,7 @@ public abstract class Recycler<T> {
     }
 
     /**
-     * 抽象方法，子类实现
+     * 抽象方法, 具体实现类才知道对象池要保存哪种对象
      */
     protected abstract T newObject(Handle<T> handle);
 
@@ -244,9 +251,7 @@ public abstract class Recycler<T> {
         private Stack<?> stack;
         private Object value;
 
-        /**
-         * 构造器
-         */
+        // 构造器
         DefaultHandle(Stack<?> stack) {
             this.stack = stack;
         }
@@ -265,6 +270,7 @@ public abstract class Recycler<T> {
             stack.push(this);
         }
     }
+    // ---- DefaultHandle end ---------
 
     /**
      * 匿名内部类
@@ -488,6 +494,7 @@ public abstract class Recycler<T> {
             }
         }
     }
+    // ------------- WeakOrderQueue end ------------------
 
     /**
      * 内部类
@@ -519,17 +526,18 @@ public abstract class Recycler<T> {
         private volatile WeakOrderQueue head;
 
 
-        /**
-         * 构造器
-         */
+        // 构造器
         Stack(Recycler<T> parent, Thread thread, int maxCapacity, int maxSharedCapacityFactor,
               int ratioMask, int maxDelayedQueues) {
+            //
             this.parent = parent;
             threadRef = new WeakReference<Thread>(thread);
             this.maxCapacity = maxCapacity;
             availableSharedCapacity = new AtomicInteger(max(maxCapacity / maxSharedCapacityFactor, LINK_CAPACITY));
+            //
             elements = new DefaultHandle[min(INITIAL_CAPACITY, maxCapacity)];
             this.ratioMask = ratioMask;
+            //
             this.maxDelayedQueues = maxDelayedQueues;
         }
 
@@ -712,6 +720,7 @@ public abstract class Recycler<T> {
         DefaultHandle<T> newHandle() {
             return new DefaultHandle<T>(this);
         }
+
     }
     // -----Stack end -------------------
 
