@@ -125,7 +125,7 @@ public abstract class Recycler<T> {
     private final int maxDelayedQueuesPerThread;
 
     /**
-     * 匿名内部类
+     * ThreadLocal 匿名内部类
      */
     private final FastThreadLocal<Stack<T>> threadLocal = new FastThreadLocal<Stack<T>>() {
 
@@ -133,8 +133,9 @@ public abstract class Recycler<T> {
         @Override
         protected Stack<T> initialValue() {
             // 这个this 是谁 Recycler的具体实现类
-            return new Stack<T>(Recycler.this, Thread.currentThread(),
+            Stack<T> stack = new Stack<T>(Recycler.this, Thread.currentThread(),
                     maxCapacityPerThread, maxSharedCapacityFactor, ratioMask, maxDelayedQueuesPerThread);
+            return stack;
         }
 
         @Override
@@ -147,6 +148,7 @@ public abstract class Recycler<T> {
             }
         }
     };
+
 
     /**
      * 构造器
@@ -180,7 +182,7 @@ public abstract class Recycler<T> {
     }
 
     /**
-     *
+     * 用戶方法
      */
     @SuppressWarnings("unchecked")
     public final T get() {
@@ -249,7 +251,8 @@ public abstract class Recycler<T> {
         boolean hasBeenRecycled;
 
         private Stack<?> stack;
-        private Object value;
+        //private Object value;
+        public Object value;
 
         // 构造器
         DefaultHandle(Stack<?> stack) {
@@ -541,6 +544,7 @@ public abstract class Recycler<T> {
             this.maxDelayedQueues = maxDelayedQueues;
         }
 
+
         // Marked as synchronized to ensure this is serialized.
         synchronized void setHead(WeakOrderQueue queue) {
             queue.setNext(head);
@@ -571,12 +575,14 @@ public abstract class Recycler<T> {
                 }
                 size = this.size;
             }
+
             size --;
             DefaultHandle ret = elements[size];
             elements[size] = null;
             if (ret.lastRecycledId != ret.recycleId) {
                 throw new IllegalStateException("recycled multiple times");
             }
+
             ret.recycleId = 0;
             ret.lastRecycledId = 0;
             this.size = size;
