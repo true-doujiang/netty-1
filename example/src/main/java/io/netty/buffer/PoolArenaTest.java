@@ -11,25 +11,29 @@ public class PoolArenaTest {
 //        System.out.println(byteBuf.readInt());
 
         PooledByteBufAllocator allocator = PooledByteBufAllocator.DEFAULT;
-        int pageSize = 8192;
-        int maxOrder = 11;
-        int pageShifts = 8192;
-        int chunkSize = 16777216;
-        int directMemoryCacheAlignment = 0;
-        PoolArena.HeapArena heapArena = new PoolArena.HeapArena(allocator, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
+//        int pageSize = 8192;
+//        int maxOrder = 11;
+//        int pageShifts = 8192;
+//        int chunkSize = 16777216;
+//        int directMemoryCacheAlignment = 0;
+//        PoolArena.HeapArena heapArena = new PoolArena.HeapArena(allocator, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
 
-        PoolArena directArena = null;
-        int tinyCacheSize = 512;
-        int smallCacheSize = 256;
-        int normalCacheSize = 64;
-        int DEFAULT_MAX_CACHED_BUFFER_CAPACITY = 32768;
-        int DEFAULT_CACHE_TRIM_INTERVAL = 8192;
+        PoolArena<byte[]> heapArena1 = allocator.heapArenas[0];
+        PoolThreadCache cache = allocator.threadCache.get();
 
-        PoolThreadCache cache = new PoolThreadCache(heapArena, directArena,
-                tinyCacheSize, smallCacheSize, normalCacheSize,
-                DEFAULT_MAX_CACHED_BUFFER_CAPACITY, DEFAULT_CACHE_TRIM_INTERVAL);
+//        PoolArena directArena = null;
+//        int tinyCacheSize = 512;
+//        int smallCacheSize = 256;
+//        int normalCacheSize = 64;
+//        int DEFAULT_MAX_CACHED_BUFFER_CAPACITY = 32768;
+//        int DEFAULT_CACHE_TRIM_INTERVAL = 8192;
 
-        ByteBuf buf = heapArena.allocate(cache, 11, Integer.MAX_VALUE);
+//        PoolThreadCache cache = new PoolThreadCache(heapArena1, directArena,
+//                tinyCacheSize, smallCacheSize, normalCacheSize,
+//                DEFAULT_MAX_CACHED_BUFFER_CAPACITY, DEFAULT_CACHE_TRIM_INTERVAL);
+
+        // PooledUnsafeHeapByteBuf
+        ByteBuf buf = heapArena1.allocate(cache, 11, Integer.MAX_VALUE);
         buf.writeInt(111);
         int a = buf.readInt();
         System.out.println("a = " + a);

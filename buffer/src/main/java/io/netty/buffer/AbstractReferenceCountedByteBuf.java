@@ -38,6 +38,7 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
     @SuppressWarnings("unused")
     private volatile int refCnt = 2;
 
+
     static {
         long refCntFieldOffset = -1;
         try {

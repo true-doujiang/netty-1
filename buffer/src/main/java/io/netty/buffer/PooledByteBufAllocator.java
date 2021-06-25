@@ -169,8 +169,9 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     /**
      * 和下面2个list 装的东西一样   下面构造器初始化
      * 内存分配竞技场，每个io线程对应一个竞技场
+     * private
      */
-    private final PoolArena<byte[]>[] heapArenas;
+    public final PoolArena<byte[]>[] heapArenas;
     private final PoolArena<ByteBuffer>[] directArenas;
 
     // 上面的静态常量会初始化这些常量, 这3个变量是在内存分配器中维护
@@ -188,7 +189,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     private final List<PoolArenaMetric> directArenaMetrics;
 
     // PoolThreadLocalCache 本类的内部类
-    private final PoolThreadLocalCache threadCache;
+    public final PoolThreadLocalCache threadCache;
     // 构造器初始化  16777214
     private final int chunkSize;
     //

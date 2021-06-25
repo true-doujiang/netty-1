@@ -52,7 +52,9 @@ public abstract class Recycler<T> {
         }
     };
 
+    //
     private static final AtomicInteger ID_GENERATOR = new AtomicInteger(Integer.MIN_VALUE);
+    // -2147483648
     private static final int OWN_THREAD_ID = ID_GENERATOR.getAndIncrement();
     // 4096
     private static final int DEFAULT_INITIAL_MAX_CAPACITY_PER_THREAD = 4 * 1024; // Use 4k instances as default.
@@ -115,7 +117,7 @@ public abstract class Recycler<T> {
     }
     // ---- static end ---
 
-    // 4096
+    // 4096 单个线程最大容量
     private final int maxCapacityPerThread;
     // 2
     private final int maxSharedCapacityFactor;
@@ -182,20 +184,21 @@ public abstract class Recycler<T> {
     }
 
     /**
-     * 用戶方法
+     * 用戶方法 获取一个对象
      */
     @SuppressWarnings("unchecked")
     public final T get() {
         if (maxCapacityPerThread == 0) {
-            // 没有则调用子类方法
             return newObject((Handle<T>) NOOP_HANDLE);
         }
 
-        // 从threadLocal中获取
+        // 从threadLocal中获取 stack(里面存放对象)
         Stack<T> stack = threadLocal.get();
         DefaultHandle<T> handle = stack.pop();
         if (handle == null) {
+            // 创建一个Handle
             handle = stack.newHandle();
+            // 没有则调用子类方法
             handle.value = newObject(handle);
         }
 
@@ -244,21 +247,22 @@ public abstract class Recycler<T> {
      * 内部类 实现上面一个接口
      */
     static final class DefaultHandle<T> implements Handle<T> {
-
+        // stack 中操作了这2个变量
         private int lastRecycledId;
         private int recycleId;
-
+        // 被回收过一次就置位true
         boolean hasBeenRecycled;
-
+        //
         private Stack<?> stack;
         //private Object value;
-        public Object value;
+        public Object value; // 缓存的对象
 
         // 构造器
         DefaultHandle(Stack<?> stack) {
             this.stack = stack;
         }
 
+        // 对象中调用
         @Override
         public void recycle(Object object) {
             if (object != value) {
@@ -270,6 +274,7 @@ public abstract class Recycler<T> {
                 throw new IllegalStateException("recycled already");
             }
 
+            // 入栈保存对象
             stack.push(this);
         }
     }
@@ -293,6 +298,7 @@ public abstract class Recycler<T> {
     // but we aren't absolutely guaranteed to ever see anything at all, thereby keeping the queue cheap to maintain
     private static final class WeakOrderQueue {
 
+        //
         static final WeakOrderQueue DUMMY = new WeakOrderQueue();
 
         // Let Link extend AtomicInteger for intrinsics. The Link itself will be used as writerIndex.
@@ -304,9 +310,14 @@ public abstract class Recycler<T> {
             Link next;
         }
 
+
         // This act as a place holder for the head Link but also will reclaim space once finalized.
         // Its important this does not hold any reference to either Stack or WeakOrderQueue.
+        /**
+         *  内部类中的内部类
+         */
         static final class Head {
+
             private final AtomicInteger availableSharedCapacity;
 
             Link link;
@@ -355,6 +366,7 @@ public abstract class Recycler<T> {
                 }
             }
         }
+        //------- 内部类中的内部类 end -------------
 
         // chain of data items
         private final Head head;
@@ -364,6 +376,7 @@ public abstract class Recycler<T> {
         private final WeakReference<Thread> owner;
         private final int id = ID_GENERATOR.getAndIncrement();
 
+        //
         private WeakOrderQueue() {
             owner = null;
             head = new Head(null);
@@ -521,9 +534,14 @@ public abstract class Recycler<T> {
         final int maxDelayedQueues;
 
         private final int maxCapacity;
+        // 7
         private final int ratioMask;
-        private DefaultHandle<?>[] elements;
-        private int size;
+
+        // 2个是private的 为了测试改成public
+        // stack栈的容器，一个Handle对一个对象
+        public DefaultHandle<?>[] elements;
+        public int size;
+
         private int handleRecycleCount = -1; // Start with -1 so the first one will be recycled.
         private WeakOrderQueue cursor, prev;
         private volatile WeakOrderQueue head;
@@ -570,6 +588,7 @@ public abstract class Recycler<T> {
         DefaultHandle<T> pop() {
             int size = this.size;
             if (size == 0) {
+                //
                 if (!scavenge()) {
                     return null;
                 }
@@ -589,6 +608,7 @@ public abstract class Recycler<T> {
             return ret;
         }
 
+        //
         boolean scavenge() {
             // continue an existing scavenge, if any
             if (scavengeSome()) {
@@ -601,6 +621,7 @@ public abstract class Recycler<T> {
             return false;
         }
 
+        //
         boolean scavengeSome() {
             WeakOrderQueue prev;
             WeakOrderQueue cursor = this.cursor;
@@ -664,6 +685,7 @@ public abstract class Recycler<T> {
             }
         }
 
+        //
         private void pushNow(DefaultHandle<?> item) {
             if ((item.recycleId | item.lastRecycledId) != 0) {
                 throw new IllegalStateException("recycled already");
@@ -671,6 +693,7 @@ public abstract class Recycler<T> {
             item.recycleId = item.lastRecycledId = OWN_THREAD_ID;
 
             int size = this.size;
+            // dropHandle()
             if (size >= maxCapacity || dropHandle(item)) {
                 // Hit the maximum capacity or should drop - drop the possibly youngest object.
                 return;
@@ -709,8 +732,13 @@ public abstract class Recycler<T> {
             queue.add(item);
         }
 
+        /**
+         * 这个方法逻辑是判断当前回收的对象是否回收超过了上限，默认的ratioMask的值为8，
+         * 也就是如果一个对象回收了8次之后，就直接删除此对象，不对此对象进行回收。
+         */
         boolean dropHandle(DefaultHandle<?> handle) {
             if (!handle.hasBeenRecycled) {
+                //
                 if ((++handleRecycleCount & ratioMask) != 0) {
                     // Drop the object.
                     return true;

@@ -72,8 +72,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
         }
     }
 
-    static final ResourceLeakDetector<ByteBuf> leakDetector =
-            ResourceLeakDetectorFactory.instance().newResourceLeakDetector(ByteBuf.class);
+    static final ResourceLeakDetector<ByteBuf> leakDetector = ResourceLeakDetectorFactory.instance().newResourceLeakDetector(ByteBuf.class);
 
     // 读写指针
     int readerIndex;

@@ -72,15 +72,11 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     final int directMemoryCacheAlignment;
     final int directMemoryCacheAlignmentMask;
 
-    /**
-     * 一个内存页，默认是8k
-     */
+    // 一个内存页，默认是8k
     private final PoolSubpage<T>[] tinySubpagePools;
     private final PoolSubpage<T>[] smallSubpagePools;
 
-    /**
-     *
-     */
+    //
     private final PoolChunkList<T> q050;
     private final PoolChunkList<T> q025;
     private final PoolChunkList<T> q000;
@@ -150,9 +146,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
         // todo 为毛没有normal
 
-        /**
-         *
-         */
+        //
         q100 = new PoolChunkList<T>(this, null, 100, Integer.MAX_VALUE, chunkSize);
         q075 = new PoolChunkList<T>(this, q100, 75, 100, chunkSize);
         q050 = new PoolChunkList<T>(this, q075, 50, 100, chunkSize);
@@ -178,9 +172,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     }
 
 
-    /**
-     *
-     */
+    // 构造器中调用
     private PoolSubpage<T> newSubpagePoolHead(int pageSize) {
         PoolSubpage<T> head = new PoolSubpage<T>(pageSize);
         head.prev = head;
@@ -188,40 +180,39 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         return head;
     }
 
+    // 构造器中调用
     @SuppressWarnings("unchecked")
     private PoolSubpage<T>[] newSubpagePoolArray(int size) {
         return new PoolSubpage[size];
     }
 
-    /**
-     * 2 个内部类 实现了,用于表示是 堆分配 还是 直接内存分配
-     */
+
+
+    //  2 个内部类 实现了,用于表示是 堆分配 还是 直接内存分配
     abstract boolean isDirect();
 
 
     /**
      * 内存规格化入口
+     * PooledByteBufAllocator 中调用
      */
     PooledByteBuf<T> allocate(PoolThreadCache cache, int reqCapacity, int maxCapacity) {
         // 创建一个空的byteBuffer 创建buffer的流程要分析
         PooledByteBuf<T> buf = newByteBuf(maxCapacity);
-        System.out.println("allocate 空PooledByteBuf 有可能是从对象池中获取到的  buf = " + buf);
+
+        System.out.println(Thread.currentThread().getName() + " PoolArena allocate 空PooledByteBuf 有可能是从对象池中获取到的  buf = " + buf);
 
         // reqCapacity规格化, 并给buf初始化内存
         allocate(cache, buf, reqCapacity);
         return buf;
     }
 
-    /**
-     * 除以16
-     */
+    // 除以16
     static int tinyIdx(int normCapacity) {
         return normCapacity >>> 4;
     }
 
-    /**
-     *
-     */
+    //
     static int smallIdx(int normCapacity) {
         int tableIdx = 0;
 

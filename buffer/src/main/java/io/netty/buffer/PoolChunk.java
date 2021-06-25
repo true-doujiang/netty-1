@@ -143,7 +143,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
     private final int maxOrder;
     private final int chunkSize;
     private final int log2ChunkSize;
-    private final int maxSubpageAllocs;
+    private final int maxSubpageAllocs;//2048
     /** Used to mark memory as unusable */
     private final byte unusable;
 
