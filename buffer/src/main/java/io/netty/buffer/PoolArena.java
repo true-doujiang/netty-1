@@ -813,6 +813,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
         @Override
         protected PoolChunk<byte[]> newChunk(int pageSize, int maxOrder, int pageShifts, int chunkSize) {
+            // 16M内存
             byte[] bytes = newByteArray(chunkSize);
             PoolChunk chunk = new PoolChunk(this, bytes, pageSize, maxOrder, pageShifts, chunkSize, 0);
             return chunk;
@@ -901,6 +902,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             return new PoolChunk<ByteBuffer>(this, memory, capacity, offsetCacheLine(memory));
         }
 
+        //
         private static ByteBuffer allocateDirect(int capacity) {
             boolean b = PlatformDependent.useDirectBufferNoCleaner();
             if (b) {

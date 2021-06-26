@@ -154,7 +154,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
     // 16M 内存
     final T memory;
 
-    //
+    // false
     final boolean unpooled;
     final int offset;
 
@@ -178,6 +178,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
     private final int chunkSize;//16777216
     private final int log2ChunkSize;
     private final int maxSubpageAllocs;//2048
+
     /** Used to mark memory as unusable */
     private final byte unusable;//12
 
@@ -203,9 +204,8 @@ final class PoolChunk<T> implements PoolChunkMetric {
      */
     PoolChunk(PoolArena<T> arena, T memory, int pageSize, int maxOrder, int pageShifts, int chunkSize, int offset) {
         unpooled = false;
-        //
         this.arena = arena;
-        //
+        // 16M 内存
         this.memory = memory;
 
         this.pageSize = pageSize;
@@ -289,14 +289,16 @@ final class PoolChunk<T> implements PoolChunkMetric {
         return 100 - freePercentage;
     }
 
-    // 调用放  PoolArena.allocateNormal()
+    /**
+     * 调用放  PoolArena.allocateNormal()
+     */
     boolean allocate(PooledByteBuf<T> buf, int reqCapacity, int normCapacity) {
         final long handle;
         if ((normCapacity & subpageOverflowMask) != 0) { // >= pageSize
-            // 如果为8k或者大于8k
+            // 如果为8k或者大于8k  handle: index in memoryMap
             handle =  allocateRun(normCapacity);
         } else {
-            // 下面的方法
+            // 下面的方法         handle: index in memoryMap
             handle = allocateSubpage(normCapacity);
         }
 
@@ -305,7 +307,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
         }
 
         ByteBuffer nioBuffer = cachedNioBuffers != null ? cachedNioBuffers.pollLast() : null;
-        //
+        // 下下下面的方法
         initBuf(buf, nioBuffer, handle, reqCapacity);
         return true;
     }
@@ -494,6 +496,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
      * 分配normal级别的容量
      */
     void initBuf(PooledByteBuf<T> buf, ByteBuffer nioBuffer, long handle, int reqCapacity) {
+        //
         int memoryMapIdx = memoryMapIdx(handle);
         int bitmapIdx = bitmapIdx(handle);
 
@@ -502,6 +505,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
             byte val = value(memoryMapIdx);
             assert val == unusable : String.valueOf(val);
 
+            //
             int offset = runOffset(memoryMapIdx) + this.offset;
             int length = runLength(memoryMapIdx);
             PoolThreadCache poolThreadCache = arena.parent.threadCache();

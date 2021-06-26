@@ -1,9 +1,12 @@
 package io.netty.buffer;
 
+import java.io.*;
+import java.util.Arrays;
+
 public class PoolArenaTest {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 //        ByteBufAllocator alloc = PooledByteBufAllocator.DEFAULT;
 //        // PooledUnsafeHeapByteBuf(ridx: 0, widx: 0, cap: 254)
 //        ByteBuf byteBuf = alloc.heapBuffer(254);
@@ -37,13 +40,45 @@ public class PoolArenaTest {
         buf.writeInt(111);
         int a = buf.readInt();
         System.out.println("a = " + a);
+        System.out.println(((PooledByteBuf) buf).handle);
+        System.out.println(((PooledByteBuf) buf).offset);
+        System.out.println(((PooledByteBuf) buf).length);
+        //buf.release();
 
-        buf.release();
-
-        ByteBuf buf2 = heapArena1.allocate(cache, 8192, Integer.MAX_VALUE);
-        buf2.writeInt(111);
+        ByteBuf buf2 = heapArena1.allocate(cache, 8192+1, Integer.MAX_VALUE);
+        buf2.writeInt(222);
         int a2 = buf2.readInt();
         System.out.println("a2 = " + a2);
+        System.out.println(((PooledByteBuf) buf2).handle);
+        System.out.println(((PooledByteBuf) buf2).offset);
+        System.out.println(((PooledByteBuf) buf2).length);
+
+        ByteBuf buf3 = heapArena1.allocate(cache, 8192+2, Integer.MAX_VALUE);
+        buf3.writeInt(333);
+        int a3 = buf3.readInt();
+        System.out.println("a3 = " + a3);
+        System.out.println(((PooledByteBuf) buf3).handle);
+        System.out.println(((PooledByteBuf) buf3).offset);
+        System.out.println(((PooledByteBuf) buf3).length);
+
+
+
+
+
+//        byte[] memory = (byte[]) ((PooledByteBuf) buf2).memory;
+//        OutputStream out = new FileOutputStream("D:\\log/ccc.txt");
+//
+//        String s = Arrays.toString(memory);
+//        InputStream is = new ByteArrayInputStream(s.getBytes());
+//        byte[] buff = new byte[1024*10];
+//        int len = 0;
+//        int index = 1;
+//        while((len=is.read(buff))!=-1){
+//            System.out.println((index++) + " " + Arrays.toString(buff));
+//            out.write(buff, 0, len);
+//        }
+//        is.close();
+//        out.close();
 
         //cache.allocateTiny(heapArena1, buf, 11, 16);
     }
