@@ -318,6 +318,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     }
 
 
+    //构造器中调用
     @SuppressWarnings("unchecked")
     private static <T> PoolArena<T>[] newArenaArray(int size) {
         return new PoolArena[size];

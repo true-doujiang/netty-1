@@ -22,6 +22,9 @@ package io.netty.buffer;
  */
 final class PoolSubpage<T> implements PoolSubpageMetric {
 
+    // PoolArena中用到了我  tinySubpagePools[]  smallSubpagePools[]
+    // PoolChunk中用到了我  subpages[]
+    //
 
     final PoolChunk<T> chunk;
 
@@ -31,9 +34,8 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
     private final int pageSize;
     private final long[] bitmap;
 
-    //
+    // 说明本类是链表结构
     PoolSubpage<T> prev;
-    //
     PoolSubpage<T> next;
 
     boolean doNotDestroy;
@@ -49,7 +51,7 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
     /** Special constructor that creates a linked list head */
     /**
      * 构造器1
-     * 调用方： io.netty.buffer.PoolArena#newSubpagePoolHead(int)
+     * 调用方 PoolArena.newSubpagePoolHead(int)
      */
     PoolSubpage(int pageSize) {
         chunk = null;
@@ -64,25 +66,27 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
 
     /**
      * 构造器2
+     * 调用方 PoolChunk.allocateSubpage(int)
      */
     PoolSubpage(PoolSubpage<T> head, PoolChunk<T> chunk, int memoryMapIdx, int runOffset, int pageSize, int elemSize) {
         this.chunk = chunk;
         this.memoryMapIdx = memoryMapIdx;
         this.runOffset = runOffset;
         this.pageSize = pageSize;
+        // len = 8
         bitmap = new long[pageSize >>> 10]; // pageSize / 16 / 64
         init(head, elemSize);
     }
 
-
-
-
+    //
     void init(PoolSubpage<T> head, int elemSize) {
         doNotDestroy = true;
         this.elemSize = elemSize;
         if (elemSize != 0) {
+            //
             maxNumElems = numAvail = pageSize / elemSize;
             nextAvail = 0;
+            //
             bitmapLength = maxNumElems >>> 6;
             if ((maxNumElems & 63) != 0) {
                 bitmapLength ++;
@@ -92,6 +96,7 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
                 bitmap[i] = 0;
             }
         }
+        //
         addToPool(head);
     }
 
@@ -161,6 +166,7 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
         }
     }
 
+    //
     private void addToPool(PoolSubpage<T> head) {
         assert prev == null && next == null;
         prev = head;
@@ -220,6 +226,7 @@ final class PoolSubpage<T> implements PoolSubpageMetric {
         return -1;
     }
 
+    //
     private long toHandle(int bitmapIdx) {
         return 0x4000000000000000L | (long) bitmapIdx << 32 | memoryMapIdx;
     }

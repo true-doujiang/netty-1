@@ -34,22 +34,27 @@ import java.nio.ByteOrder;
 abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
 
 
-    //
+    // 对象池
     private final Recycler.Handle<PooledByteBuf<T>> recyclerHandle;
 
     // 记录本buffer使用的内存在哪个chunk上
     protected PoolChunk<T> chunk;
+
     // 4611686018427389952
     protected long handle;
+
     // chunk上的内存 heap：用数组  direct：用directBuffer
     protected T memory;
+
     //memoryMap中节点的偏移量
     protected int offset;
     protected int length;
     int maxLength;// buffer的大小
+
     //
     PoolThreadCache cache;
     ByteBuffer tmpNioBuf;
+
     //
     private ByteBufAllocator allocator;
 
@@ -78,7 +83,9 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
     /**
      *
      */
-    private void init0(PoolChunk<T> chunk, ByteBuffer nioBuffer, long handle, int offset, int length, int maxLength, PoolThreadCache cache) {
+    private void init0(PoolChunk<T> chunk, ByteBuffer nioBuffer, long handle, int offset,
+                       int length, int maxLength, PoolThreadCache cache) {
+
         assert handle >= 0;
         assert chunk != null;
 
@@ -86,6 +93,7 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
         memory = chunk.memory;
         tmpNioBuf = nioBuffer;
         allocator = chunk.arena.parent;
+
         this.cache = cache;
         this.handle = handle;
         this.offset = offset;
@@ -186,18 +194,20 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
         return tmpNioBuf;
     }
 
+    /**
+     *  抽象方法
+     */
     protected abstract ByteBuffer newInternalNioBuffer(T memory);
 
-    /**
-     *
-     */
+
+    // AbstractReferenceCountedByteBuf 定义
     @Override
     protected final void deallocate() {
         if (handle >= 0) {
-
             final long handle = this.handle;
             this.handle = -1;
             memory = null;
+            //
             chunk.arena.free(chunk, tmpNioBuf, handle, maxLength, cache);
             tmpNioBuf = null;
             chunk = null;
@@ -206,7 +216,7 @@ abstract class PooledByteBuf<T> extends AbstractReferenceCountedByteBuf {
     }
 
     /**
-     *
+     * 回收本buffer
      */
     private void recycle() {
         recyclerHandle.recycle(this);

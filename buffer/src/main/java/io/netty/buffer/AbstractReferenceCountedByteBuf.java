@@ -154,7 +154,7 @@ public abstract class AbstractReferenceCountedByteBuf extends AbstractByteBuf {
         int rawCnt = nonVolatileRawCnt(), realCnt = toLiveRealCnt(rawCnt, decrement);
         if (decrement == realCnt) {
             if (refCntUpdater.compareAndSet(this, rawCnt, 1)) {
-                //引用的次数 和 这次要减掉的次数相等  则回收改buf
+                // 抽象方法  引用的次数 和 这次要减掉的次数相等  则回收改buf
                 deallocate();
                 return true;
             }

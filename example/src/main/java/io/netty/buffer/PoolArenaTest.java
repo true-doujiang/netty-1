@@ -33,10 +33,19 @@ public class PoolArenaTest {
 //                DEFAULT_MAX_CACHED_BUFFER_CAPACITY, DEFAULT_CACHE_TRIM_INTERVAL);
 
         // PooledUnsafeHeapByteBuf
-        ByteBuf buf = heapArena1.allocate(cache, 11, Integer.MAX_VALUE);
+        ByteBuf buf = heapArena1.allocate(cache, 8192, Integer.MAX_VALUE);
         buf.writeInt(111);
         int a = buf.readInt();
         System.out.println("a = " + a);
+
+        buf.release();
+
+        ByteBuf buf2 = heapArena1.allocate(cache, 8192, Integer.MAX_VALUE);
+        buf2.writeInt(111);
+        int a2 = buf2.readInt();
+        System.out.println("a2 = " + a2);
+
+        //cache.allocateTiny(heapArena1, buf, 11, 16);
     }
 
 }

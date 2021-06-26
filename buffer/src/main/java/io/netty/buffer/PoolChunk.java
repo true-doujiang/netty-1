@@ -103,11 +103,47 @@ import java.util.Deque;
  * memoryMap[id]= depth_of_id  is defined above
  * depthMap[id]= x  indicates that the first node which is free to be allocated is at depth x (from root)
  *
+ *
+ *
+ *
+ *
  * 参考: https://www.cnblogs.com/sunshine-2015/p/9375157.html
  * 有多个PoolSubpage组成，默认包含2048个subpage，即默认大小是16m
  * chunk内部包含一个byte数组memoryMap，默认包含4096个元素，memoryMap实际上是一棵完全二叉树，共有12层，也就是maxOrder默认是11（从0开始），
  * 所以这棵树总共有2048个叶子结点，每个叶子节点对应一个subpage，树中非叶子节点的内存大小由左子节点的内存大小加上右子节点的内存大小，
  * memoryMap数组中存储的值是byte类型，其实就是该树节点在树中的深度（深度从0开始）。树的基本结构如下图：
+ */
+
+/*
+
+ 个数   数字
+ 1      0
+ 1	    0
+ 2      1
+ 4      2
+ 8      3
+ 16     4
+ 32     5
+ 64     6
+ 128    7
+ 256    8
+ 512    9
+ 1024   10
+ 2048   11
+
+ 1
+ +1
+ +2
+ +4
+ +8
+ +16
+ +32
+ +64
+ +128
+ +256
+ +512
+ +1024
+ =2048
  */
 final class PoolChunk<T> implements PoolChunkMetric {
 
@@ -115,37 +151,35 @@ final class PoolChunk<T> implements PoolChunkMetric {
 
     //
     final PoolArena<T> arena;
-
+    // 16M 内存
     final T memory;
 
+    //
     final boolean unpooled;
     final int offset;
 
     //
     private final byte[] memoryMap;
 
-    /** depthMap数组值为0表示可以分配16M空间，如果为1 表示可以分配8M，
+    /**
+     * depthMap数组值为0表示可以分配16M空间，如果为1 表示可以分配8M，
      * 如果为2表示嗯可以分配4M，如果为3表示可以分配2M ……………………如果为11表示可以分配8k空间
      */
     private final byte[] depthMap;
 
-
-
-    // 只有分配的内存小于pageSize（8k）时才会用到我
+    // 只有分配的内存小于pageSize（8k）时才会用到我  len=2048
     private final PoolSubpage<T>[] subpages;
 
-
-
     /** Used to determine if the requested capacity is equal to or greater than pageSize. */
-    private final int subpageOverflowMask;
-    private final int pageSize;
-    private final int pageShifts;
-    private final int maxOrder;
-    private final int chunkSize;
+    private final int subpageOverflowMask;//-8192
+    private final int pageSize;//8192
+    private final int pageShifts;//13
+    private final int maxOrder;//11
+    private final int chunkSize;//16777216
     private final int log2ChunkSize;
     private final int maxSubpageAllocs;//2048
     /** Used to mark memory as unusable */
-    private final byte unusable;
+    private final byte unusable;//12
 
     // Use as cache for ByteBuffer created from the memory. These are just duplicates and so are only a container
     // around the memory itself. These are often needed for operations within the Pooled*ByteBuf and so
@@ -169,8 +203,11 @@ final class PoolChunk<T> implements PoolChunkMetric {
      */
     PoolChunk(PoolArena<T> arena, T memory, int pageSize, int maxOrder, int pageShifts, int chunkSize, int offset) {
         unpooled = false;
+        //
         this.arena = arena;
+        //
         this.memory = memory;
+
         this.pageSize = pageSize;
         this.pageShifts = pageShifts;
         this.maxOrder = maxOrder;
@@ -183,9 +220,9 @@ final class PoolChunk<T> implements PoolChunkMetric {
         freeBytes = chunkSize;
 
         assert maxOrder < 30 : "maxOrder should be < 30, but is: " + maxOrder;
-        maxSubpageAllocs = 1 << maxOrder;
+        maxSubpageAllocs = 1 << maxOrder; //2048
 
-        // Generate the memory map.  memoryMap/depthMap长度都是4096
+        // Generate the memory map.  memoryMap, depthMap长度都是4096
         memoryMap = new byte[maxSubpageAllocs << 1];
         depthMap = new byte[memoryMap.length];
 
@@ -200,6 +237,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
             }
         }
 
+        // 下面一个方法 len=2048
         subpages = newSubpageArray(maxSubpageAllocs);
         cachedNioBuffers = new ArrayDeque<ByteBuffer>(8);
     }
@@ -224,6 +262,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
         cachedNioBuffers = null;
     }
 
+    // 构造器中调用
     @SuppressWarnings("unchecked")
     private PoolSubpage<T>[] newSubpageArray(int size) {
         return new PoolSubpage[size];
@@ -250,14 +289,14 @@ final class PoolChunk<T> implements PoolChunkMetric {
         return 100 - freePercentage;
     }
 
-    /**
-     *
-     */
+    // 调用放  PoolArena.allocateNormal()
     boolean allocate(PooledByteBuf<T> buf, int reqCapacity, int normCapacity) {
         final long handle;
         if ((normCapacity & subpageOverflowMask) != 0) { // >= pageSize
+            // 如果为8k或者大于8k
             handle =  allocateRun(normCapacity);
         } else {
+            // 下面的方法
             handle = allocateSubpage(normCapacity);
         }
 
@@ -266,6 +305,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
         }
 
         ByteBuffer nioBuffer = cachedNioBuffers != null ? cachedNioBuffers.pollLast() : null;
+        //
         initBuf(buf, nioBuffer, handle, reqCapacity);
         return true;
     }
@@ -331,8 +371,10 @@ final class PoolChunk<T> implements PoolChunkMetric {
         }
 
         while (val < d || (id & initial) == 0) { // id & initial == 1 << d for all ids at depth d, for < d it is 0
+            // 下沉一层,获取这一层的第一个元素的值
             id <<= 1;
             val = value(id);
+            //
             if (val > d) {
                 id ^= 1;
                 val = value(id);
@@ -384,25 +426,31 @@ final class PoolChunk<T> implements PoolChunkMetric {
         int d = maxOrder; // subpages are only be allocated from pages i.e., leaves
 
         synchronized (head) {
+            //
             int id = allocateNode(d);
             if (id < 0) {
                 return id;
             }
 
+            // Chunk总的subpages[]
             final PoolSubpage<T>[] subpages = this.subpages;
             final int pageSize = this.pageSize;
 
             freeBytes -= pageSize;
 
+            // id ^ maxSubpageAllocs
             int subpageIdx = subpageIdx(id);
             PoolSubpage<T> subpage = subpages[subpageIdx];
             if (subpage == null) {
+                // 创建一个PoolSubpage       head:PoolArena中的PoolSubpage
                 subpage = new PoolSubpage<T>(head, this, id, runOffset(id), pageSize, normCapacity);
                 subpages[subpageIdx] = subpage;
             } else {
                 subpage.init(head, normCapacity);
             }
-            return subpage.allocate();
+
+            long allocate = subpage.allocate();
+            return allocate;
         }
     }
 
@@ -458,6 +506,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
             int length = runLength(memoryMapIdx);
             PoolThreadCache poolThreadCache = arena.parent.threadCache();
 
+            //
             buf.init(this, nioBuffer, handle, offset, reqCapacity, length, poolThreadCache);
         } else {
             initBufWithSubpage(buf, nioBuffer, handle, bitmapIdx, reqCapacity);
@@ -486,6 +535,8 @@ final class PoolChunk<T> implements PoolChunkMetric {
         buf.init(this, nioBuffer, handle, i, reqCapacity, subpage.elemSize, arena.parent.threadCache());
     }
 
+
+
     private byte value(int id) {
         return memoryMap[id];
     }
@@ -497,6 +548,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
     private byte depth(int id) {
         return depthMap[id];
     }
+
 
     private static int log2(int val) {
         // compute the (0-based, with lsb = 0) position of highest set bit i.e, log2
@@ -521,6 +573,8 @@ final class PoolChunk<T> implements PoolChunkMetric {
         return memoryMapIdx ^ maxSubpageAllocs; // remove highest set bit, to get offset
     }
 
+
+
     private static int memoryMapIdx(long handle) {
         return (int) handle;
     }
@@ -528,6 +582,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
     private static int bitmapIdx(long handle) {
         return (int) (handle >>> Integer.SIZE);
     }
+
 
     @Override
     public int chunkSize() {
