@@ -36,6 +36,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.netty.util.internal.MathUtil.isOutOfBounds;
 import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
@@ -49,8 +50,8 @@ public abstract class AbstractByteBuf extends ByteBuf {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractByteBuf.class);
 
-
-    public String myName;
+    private static AtomicInteger counter = new AtomicInteger(1);
+    public String myName = "AbstractByteBuf-" + counter.getAndIncrement();
 
 
     private static final String LEGACY_PROP_CHECK_ACCESSIBLE = "io.netty.buffer.bytebuf.checkAccessible";
@@ -1463,7 +1464,7 @@ public abstract class AbstractByteBuf extends ByteBuf {
         }
         buf.append(')');
 
-        buf.append("   myName:" + myName);
+        buf.append(",  myName:" + myName);
 
         return buf.toString();
     }

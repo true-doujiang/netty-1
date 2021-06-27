@@ -35,7 +35,9 @@ class PooledHeapByteBuf extends PooledByteBuf<byte[]> {
     private static final Recycler<PooledHeapByteBuf> RECYCLER = new Recycler<PooledHeapByteBuf>() {
         @Override
         protected PooledHeapByteBuf newObject(Handle<PooledHeapByteBuf> handle) {
-            return new PooledHeapByteBuf(handle, 0);
+            PooledHeapByteBuf byteBuf = new PooledHeapByteBuf(handle, 0);
+            System.out.println("PooledHeapByteBuf RECYCLER中没有可用的. so RECYCLER.newObject()  byteBuf = " + byteBuf);
+            return byteBuf;
         }
     };
 

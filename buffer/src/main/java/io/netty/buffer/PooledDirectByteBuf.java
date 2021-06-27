@@ -32,13 +32,13 @@ import java.nio.channels.ScatteringByteChannel;
  */
 final class PooledDirectByteBuf extends PooledByteBuf<ByteBuffer> {
 
-    /**
-     * 对象池
-     */
+
     private static final Recycler<PooledDirectByteBuf> RECYCLER = new Recycler<PooledDirectByteBuf>() {
         @Override
         protected PooledDirectByteBuf newObject(Handle<PooledDirectByteBuf> handle) {
-            return new PooledDirectByteBuf(handle, 0);
+            PooledDirectByteBuf byteBuf = new PooledDirectByteBuf(handle, 0);
+            System.out.println("PooledDirectByteBuf RECYCLER中没有可用的. so RECYCLER.newObject()  byteBuf = " + byteBuf);
+            return byteBuf;
         }
     };
 

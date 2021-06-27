@@ -19,7 +19,8 @@ package io.netty.buffer;
 import io.netty.util.internal.LongCounter;
 import io.netty.util.internal.PlatformDependent;
 import io.netty.util.internal.StringUtil;
-
+import io.netty.util.internal.logging.InternalLogger;
+import io.netty.util.internal.logging.InternalLoggerFactory;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,6 +38,8 @@ import static java.lang.Math.max;
  *    竞技场
  */
 abstract class PoolArena<T> implements PoolArenaMetric {
+
+    private static final InternalLogger logger = InternalLoggerFactory.getInstance(PoolArena.class);
 
     //
     static final boolean HAS_UNSAFE = PlatformDependent.hasUnsafe();
@@ -196,7 +199,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         // 创建一个空的byteBuffer 创建buffer的流程要分析
         PooledByteBuf<T> buf = newByteBuf(maxCapacity);
 
-        System.out.println(Thread.currentThread().getName() + " PoolArena allocate 空PooledByteBuf 有可能是从对象池中获取到的  buf = " + buf);
+        logger.info(" PoolArena allocate 空PooledByteBuf 有可能是从对象池中获取到的  buf = " + buf);
 
         // reqCapacity规格化, 并给buf初始化内存
         allocate(poolThreadCache, buf, reqCapacity);
@@ -245,7 +248,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
         // 内存规格化
         final int normCapacity = normalizeCapacity(reqCapacity);
 
-        // 小于pageSize(默认是8K)
+        // 小于pageSize(默认是8K)才会进入if
         if (isTinyOrSmall(normCapacity)) { // capacity < pageSize
 
             int tableIdx;
@@ -254,7 +257,8 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
             if (tiny) { // < 512
 
-                // 优先使用缓存   this传进去是为了区分是 PoolArena.HeapArena 还是PoolArena.DirectArena
+                // 优先使用poolThreadCache中的memoryRegionCache缓存
+                // this传进去是为了区分是 PoolArena.HeapArena 还是PoolArena.DirectArena
                 if (poolThreadCache.allocateTiny(this, buf, reqCapacity, normCapacity)) {
                     // was able to allocate out of the cache so move on
                     return;
@@ -265,7 +269,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
                 table = tinySubpagePools;
             } else {
 
-                // // 优先使用缓存   512-8K
+                // 优先使用poolThreadCache中的memoryRegionCache缓存     512-8K
                 if (poolThreadCache.allocateSmall(this, buf, reqCapacity, normCapacity)) {
                     // was able to allocate out of the cache so move on
                     return;
@@ -311,7 +315,8 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
         // normal级别处理
         if (normCapacity <= chunkSize) {
-            // 优先使用缓存
+
+            // 优先使用poolThreadCache中的memoryRegionCache缓存
             if (poolThreadCache.allocateNormal(this, buf, reqCapacity, normCapacity)) {
                 // was able to allocate out of the cache so move on
                 return;
@@ -335,22 +340,49 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     private void allocateNormal(PooledByteBuf<T> buf, int reqCapacity, int normCapacity) {
         // 优先在缓存中分配, 缓存中分配失败就会新创建 PoolChunk, 并添加到qInit中
         // 为毛是先q050
-        if (q050.allocate(buf, reqCapacity, normCapacity) || q025.allocate(buf, reqCapacity, normCapacity) ||
-            q000.allocate(buf, reqCapacity, normCapacity) || qInit.allocate(buf, reqCapacity, normCapacity) ||
-            q075.allocate(buf, reqCapacity, normCapacity)) {
+//        if (q050.allocate(buf, reqCapacity, normCapacity) || q025.allocate(buf, reqCapacity, normCapacity) ||
+//                q000.allocate(buf, reqCapacity, normCapacity) || qInit.allocate(buf, reqCapacity, normCapacity) ||
+//                q075.allocate(buf, reqCapacity, normCapacity)) {
+//            return;
+//        }
+
+        boolean q50 = q050.allocate(buf, reqCapacity, normCapacity);
+        logger.info("q50 = " + q50);
+        if (q50) {
+            return;
+        }
+        boolean q25 = q025.allocate(buf, reqCapacity, normCapacity);
+        logger.info("q25 = " + q25);
+        if (q25) {
+            return;
+        }
+        boolean q00 = q025.allocate(buf, reqCapacity, normCapacity);
+        logger.info("q00 = " + q00);
+        if (q00) {
+            return;
+        }
+        boolean qin = qInit.allocate(buf, reqCapacity, normCapacity);
+        logger.info("qin = " + qin);
+        if (qin) {
+            return;
+        }
+        boolean q75 = q075.allocate(buf, reqCapacity, normCapacity);
+        logger.info("q75 = " + q75);
+        if (q75) {
             return;
         }
 
-        // 抽象方法  HeapArena 和 DirectArena 实现
-        // Add a new chunk.  里面的memory字段包含了16M内存
+        // Add a new chunk.  里面的memory字段包含了16M内存     newChunk抽象方法 HeapArena和DirectArena 实现
         PoolChunk<T> newChunk = newChunk(pageSize, maxOrder, pageShifts, chunkSize);
 
         //给buf分配内存
         boolean success = newChunk.allocate(buf, reqCapacity, normCapacity);
         assert success;
 
+        // qInit不是缓存
         qInit.add(newChunk);
     }
+
 
     private void incTinySmallAllocation(boolean tiny) {
         if (tiny) {
@@ -734,9 +766,12 @@ abstract class PoolArena<T> implements PoolArenaMetric {
             .append(q100)
             .append(StringUtil.NEWLINE)
             .append("tiny subpages:");
+
         appendPoolSubPages(buf, tinySubpagePools);
+
         buf.append(StringUtil.NEWLINE)
            .append("small subpages:");
+
         appendPoolSubPages(buf, smallSubpagePools);
         buf.append(StringUtil.NEWLINE);
 

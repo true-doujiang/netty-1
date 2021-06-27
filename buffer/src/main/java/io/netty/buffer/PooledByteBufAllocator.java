@@ -40,11 +40,10 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(PooledByteBufAllocator.class);
 
 
-    // 在static{} 代码块中初始化的   8  nHeapArena  cup核心数2倍，每个线程取一个 heapArena
+    // 在static{} 代码块中初始化的   8 换完电脑 16了 nHeapArena  cup核心数2倍，每个线程取一个 heapArena
     private static final int DEFAULT_NUM_HEAP_ARENA;
-    // 在static{} 代码块中初始化的   8   nDirectArena  cup核心数2倍，每个线程取一个 directArena
+    // 在static{} 代码块中初始化的   8 换完电脑 16了  nDirectArena  cup核心数2倍，每个线程取一个 directArena
     private static final int DEFAULT_NUM_DIRECT_ARENA;
-
     // 8192
     private static final int DEFAULT_PAGE_SIZE;
     // 11
@@ -149,14 +148,14 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
             } else {
                 logger.debug("-Dio.netty.allocator.maxOrder: {}", DEFAULT_MAX_ORDER, maxOrderFallbackCause);
             }
-            logger.debug("-Dio.netty.allocator.chunkSize: {}", DEFAULT_PAGE_SIZE << DEFAULT_MAX_ORDER);
-            logger.debug("-Dio.netty.allocator.tinyCacheSize: {}", DEFAULT_TINY_CACHE_SIZE);
-            logger.debug("-Dio.netty.allocator.smallCacheSize: {}", DEFAULT_SMALL_CACHE_SIZE);
-            logger.debug("-Dio.netty.allocator.normalCacheSize: {}", DEFAULT_NORMAL_CACHE_SIZE);
-            logger.debug("-Dio.netty.allocator.maxCachedBufferCapacity: {}", DEFAULT_MAX_CACHED_BUFFER_CAPACITY);
-            logger.debug("-Dio.netty.allocator.cacheTrimInterval: {}", DEFAULT_CACHE_TRIM_INTERVAL);
-            logger.debug("-Dio.netty.allocator.useCacheForAllThreads: {}", DEFAULT_USE_CACHE_FOR_ALL_THREADS);
-            logger.debug("-Dio.netty.allocator.maxCachedByteBuffersPerChunk: {}", DEFAULT_MAX_CACHED_BYTEBUFFERS_PER_CHUNK);
+//            logger.debug("-Dio.netty.allocator.chunkSize: {}", DEFAULT_PAGE_SIZE << DEFAULT_MAX_ORDER);
+//            logger.debug("-Dio.netty.allocator.tinyCacheSize: {}", DEFAULT_TINY_CACHE_SIZE);
+//            logger.debug("-Dio.netty.allocator.smallCacheSize: {}", DEFAULT_SMALL_CACHE_SIZE);
+//            logger.debug("-Dio.netty.allocator.normalCacheSize: {}", DEFAULT_NORMAL_CACHE_SIZE);
+//            logger.debug("-Dio.netty.allocator.maxCachedBufferCapacity: {}", DEFAULT_MAX_CACHED_BUFFER_CAPACITY);
+//            logger.debug("-Dio.netty.allocator.cacheTrimInterval: {}", DEFAULT_CACHE_TRIM_INTERVAL);
+//            logger.debug("-Dio.netty.allocator.useCacheForAllThreads: {}", DEFAULT_USE_CACHE_FOR_ALL_THREADS);
+//            logger.debug("-Dio.netty.allocator.maxCachedByteBuffersPerChunk: {}", DEFAULT_MAX_CACHED_BYTEBUFFERS_PER_CHUNK);
         }
     }
     //------ 静态代码块 结束 -----
@@ -189,7 +188,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     private final List<PoolArenaMetric> directArenaMetrics;
 
     // PoolThreadLocalCache 本类的内部类
-    public final PoolThreadLocalCache threadCache;
+    public final PoolThreadLocalCache threadLocalCache;
     // 构造器初始化  16777214
     private final int chunkSize;
     //
@@ -258,7 +257,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
         super(preferDirect);
 
         //  内部类  为了能获取本类 heapArenas, heapArenas
-        threadCache = new PoolThreadLocalCache(useCacheForAllThreads);
+        threadLocalCache = new PoolThreadLocalCache(useCacheForAllThreads);
 
         this.tinyCacheSize = tinyCacheSize;// 512
         this.smallCacheSize = smallCacheSize;//256
@@ -359,7 +358,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     @Override
     protected ByteBuf newHeapBuffer(int initialCapacity, int maxCapacity) {
         // 从当前线程缓存中获取一块内存,会触发threadlocal的initValue()
-        PoolThreadCache cache = threadCache.get();
+        PoolThreadCache cache = threadLocalCache.get();
         PoolArena<byte[]> heapArena = cache.heapArena;
 
         final ByteBuf buf;
@@ -381,7 +380,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     @Override
     protected ByteBuf newDirectBuffer(int initialCapacity, int maxCapacity) {
         // 从当前线程缓存中获取一块内存,会触发threadlocal的initValue()
-        PoolThreadCache cache = threadCache.get();
+        PoolThreadCache cache = threadLocalCache.get();
         PoolArena<ByteBuffer> directArena = cache.directArena;
 
         final ByteBuf buf;
@@ -478,7 +477,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
      */
     @Deprecated
     public boolean hasThreadLocalCache() {
-        return threadCache.isSet();
+        return threadLocalCache.isSet();
     }
 
     /**
@@ -486,7 +485,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
      */
     @Deprecated
     public void freeThreadLocalCache() {
-        threadCache.remove();
+        threadLocalCache.remove();
     }
 
 
@@ -501,16 +500,12 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
 
         private final boolean useCacheForAllThreads;
 
-        /**
-         *  构造器
-         */
+        // 构造器
         PoolThreadLocalCache(boolean useCacheForAllThreads) {
             this.useCacheForAllThreads = useCacheForAllThreads;
         }
 
-        /**
-         * 初始化 value
-         */
+        // 初始化 value
         @Override
         protected synchronized PoolThreadCache initialValue() {
 
@@ -693,7 +688,7 @@ public class PooledByteBufAllocator extends AbstractByteBufAllocator implements 
     }
 
     final PoolThreadCache threadCache() {
-        PoolThreadCache cache =  threadCache.get();
+        PoolThreadCache cache =  threadLocalCache.get();
         assert cache != null;
         return cache;
     }

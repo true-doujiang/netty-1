@@ -234,8 +234,13 @@ final class PoolThreadCache {
     }
 
 
-
-    // 上面3个方法调用
+    /**
+     * 上面3个方法调用
+     * @param memoryRegionCache
+     * @param buf
+     * @param reqCapacity
+     * @return
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private boolean allocate(MemoryRegionCache<?> memoryRegionCache, PooledByteBuf buf, int reqCapacity) {
         if (memoryRegionCache == null) {
@@ -245,7 +250,7 @@ final class PoolThreadCache {
 
         // 转入内部类MemoryRegionCache 方法   1.从memoryRegionCache中的queue弹出一个entry（包含一个PoolChunk）
         boolean allocated = memoryRegionCache.allocate(buf, reqCapacity);
-        System.out.println("cache = " + memoryRegionCache + "  allocated = " + allocated);
+        logger.info("memoryRegionCache = " + memoryRegionCache + "  分配结果: " + allocated);
 
         //
         if (++ allocations >= freeSweepAllocationThreshold) {

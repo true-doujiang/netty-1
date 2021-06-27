@@ -1,7 +1,7 @@
 package io.netty.buffer;
 
-import java.io.*;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PoolArenaTest {
 
@@ -21,8 +21,17 @@ public class PoolArenaTest {
 //        int directMemoryCacheAlignment = 0;
 //        PoolArena.HeapArena heapArena = new PoolArena.HeapArena(allocator, pageSize, maxOrder, pageShifts, chunkSize, directMemoryCacheAlignment);
 
-        PoolArena<byte[]> heapArena1 = allocator.heapArenas[0];
-        PoolThreadCache cache = allocator.threadCache.get();
+        PoolArena<byte[]> minArena = allocator.heapArenas[0];
+
+        for (int i = 1; i < allocator.heapArenas.length; i++) {
+            PoolArena<byte[]> arena = allocator.heapArenas[i];
+            if (arena.numThreadCaches.get() < minArena.numThreadCaches.get()) {
+                minArena = arena;
+            }
+        }
+        //PoolArena<byte[]> heapArena1 = allocator.heapArenas[0];
+
+        PoolThreadCache cache = allocator.threadLocalCache.get();
 
 //        PoolArena directArena = null;
 //        int tinyCacheSize = 512;
@@ -35,34 +44,52 @@ public class PoolArenaTest {
 //                tinyCacheSize, smallCacheSize, normalCacheSize,
 //                DEFAULT_MAX_CACHED_BUFFER_CAPACITY, DEFAULT_CACHE_TRIM_INTERVAL);
 
-        // PooledUnsafeHeapByteBuf
-        ByteBuf buf = heapArena1.allocate(cache, 8192, Integer.MAX_VALUE);
-        buf.writeInt(111);
-        int a = buf.readInt();
-        System.out.println("a = " + a);
-        System.out.println(((PooledByteBuf) buf).handle);
-        System.out.println(((PooledByteBuf) buf).offset);
-        System.out.println(((PooledByteBuf) buf).length);
-        //buf.release();
+        List<ByteBuf> list = new ArrayList();
+        for (int i = 1; i <=10; i++) {
+            // PooledUnsafeHeapByteBuf
+            ByteBuf buf = minArena.allocate(cache, 8192*i*10*10, Integer.MAX_VALUE);
+            buf.writeInt(i);
+            int a = buf.readInt();
+            System.out.println(i + "a = " + a);
+            list.add(buf);
 
-        ByteBuf buf2 = heapArena1.allocate(cache, 8192+1, Integer.MAX_VALUE);
+            PooledByteBuf pooledByteBuf = (PooledByteBuf) buf;
+            System.out.println(pooledByteBuf.chunk
+                    + "  handdle:" + pooledByteBuf.handle
+                    + "  offset:" + pooledByteBuf.offset
+                    + "  length:" + pooledByteBuf.length
+                    + "  maxLength:" + pooledByteBuf.maxLength);
+            //buf.release();
+        }
+        System.out.println("list = " + list);
+
+        ByteBuf buf2 = minArena.allocate(cache, 8192+1, Integer.MAX_VALUE);
         buf2.writeInt(222);
         int a2 = buf2.readInt();
         System.out.println("a2 = " + a2);
-        System.out.println(((PooledByteBuf) buf2).handle);
-        System.out.println(((PooledByteBuf) buf2).offset);
-        System.out.println(((PooledByteBuf) buf2).length);
 
-        ByteBuf buf3 = heapArena1.allocate(cache, 8192+2, Integer.MAX_VALUE);
+        PooledByteBuf pooledByteBuf2 = (PooledByteBuf) buf2;
+
+        System.out.println(pooledByteBuf2.chunk
+                + "  handdle:" + pooledByteBuf2.handle
+                + "  offset:" + pooledByteBuf2.offset
+                + "  length:" + pooledByteBuf2.length
+                + "  maxLength:" + pooledByteBuf2.maxLength);
+
+        ByteBuf buf3 = minArena.allocate(cache, 8192*1024, Integer.MAX_VALUE);
         buf3.writeInt(333);
         int a3 = buf3.readInt();
         System.out.println("a3 = " + a3);
-        System.out.println(((PooledByteBuf) buf3).handle);
-        System.out.println(((PooledByteBuf) buf3).offset);
-        System.out.println(((PooledByteBuf) buf3).length);
 
+        PooledByteBuf pooledByteBuf3 = (PooledByteBuf) buf3;
+        System.out.println(pooledByteBuf3.chunk
+                + "  handdle:" + pooledByteBuf3.handle
+                + "  offset:" + pooledByteBuf3.offset
+                + "  length:" + pooledByteBuf3.length
+                + "  maxLength:" + pooledByteBuf3.maxLength);
+    }
 
-
+}
 
 
 //        byte[] memory = (byte[]) ((PooledByteBuf) buf2).memory;
@@ -80,7 +107,4 @@ public class PoolArenaTest {
 //        is.close();
 //        out.close();
 
-        //cache.allocateTiny(heapArena1, buf, 11, 16);
-    }
-
-}
+//cache.allocateTiny(heapArena1, buf, 11, 16);

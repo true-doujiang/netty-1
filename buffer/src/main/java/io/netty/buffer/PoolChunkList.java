@@ -45,7 +45,7 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     private final int maxUsage;
     private final int maxCapacity;
 
-    // 头节点
+    // 头节点 PoolChunk本身也是一个双向链表
     private PoolChunk<T> head;
 
     // 上一个节点
@@ -113,6 +113,7 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
         }
 
         for (PoolChunk<T> cur = head; cur != null; cur = cur.next) {
+
             if (cur.allocate(buf, reqCapacity, normCapacity)) {
                 if (cur.usage() >= maxUsage) {
                     remove(cur);
@@ -121,6 +122,7 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -177,7 +179,7 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
      *
      */
     void add0(PoolChunk<T> chunk) {
-        // 从此你输入这个chunklist
+        // 从此你属于这个chunklist
         chunk.parent = this;
         if (head == null) {
             head = chunk;
@@ -242,6 +244,7 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
     public String toString() {
         StringBuilder buf = new StringBuilder();
         synchronized (arena) {
+
             if (head == null) {
                 return "none";
             }
@@ -255,6 +258,7 @@ final class PoolChunkList<T> implements PoolChunkListMetric {
                 buf.append(StringUtil.NEWLINE);
             }
         }
+
         return buf.toString();
     }
 

@@ -40,15 +40,11 @@ final class PooledUnsafeDirectByteBuf extends PooledByteBuf<ByteBuffer> {
      */
     private static final Recycler<PooledUnsafeDirectByteBuf> RECYCLER = new Recycler<PooledUnsafeDirectByteBuf>() {
 
-        private AtomicInteger counter = new AtomicInteger();
 
         @Override
         protected PooledUnsafeDirectByteBuf newObject(Handle<PooledUnsafeDirectByteBuf> handle) {
-            //
             PooledUnsafeDirectByteBuf byteBuf = new PooledUnsafeDirectByteBuf(handle, 0);
-            byteBuf.myName = "myByteBuf" + counter.addAndGet(1);
-
-            System.out.println("RECYCLER中没有可用的. so RECYCLER.newObject()  byteBuf = " + byteBuf);
+            System.out.println("PooledUnsafeDirectByteBuf RECYCLER中没有可用的. so RECYCLER.newObject()  byteBuf = " + byteBuf);
             return byteBuf;
         }
     };

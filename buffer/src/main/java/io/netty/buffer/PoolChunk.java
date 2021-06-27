@@ -277,7 +277,12 @@ final class PoolChunk<T> implements PoolChunkMetric {
         return usage(freeBytes);
     }
 
+    /**
+     * @param freeBytes
+     * @return 使用率
+     */
     private int usage(int freeBytes) {
+
         if (freeBytes == 0) {
             return 100;
         }
@@ -286,6 +291,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
         if (freePercentage == 0) {
             return 99;
         }
+
         return 100 - freePercentage;
     }
 
@@ -607,17 +613,21 @@ final class PoolChunk<T> implements PoolChunkMetric {
             freeBytes = this.freeBytes;
         }
 
-        return new StringBuilder()
+        String s = new StringBuilder()
                 .append("Chunk(")
                 .append(Integer.toHexString(System.identityHashCode(this)))
-                .append(": ")
+                .append("  使用率: ")
                 .append(usage(freeBytes))
-                .append("%, ")
+                .append("%,  ")
                 .append(chunkSize - freeBytes)
                 .append('/')
                 .append(chunkSize)
                 .append(')')
+//                .append(",  ")
+//                .append(parent)
                 .toString();
+
+        return s;
     }
 
     void destroy() {

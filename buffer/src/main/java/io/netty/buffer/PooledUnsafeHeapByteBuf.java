@@ -29,7 +29,9 @@ final class PooledUnsafeHeapByteBuf extends PooledHeapByteBuf {
         @Override
         protected PooledUnsafeHeapByteBuf newObject(Handle<PooledUnsafeHeapByteBuf> handle) {
             // 对象池中没有可用的  所以新创建一个对象
-            return new PooledUnsafeHeapByteBuf(handle, 0);
+            PooledUnsafeHeapByteBuf byteBuf = new PooledUnsafeHeapByteBuf(handle, 0);
+            System.out.println("PooledUnsafeHeapByteBuf RECYCLER中没有可用的. so RECYCLER.newObject()  byteBuf = " + byteBuf);
+            return byteBuf;
         }
     };
 
@@ -171,5 +173,11 @@ final class PooledUnsafeHeapByteBuf extends PooledHeapByteBuf {
             return new UnsafeHeapSwappedByteBuf(this);
         }
         return super.newSwappedByteBuf();
+    }
+
+
+    @Override
+    public String toString() {
+        return super.toString() + ",  " + chunk;
     }
 }
