@@ -278,7 +278,6 @@ final class PoolChunk<T> implements PoolChunkMetric {
     }
 
     /**
-     * @param freeBytes
      * @return 使用率
      */
     private int usage(int freeBytes) {
@@ -296,7 +295,7 @@ final class PoolChunk<T> implements PoolChunkMetric {
     }
 
     /**
-     * 调用放  PoolArena.allocateNormal()
+     * 调用放  PoolArena.allocateNormal() {  newChunk.allocate()    }
      */
     boolean allocate(PooledByteBuf<T> buf, int reqCapacity, int normCapacity) {
         final long handle;

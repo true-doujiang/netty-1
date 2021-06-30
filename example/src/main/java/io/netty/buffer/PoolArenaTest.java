@@ -31,7 +31,7 @@ public class PoolArenaTest {
         }
         //PoolArena<byte[]> heapArena1 = allocator.heapArenas[0];
 
-        PoolThreadCache cache = allocator.threadLocalCache.get();
+        PoolThreadCache threadCache = allocator.threadLocalCache.get();
 
 //        PoolArena directArena = null;
 //        int tinyCacheSize = 512;
@@ -45,16 +45,17 @@ public class PoolArenaTest {
 //                DEFAULT_MAX_CACHED_BUFFER_CAPACITY, DEFAULT_CACHE_TRIM_INTERVAL);
 
         List<ByteBuf> list = new ArrayList();
-        for (int i = 1; i <=10; i++) {
+        // 循环创建buffer
+        for (int i = 1; i <=5; i++) {
             // PooledUnsafeHeapByteBuf
-            ByteBuf buf = minArena.allocate(cache, 8192*i*10*10, Integer.MAX_VALUE);
+            ByteBuf buf = minArena.allocate(threadCache, 8192, Integer.MAX_VALUE);
             buf.writeInt(i);
             int a = buf.readInt();
             System.out.println(i + "a = " + a);
             list.add(buf);
 
             PooledByteBuf pooledByteBuf = (PooledByteBuf) buf;
-            System.out.println(pooledByteBuf.chunk
+            System.err.println("看我看我看我:" + pooledByteBuf.chunk
                     + "  handdle:" + pooledByteBuf.handle
                     + "  offset:" + pooledByteBuf.offset
                     + "  length:" + pooledByteBuf.length
@@ -63,7 +64,7 @@ public class PoolArenaTest {
         }
         System.out.println("list = " + list);
 
-        ByteBuf buf2 = minArena.allocate(cache, 8192+1, Integer.MAX_VALUE);
+        ByteBuf buf2 = minArena.allocate(threadCache, 8192+1, Integer.MAX_VALUE);
         buf2.writeInt(222);
         int a2 = buf2.readInt();
         System.out.println("a2 = " + a2);
@@ -76,7 +77,7 @@ public class PoolArenaTest {
                 + "  length:" + pooledByteBuf2.length
                 + "  maxLength:" + pooledByteBuf2.maxLength);
 
-        ByteBuf buf3 = minArena.allocate(cache, 8192*1024, Integer.MAX_VALUE);
+        ByteBuf buf3 = minArena.allocate(threadCache, 8192*1024, Integer.MAX_VALUE);
         buf3.writeInt(333);
         int a3 = buf3.readInt();
         System.out.println("a3 = " + a3);

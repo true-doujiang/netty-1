@@ -114,8 +114,6 @@ abstract class PoolArena<T> implements PoolArenaMetric {
     //private long pad0, pad1, pad2, pad3, pad4, pad5, pad6, pad7;
     /**
      * 构造器
-     *
-     * 2个内部类调用
      */
     protected PoolArena(PooledByteBufAllocator parent, int pageSize, int maxOrder, int pageShifts, int chunkSize, int cacheAlignment) {
         this.parent = parent;
@@ -318,6 +316,7 @@ abstract class PoolArena<T> implements PoolArenaMetric {
 
             // 优先使用poolThreadCache中的memoryRegionCache缓存
             if (poolThreadCache.allocateNormal(this, buf, reqCapacity, normCapacity)) {
+                logger.info("使用了poolThreadCache中的memoryRegionCache缓存 return");
                 // was able to allocate out of the cache so move on
                 return;
             }

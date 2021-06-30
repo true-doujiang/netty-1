@@ -8,7 +8,7 @@ public class TestBinary {
         System.out.println(0x000E);
         System.out.println(0x000D);
         System.out.println(0x000C);
-       //f2();
+        f2();
     }
 
     public static void f1() {
@@ -28,9 +28,17 @@ public class TestBinary {
         System.out.println("---------------");
 
         int z = 1;
-        z = z<<9;
+        z = z << 10;
         System.out.println(z);
+        // 10000000000
         System.out.println(Integer.toBinaryString(z));
+
+
+        int xy = -1;
+        xy = xy << 10;
+        System.out.println(xy);
+        // 10000000000
+        System.out.println(Integer.toBinaryString(xy));
     }
 
 
@@ -51,7 +59,7 @@ public class TestBinary {
         System.out.println(Integer.toBinaryString(~15));
         System.out.println(Integer.toBinaryString(-16));
 
-        System.out.println("============100===========");
+        System.out.println("=======================");
 
         System.out.println(Integer.toBinaryString(100));
         System.out.println((100 & ~15));
