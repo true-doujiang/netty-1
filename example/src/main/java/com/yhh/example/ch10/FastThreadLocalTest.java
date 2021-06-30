@@ -7,8 +7,9 @@ public class FastThreadLocalTest {
     private static FastThreadLocal<Object> threadLocal0 = new FastThreadLocal<Object>() {
         @Override
         protected Object initialValue() {
-            System.out.println(Thread.currentThread().getName() + " initialValue");
-            return new Object();
+            Object obj = new Object();
+            System.out.println(Thread.currentThread().getName() + " initialValue = " + obj);
+            return obj;
         }
 
         @Override
@@ -21,8 +22,9 @@ public class FastThreadLocalTest {
     private static FastThreadLocal<Object> threadLocal1 = new FastThreadLocal<Object>() {
         @Override
         protected Object initialValue() {
-            System.out.println(Thread.currentThread().getName() + " threadLocal1 initialValue");
-            return new Object();
+            Object obj = new Object();
+            System.out.println(Thread.currentThread().getName() + " threadLocal1 initialValue = " + obj);
+            return obj;
         }
     };
 
@@ -33,7 +35,7 @@ public class FastThreadLocalTest {
             public void run() {
                 Object object = threadLocal0.get();
                 // .... do with object
-                System.out.println(object);
+                System.out.println(Thread.currentThread().getName() + object);
                 threadLocal0.set(new Object());
 
 //            while (true) {
@@ -52,7 +54,7 @@ public class FastThreadLocalTest {
             public void run() {
                 Object object = threadLocal0.get();
                 // ... do with object
-                System.out.println(object);
+                System.out.println(Thread.currentThread().getName() + object);
 
                 while (true) {
                     System.out.println(threadLocal0.get() == object);

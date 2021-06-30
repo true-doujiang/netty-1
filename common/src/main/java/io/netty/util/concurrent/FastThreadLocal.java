@@ -125,18 +125,23 @@ public class FastThreadLocal<V> {
         variablesToRemove.remove(variable);
     }
 
+    // ----------上面都是静态方法----------
+
     /**
-     *
+     * what
      */
     private final int index;
 
+    /**
+     * 構造器
+     */
     public FastThreadLocal() {
         index = InternalThreadLocalMap.nextVariableIndex();
     }
 
     /**
      * Returns the current value for the current thread
-     *
+     * 用戶方法
      */
     @SuppressWarnings("unchecked")
     public final V get() {
@@ -190,9 +195,13 @@ public class FastThreadLocal<V> {
         return initialize(threadLocalMap);
     }
 
+    /**
+     *
+     */
     private V initialize(InternalThreadLocalMap threadLocalMap) {
         V v = null;
         try {
+            // 用户代码重写该方法
             v = initialValue();
         } catch (Exception e) {
             PlatformDependent.throwException(e);
@@ -285,6 +294,8 @@ public class FastThreadLocal<V> {
 
     /**
      * Returns the initial value for this thread-local variable.
+     *
+     * 一般需要用戶重写
      */
     protected V initialValue() throws Exception {
         return null;

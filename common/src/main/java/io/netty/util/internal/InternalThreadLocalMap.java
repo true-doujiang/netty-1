@@ -40,6 +40,7 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(InternalThreadLocalMap.class);
 
+    //
     private static final int DEFAULT_ARRAY_LIST_INITIAL_CAPACITY = 8;
     private static final int STRING_BUILDER_INITIAL_SIZE;
     private static final int STRING_BUILDER_MAX_SIZE;
@@ -81,8 +82,6 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
 
     /**
      *
-     * @param thread
-     * @return
      */
     private static InternalThreadLocalMap fastGet(FastThreadLocalThread thread) {
         InternalThreadLocalMap threadLocalMap = thread.threadLocalMap();
@@ -94,7 +93,6 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
 
     /**
      *
-     * @return
      */
     private static InternalThreadLocalMap slowGet() {
         // jdk threadLocal
@@ -122,7 +120,6 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
 
     /**
      *
-     * @return
      */
     public static int nextVariableIndex() {
         int index = nextIndex.getAndIncrement();
@@ -141,9 +138,14 @@ public final class InternalThreadLocalMap extends UnpaddedInternalThreadLocalMap
     // With CompressedOops enabled, an instance of this class should occupy at least 128 bytes.
     public long rp1, rp2, rp3, rp4, rp5, rp6, rp7, rp8, rp9;
 
+    /**
+     * 构造器
+     */
     private InternalThreadLocalMap() {
         super(newIndexedVariableTable());
     }
+
+
 
     private static Object[] newIndexedVariableTable() {
         Object[] array = new Object[32];
