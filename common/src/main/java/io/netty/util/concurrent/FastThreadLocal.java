@@ -196,7 +196,7 @@ public class FastThreadLocal<V> {
     }
 
     /**
-     *
+     * get() 调用
      */
     private V initialize(InternalThreadLocalMap threadLocalMap) {
         V v = null;
